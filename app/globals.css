@@ -1,0 +1,619 @@
+@import "tailwindcss";
+@import "tailwindcss-animated/src/index.css";
+
+@font-face {
+  font-family: "Mikhak";
+  src: url("https://cdn.jsdelivr.net/gh/aminabedi68/Mikhak@master/fonts/webfonts/variable/Mikhak%5BDSTY,KSHD,wght%5D.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --radius: .7rem;
+  --type-weight-display: 740;
+  --type-weight-title: 700;
+  --type-weight-heading: 660;
+  --type-weight-label: 590;
+  --type-weight-body-strong: 540;
+  --type-weight-body: 440;
+  --type-weight-caption: 400;
+  --type-weight-data: 620;
+
+  --background: oklch(.992 .003 255);
+  --foreground: oklch(.19 .014 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(.19 .014 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(.19 .014 255);
+  --primary: #2563eb;
+  --primary-foreground: #f8fbff;
+  --secondary: oklch(.965 .008 255);
+  --secondary-foreground: oklch(.24 .015 255);
+  --muted: oklch(.969 .006 255);
+  --muted-foreground: oklch(.52 .018 255);
+  --accent: oklch(.96 .016 255);
+  --accent-foreground: oklch(.24 .015 255);
+  --destructive: oklch(.577 .245 27.325);
+  --profit: #15803d;
+  --loss: #c62828;
+  --border: oklch(.865 .014 255);
+  --input: oklch(.84 .016 255);
+  --ring: #3b82f6;
+  --glass: oklch(1 0 0 / 84%);
+  --glass-border: rgb(37 99 235 / 18%);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: oklch(.145 .014 255);
+  --foreground: oklch(.965 .006 250);
+  --card: oklch(.19 .016 255);
+  --card-foreground: oklch(.965 .006 250);
+  --popover: oklch(.205 .018 255);
+  --popover-foreground: oklch(.965 .006 250);
+  --primary: #60a5fa;
+  --primary-foreground: #07111f;
+  --secondary: oklch(.25 .018 255);
+  --secondary-foreground: oklch(.965 .006 250);
+  --muted: oklch(.245 .016 255);
+  --muted-foreground: oklch(.7 .016 250);
+  --accent: oklch(.27 .02 255);
+  --accent-foreground: oklch(.965 .006 250);
+  --destructive: oklch(.704 .191 22.216);
+  --profit: #4ade80;
+  --loss: #f87171;
+  --border: oklch(1 0 0 / 20%);
+  --input: oklch(1 0 0 / 24%);
+  --ring: #60a5fa;
+  --glass: oklch(.18 .014 255 / 88%);
+  --glass-border: rgb(96 165 250 / 22%);
+}
+
+[data-palette="amber"] {
+  --primary: #9a6f0a;
+  --primary-foreground: #fffaf0;
+  --ring: #b88a22;
+  --glass-border: rgb(154 111 10 / 18%);
+}
+
+[data-palette="blue"] {
+  --primary: #2563eb;
+  --primary-foreground: #f8fbff;
+  --ring: #3b82f6;
+  --glass-border: rgb(37 99 235 / 15%);
+}
+
+[data-palette="violet"] {
+  --primary: #7c3aed;
+  --primary-foreground: #fbf8ff;
+  --ring: #8b5cf6;
+  --glass-border: rgb(124 58 237 / 15%);
+}
+
+[data-palette="rose"] {
+  --primary: #db2777;
+  --primary-foreground: #fff8fb;
+  --ring: #e11d74;
+  --glass-border: rgb(219 39 119 / 15%);
+}
+
+.dark[data-palette="amber"] {
+  --primary: #d4a72c;
+  --primary-foreground: #17130a;
+  --ring: #d4a72c;
+  --glass-border: rgb(212 167 44 / 22%);
+}
+
+.dark[data-palette="blue"] {
+  --primary: #60a5fa;
+  --primary-foreground: #071525;
+  --ring: #60a5fa;
+  --glass-border: rgb(96 165 250 / 19%);
+}
+
+.dark[data-palette="violet"] {
+  --primary: #a78bfa;
+  --primary-foreground: #130b22;
+  --ring: #a78bfa;
+  --glass-border: rgb(167 139 250 / 19%);
+}
+
+.dark[data-palette="rose"] {
+  --primary: #f472b6;
+  --primary-foreground: #250916;
+  --ring: #f472b6;
+  --glass-border: rgb(244 114 182 / 19%);
+}
+
+* {
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+html {
+  direction: rtl;
+  color-scheme: light;
+  background: var(--background);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Mikhak", ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01";
+  font-weight: var(--type-weight-body);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+[role="button"],
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--primary) 22%, transparent);
+}
+
+.type-display {
+  font-size: clamp(1.75rem, 1.4rem + 1vw, 2.45rem);
+  line-height: 1.24;
+  font-weight: var(--type-weight-display);
+  letter-spacing: -.025em;
+  text-wrap: balance;
+}
+
+.type-page-title {
+  font-size: clamp(1.45rem, 1.24rem + .72vw, 2.02rem);
+  line-height: 1.32;
+  font-weight: var(--type-weight-title);
+  letter-spacing: -.02em;
+  text-wrap: balance;
+}
+
+.type-section-title {
+  font-size: 1.125rem;
+  line-height: 1.55;
+  font-weight: var(--type-weight-heading);
+  letter-spacing: -.012em;
+}
+
+.type-card-title {
+  font-size: 1rem;
+  line-height: 1.55;
+  font-weight: var(--type-weight-heading);
+  letter-spacing: -.01em;
+}
+
+.type-brand {
+  font-size: 1.18rem;
+  line-height: 1.35;
+  font-weight: var(--type-weight-title);
+  letter-spacing: -.02em;
+}
+
+.type-label {
+  font-size: .875rem;
+  line-height: 1.55;
+  font-weight: var(--type-weight-label);
+}
+
+.type-body {
+  font-size: .875rem;
+  line-height: 1.8;
+  font-weight: var(--type-weight-body);
+}
+
+.type-caption {
+  font-size: .75rem;
+  line-height: 1.65;
+  font-weight: var(--type-weight-caption);
+}
+
+.type-data {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--type-weight-data);
+  letter-spacing: -.01em;
+}
+
+@theme inline {
+  --font-sans: "Mikhak", ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-profit: var(--profit);
+  --color-loss: var(--loss);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+.mesh-bg {
+  background-image:
+    radial-gradient(circle at 10% 0%, color-mix(in oklab, var(--primary) 8%, transparent) 0, transparent 26%),
+    radial-gradient(circle at 92% 15%, color-mix(in oklab, var(--primary) 5%, transparent) 0, transparent 24%);
+}
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 16px 50px color-mix(in oklab, var(--foreground) 7%, transparent);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 25%, transparent);
+}
+
+.skip-link {
+  position: fixed;
+  inset-inline-start: 1rem;
+  top: .75rem;
+  z-index: 100;
+  transform: translateY(-160%);
+  border-radius: .65rem;
+  background: var(--foreground);
+  color: var(--background);
+  padding: .55rem .85rem;
+  transition: transform .18s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+@media (max-width: 767px) {
+  .mesh-bg {
+    background-image:
+      radial-gradient(circle at 5% 0%, color-mix(in oklab, var(--primary) 10%, transparent) 0, transparent 28%),
+      radial-gradient(circle at 96% 14%, color-mix(in oklab, var(--primary) 4%, transparent) 0, transparent 24%);
+  }
+}
+
+:root {
+  --chart-1: #2563eb;
+  --chart-2: #0f766e;
+  --chart-3: #7c3aed;
+  --chart-4: #15803d;
+  --chart-5: #c2410c;
+  --chart-6: #0891b2;
+  --chart-7: #be185d;
+  --chart-8: #475569;
+}
+
+.dark {
+  --chart-1: #60a5fa;
+  --chart-2: #2dd4bf;
+  --chart-3: #a78bfa;
+  --chart-4: #4ade80;
+  --chart-5: #fb923c;
+  --chart-6: #22d3ee;
+  --chart-7: #f472b6;
+  --chart-8: #94a3b8;
+}
+
+[data-palette="amber"] {
+  --chart-1: #9a6f0a;
+  --chart-2: #2563eb;
+  --chart-3: #15803d;
+  --chart-4: #7c3aed;
+  --chart-5: #c2410c;
+  --chart-6: #0f766e;
+  --chart-7: #be185d;
+  --chart-8: #475569;
+}
+
+[data-palette="blue"] {
+  --chart-1: #2563eb;
+  --chart-2: #0f766e;
+  --chart-3: #7c3aed;
+  --chart-4: #15803d;
+  --chart-5: #c2410c;
+  --chart-6: #0891b2;
+  --chart-7: #be185d;
+  --chart-8: #475569;
+}
+
+[data-palette="violet"] {
+  --chart-1: #7c3aed;
+  --chart-2: #2563eb;
+  --chart-3: #be185d;
+  --chart-4: #15803d;
+  --chart-5: #c2410c;
+  --chart-6: #0f766e;
+  --chart-7: #9a6f0a;
+  --chart-8: #475569;
+}
+
+[data-palette="rose"] {
+  --chart-1: #db2777;
+  --chart-2: #7c3aed;
+  --chart-3: #2563eb;
+  --chart-4: #15803d;
+  --chart-5: #c2410c;
+  --chart-6: #0f766e;
+  --chart-7: #9a6f0a;
+  --chart-8: #475569;
+}
+
+.dark[data-palette="amber"] {
+  --chart-1: #d4a72c;
+  --chart-2: #60a5fa;
+  --chart-3: #4ade80;
+  --chart-4: #a78bfa;
+  --chart-5: #fb923c;
+  --chart-6: #2dd4bf;
+  --chart-7: #f472b6;
+  --chart-8: #94a3b8;
+}
+
+.dark[data-palette="blue"] {
+  --chart-1: #60a5fa;
+  --chart-2: #2dd4bf;
+  --chart-3: #a78bfa;
+  --chart-4: #4ade80;
+  --chart-5: #fb923c;
+  --chart-6: #22d3ee;
+  --chart-7: #f472b6;
+  --chart-8: #94a3b8;
+}
+
+.dark[data-palette="violet"] {
+  --chart-1: #a78bfa;
+  --chart-2: #60a5fa;
+  --chart-3: #f472b6;
+  --chart-4: #4ade80;
+  --chart-5: #fb923c;
+  --chart-6: #2dd4bf;
+  --chart-7: #d4a72c;
+  --chart-8: #94a3b8;
+}
+
+.dark[data-palette="rose"] {
+  --chart-1: #f472b6;
+  --chart-2: #a78bfa;
+  --chart-3: #60a5fa;
+  --chart-4: #4ade80;
+  --chart-5: #fb923c;
+  --chart-6: #2dd4bf;
+  --chart-7: #d4a72c;
+  --chart-8: #94a3b8;
+}
+
+.recharts-text,
+.recharts-default-tooltip,
+.recharts-legend-item-text {
+  font-family: "Mikhak", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+/* Doran calendar bridge: Doran behavior, Besanj/Poolamkoo visual tokens. */
+.besanj-doran {
+  --doran-primary: var(--primary);
+  --doran-primary-contrast: var(--primary-foreground);
+  --doran-primary-hover: color-mix(in oklab, var(--primary) 88%, var(--foreground));
+  --doran-surface: var(--popover);
+  --doran-surface-muted: var(--muted);
+  --doran-border: var(--border);
+  --doran-text: var(--popover-foreground);
+  --doran-text-muted: var(--muted-foreground);
+  --doran-focus-ring: color-mix(in oklab, var(--ring) 32%, transparent);
+  color: var(--popover-foreground);
+  color-scheme: inherit;
+  isolation: isolate;
+}
+
+.besanj-doran .doran-calendar__header {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: .45rem;
+  margin-bottom: .5rem;
+  padding-bottom: .45rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 82%, transparent);
+}
+
+.besanj-doran .doran-calendar__heading {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  min-width: 0;
+  font-size: .875rem;
+  font-weight: var(--type-weight-label);
+  color: var(--popover-foreground);
+}
+
+.besanj-doran .doran-calendar__nav,
+.besanj-doran .doran-calendar__heading-btn,
+.besanj-doran .doran-picker-option {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--popover) 88%, var(--background));
+  color: var(--popover-foreground);
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color .15s ease,
+    border-color .15s ease,
+    color .15s ease,
+    box-shadow .15s ease,
+    transform .15s ease;
+}
+
+.besanj-doran .doran-calendar__nav {
+  display: inline-grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: .75rem;
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 4%, transparent);
+}
+
+.besanj-doran .doran-calendar__heading-btn {
+  display: inline-flex;
+  min-height: 2.1rem;
+  align-items: center;
+  gap: .25rem;
+  border-radius: .7rem;
+  padding: .3rem .6rem;
+  font-weight: var(--type-weight-label);
+  white-space: nowrap;
+}
+
+.besanj-doran .doran-calendar__heading-btn svg {
+  width: .8rem;
+  height: .8rem;
+  opacity: .7;
+}
+
+.besanj-doran .doran-calendar__nav:hover,
+.besanj-doran .doran-calendar__heading-btn:hover,
+.besanj-doran .doran-calendar__heading-btn--active {
+  border-color: color-mix(in oklab, var(--primary) 52%, var(--border));
+  background: color-mix(in oklab, var(--primary) 14%, var(--popover));
+  color: var(--primary);
+}
+
+.besanj-doran .doran-calendar__heading-btn--active {
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 14%, transparent);
+}
+
+.besanj-doran .doran-calendar__nav:active,
+.besanj-doran .doran-calendar__heading-btn:active,
+.besanj-doran .doran-picker-option:active {
+  transform: translateY(1px);
+}
+
+.besanj-doran .doran-calendar__nav:focus-visible,
+.besanj-doran .doran-calendar__heading-btn:focus-visible,
+.besanj-doran .doran-picker-option:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 26%, transparent);
+}
+
+.besanj-doran .doran-picker-panel {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: .15rem;
+}
+
+.besanj-doran .doran-picker-panel__grid {
+  display: grid;
+  gap: .45rem;
+  padding: .1rem;
+}
+
+.besanj-doran .doran-picker-panel__grid--months {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.besanj-doran .doran-picker-panel__grid--years {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-height: 13.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--primary) 58%, var(--border)) transparent;
+}
+
+.besanj-doran .doran-picker-option {
+  min-height: 2.55rem;
+  border-radius: .75rem;
+  padding: .42rem .3rem;
+  font-size: .8rem;
+  font-weight: var(--type-weight-body-strong);
+  text-align: center;
+}
+
+.besanj-doran .doran-picker-option:hover {
+  border-color: color-mix(in oklab, var(--primary) 28%, var(--border));
+  background: color-mix(in oklab, var(--primary) 8%, var(--muted));
+  color: var(--foreground);
+}
+
+/* Doran exposes both a class and aria-selected. Use both so active month/year
+   stays readable even if Doran's own stylesheet is added later. */
+.besanj-doran .doran-picker-option--active,
+.besanj-doran .doran-picker-option--active:hover,
+.besanj-doran .doran-picker-option[aria-selected="true"],
+.besanj-doran .doran-picker-option[aria-selected="true"]:hover {
+  border-color: var(--primary) !important;
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  box-shadow: 0 4px 16px color-mix(in oklab, var(--primary) 24%, transparent) !important;
+}
+
+.dark .besanj-doran {
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--foreground) 4%, transparent);
+}
+
+.dark .besanj-doran .doran-calendar__nav,
+.dark .besanj-doran .doran-calendar__heading-btn,
+.dark .besanj-doran .doran-picker-option {
+  border-color: color-mix(in oklab, var(--border) 92%, transparent);
+  background: color-mix(in oklab, var(--popover) 90%, var(--background));
+  color: var(--popover-foreground);
+}
+
+.dark .besanj-doran .doran-picker-option:hover,
+.dark .besanj-doran .doran-calendar__nav:hover,
+.dark .besanj-doran .doran-calendar__heading-btn:hover {
+  border-color: color-mix(in oklab, var(--primary) 48%, var(--border));
+  background: color-mix(in oklab, var(--primary) 13%, var(--popover));
+  color: var(--primary);
+}
+
+.dark .besanj-doran .doran-calendar__heading-btn--active,
+.dark .besanj-doran .doran-calendar__heading-btn--active:hover {
+  border-color: color-mix(in oklab, var(--primary) 62%, var(--border));
+  background: color-mix(in oklab, var(--primary) 17%, var(--popover));
+  color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 16%, transparent);
+}

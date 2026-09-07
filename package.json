@@ -1,0 +1,51 @@
+{
+  "name": "besanj",
+  "version": "0.4.9",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "check:ui": "node scripts/cleanup-stale-ui.mjs && node scripts/check-ui-components.mjs",
+    "check": "npm run doctor && npm run check:ui && npm run check:theme && npm run check:pwa && npm run typecheck && npm run lint && npm test && npm run build",
+    "predev": "node scripts/cleanup-stale-ui.mjs && node scripts/doctor.mjs",
+    "postinstall": "node scripts/cleanup-stale-ui.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "check:theme": "node scripts/check-theme-runtime.mjs",
+    "check:pwa": "node scripts/check-pwa.mjs"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.7.0",
+    "@doranjs/core": "0.3.0",
+    "@doranjs/react": "0.9.2",
+    "@doranjs/ui": "0.0.4",
+    "@hookform/resolvers": "^5.2.1",
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.2.5",
+    "dexie": "^4.4.5",
+    "dexie-react-hooks": "^4.4.0",
+    "lucide-react": "^1.33.0",
+    "motion": "^13.1.1",
+    "next": "16.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-hook-form": "^7.62.0",
+    "recharts": "3.10.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.3.2",
+    "tailwindcss": "^4.3.3",
+    "tailwindcss-animated": "^2.1.0",
+    "typescript": "^5.9.0"
+  }
+}

@@ -1,0 +1,444 @@
+"use client";
+
+import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { DoranDate } from "@doranjs/core";
+import { Calculator, CirclePlus } from "lucide-react";
+import { addQuote } from "@/lib/db";
+import {
+  channelContactMeta,
+  dateToIso,
+  formatPersianDate,
+  QUOTE_CHANNELS,
+} from "@/lib/format";
+import { quoteTotal } from "@/lib/quote";
+import { quoteFormSchema, type QuoteFormValues } from "@/lib/schemas";
+import type { Provider, Quote, QuoteChannel } from "@/lib/types";
+import { useToast } from "@/components/toast";
+import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
+import { FormField } from "@/components/ui/form-field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+} from "@/components/ui/input-group";
+import { Input } from "@/components/ui/input";
+import { IntegerInput } from "@/components/ui/integer-input";
+import { MobileNumberInput } from "@/components/ui/mobile-number-input";
+import { PriceInput } from "@/components/ui/price-input";
+import { ResponsiveSheet } from "@/components/ui/responsive-sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { TomanIcon } from "@/components/ui/toman-icon";
+import { normalizeOptionalText } from "@/lib/validation-rules";
+
+export type RequotePreset = {
+  quote: Quote;
+  provider: Provider;
+};
+
+function cleanText(value?: string | null) {
+  return normalizeOptionalText(value) ?? "";
+}
+
+function blankValues(preset?: RequotePreset | null): QuoteFormValues {
+  return {
+    providerName: cleanText(preset?.provider.name),
+    phone: cleanText(preset?.provider.phone),
+    priceToman: 0,
+    extraCostToman: null,
+    quotedAt: new Date(),
+    validUntil: null,
+    deliveryDays:
+      typeof preset?.quote.deliveryDays === "number" &&
+      Number.isFinite(preset.quote.deliveryDays)
+        ? preset.quote.deliveryDays
+        : null,
+    warranty: cleanText(preset?.quote.warranty),
+    paymentTerms: cleanText(preset?.quote.paymentTerms),
+    channel: preset?.quote.channel ?? "phone",
+    contactRef: cleanText(preset?.quote.contactRef),
+    note: "",
+  };
+}
+
+function validityPresets(quotedAt: Date) {
+  const base = DoranDate.fromGregorian(quotedAt);
+  return [
+    { label: "همان روز", value: base.toGregorian() },
+    { label: "۳ روز", value: base.addDays(3).toGregorian() },
+    { label: "۱ هفته", value: base.addDays(7).toGregorian() },
+    { label: "۲ هفته", value: base.addDays(14).toGregorian() },
+    { label: "۱ ماه", value: base.addMonths(1).toGregorian() },
+  ] as const;
+}
+
+export function QuoteFormDialog({
+  caseId,
+  open,
+  onOpenChange,
+  preset,
+}: {
+  caseId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  preset?: RequotePreset | null;
+}) {
+  const { toast } = useToast();
+
+  const form = useForm<QuoteFormValues>({
+    resolver: zodResolver(quoteFormSchema),
+    defaultValues: blankValues(preset),
+  });
+
+  React.useEffect(() => {
+    if (open) form.reset(blankValues(preset));
+  }, [open, preset, form]);
+
+  const price = useWatch({ control: form.control, name: "priceToman" }) || 0;
+  const extra = useWatch({ control: form.control, name: "extraCostToman" }) || 0;
+  const quotedAt = useWatch({ control: form.control, name: "quotedAt" });
+  const channel = useWatch({ control: form.control, name: "channel" });
+  const total = quoteTotal({ priceToman: price, extraCostToman: extra });
+  const contactMeta = channelContactMeta(channel);
+  const quickValidityPresets = React.useMemo(
+    () => validityPresets(quotedAt),
+    [quotedAt]
+  );
+
+  async function onSubmit(
+    values: QuoteFormValues,
+    event?: React.BaseSyntheticEvent
+  ) {
+    const submitter = (event?.nativeEvent as SubmitEvent | undefined)?.submitter as
+      | HTMLButtonElement
+      | null
+      | undefined;
+    const submitMode = submitter?.value === "next" ? "next" : "close";
+
+    try {
+      await addQuote({
+        caseId,
+        providerName: values.providerName,
+        phone: values.phone,
+        priceToman: values.priceToman,
+        extraCostToman: values.extraCostToman,
+        quotedAt: dateToIso(values.quotedAt),
+        validUntil: values.validUntil ? dateToIso(values.validUntil, true) : undefined,
+        deliveryDays: values.deliveryDays,
+        warranty: values.warranty,
+        paymentTerms: values.paymentTerms,
+        channel: values.channel,
+        contactRef: values.contactRef,
+        note: values.note,
+        previousQuoteId: preset?.quote.id,
+      });
+
+      toast(preset ? "قیمت جدید ثبت شد." : "استعلام ثبت شد.");
+
+      if (!preset && submitMode === "next") {
+        form.reset(blankValues());
+      } else {
+        onOpenChange(false);
+      }
+    } catch (error) {
+      toast(
+        error instanceof Error ? error.message : "ثبت استعلام انجام نشد.",
+        "error"
+      );
+    }
+  }
+
+  return (
+    <ResponsiveSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={preset ? `استعلام مجدد از ${preset.provider.name}` : "ثبت استعلام"}
+      description={
+        preset
+          ? "قیمت قبلی حذف نمی‌شود و تغییر قیمت در تاریخچه همان فروشنده می‌ماند."
+          : "قیمت و شرایطی که همین حالا گرفته‌ای را ثبت کن."
+      }
+      className="sm:max-w-2xl"
+    >
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="grid gap-5 p-4 pb-6 sm:p-5"
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            label="فروشنده / ارائه‌دهنده"
+            required
+            error={form.formState.errors.providerName?.message}
+          >
+            <Input
+              placeholder="مثلاً فروشگاه مرکزی"
+              readOnly={Boolean(preset)}
+              {...form.register("providerName")}
+            />
+          </FormField>
+
+          <FormField label="شماره موبایل" error={form.formState.errors.phone?.message}>
+            <Controller
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <MobileNumberInput
+                  value={field.value ?? ""}
+                  onValueChange={field.onChange}
+                  readOnly={Boolean(preset)}
+                  aria-invalid={Boolean(form.formState.errors.phone)}
+                />
+              )}
+            />
+          </FormField>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            label="قیمت"
+            required
+            error={form.formState.errors.priceToman?.message}
+          >
+            <InputGroup className="h-10">
+              <Controller
+                control={form.control}
+                name="priceToman"
+                render={({ field }) => (
+                  <PriceInput
+                    data-slot="input-group-control"
+                    value={field.value > 0 ? field.value : null}
+                    onValueChange={(value) => field.onChange(value ?? 0)}
+                    min={0}
+                    aria-invalid={Boolean(form.formState.errors.priceToman)}
+                    className="flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent"
+                  />
+                )}
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupText>
+                  <TomanIcon className="size-4" />
+                  <span className="sr-only">تومان</span>
+                </InputGroupText>
+              </InputGroupAddon>
+            </InputGroup>
+          </FormField>
+
+          <FormField
+            label="هزینه اضافه"
+            hint="ارسال، نصب، ویزیت یا هزینه جانبی"
+            error={form.formState.errors.extraCostToman?.message}
+          >
+            <InputGroup className="h-10">
+              <Controller
+                control={form.control}
+                name="extraCostToman"
+                render={({ field }) => (
+                  <PriceInput
+                    data-slot="input-group-control"
+                    value={field.value ?? null}
+                    onValueChange={field.onChange}
+                    min={0}
+                    aria-invalid={Boolean(form.formState.errors.extraCostToman)}
+                    className="flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent"
+                  />
+                )}
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupText>
+                  <TomanIcon className="size-4" />
+                  <span className="sr-only">تومان</span>
+                </InputGroupText>
+              </InputGroupAddon>
+            </InputGroup>
+          </FormField>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/10 px-3.5 py-3">
+          <div>
+            <div className="type-caption text-muted-foreground">قیمت نهایی</div>
+            <div className="type-data mt-0.5 inline-flex items-center gap-1 text-lg text-primary">
+              {total.toLocaleString("fa-IR")}
+              <TomanIcon className="size-4" />
+            </div>
+          </div>
+          <Calculator className="size-5 text-primary/70" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            label="تاریخ استعلام"
+            required
+            error={form.formState.errors.quotedAt?.message}
+          >
+            <Controller
+              control={form.control}
+              name="quotedAt"
+              render={({ field }) => (
+                <DatePicker
+                  value={field.value}
+                  onValueChange={(value) => value && field.onChange(value)}
+                  placeholder="تاریخ استعلام"
+                  drawerTitle="تاریخ استعلام"
+                  className="w-full"
+                />
+              )}
+            />
+          </FormField>
+
+          <FormField
+            label="اعتبار قیمت تا"
+            hint="اگر فروشنده زمانی برای اعتبار قیمت گفته است"
+            error={form.formState.errors.validUntil?.message}
+          >
+            <Controller
+              control={form.control}
+              name="validUntil"
+              render={({ field }) => (
+                <DatePicker
+                  value={field.value ?? null}
+                  onValueChange={field.onChange}
+                  placeholder="انتخاب تاریخ اعتبار"
+                  drawerTitle="اعتبار قیمت تا"
+                  clearable
+                  className="w-full"
+                  min={quotedAt}
+                  quickPresets={quickValidityPresets}
+                />
+              )}
+            />
+          </FormField>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            label="زمان تحویل"
+            hint="تعداد روز؛ صفر یعنی تحویل فوری"
+            error={form.formState.errors.deliveryDays?.message}
+          >
+            <Controller
+              control={form.control}
+              name="deliveryDays"
+              render={({ field }) => (
+                <IntegerInput
+                  value={field.value ?? null}
+                  onValueChange={field.onChange}
+                  min={0}
+                  placeholder="مثلاً ۳"
+                  aria-invalid={Boolean(form.formState.errors.deliveryDays)}
+                />
+              )}
+            />
+          </FormField>
+
+          <FormField label="روش استعلام" error={form.formState.errors.channel?.message}>
+            <Controller
+              control={form.control}
+              name="channel"
+              render={({ field }) => (
+                <Select<QuoteChannel>
+                  value={field.value}
+                  onValueChange={(value) => { if (value !== null) field.onChange(value); }}
+                  items={QUOTE_CHANNELS}
+                >
+                  <SelectTrigger className="h-10 rounded-xl">
+                    <SelectValue placeholder="روش استعلام" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {QUOTE_CHANNELS.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </FormField>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            label={contactMeta.label}
+            hint="اختیاری؛ برای اینکه دفعه بعد سریع همان مسیر را پیدا کنی"
+            error={form.formState.errors.contactRef?.message}
+          >
+            <Input
+              dir="auto"
+              placeholder={contactMeta.placeholder}
+              {...form.register("contactRef")}
+            />
+          </FormField>
+
+          <FormField label="گارانتی" error={form.formState.errors.warranty?.message}>
+            <Input
+              placeholder="مثلاً ۱۸ ماه گارانتی شرکتی"
+              {...form.register("warranty")}
+            />
+          </FormField>
+        </div>
+
+        <FormField
+          label="شرایط پرداخت"
+          error={form.formState.errors.paymentTerms?.message}
+        >
+          <Input
+            placeholder="نقد، کارت، اقساط، بیعانه..."
+            {...form.register("paymentTerms")}
+          />
+        </FormField>
+
+        <FormField label="یادداشت" error={form.formState.errors.note?.message}>
+          <Textarea
+            placeholder="هر چیزی که بعداً ممکن است یادت برود..."
+            {...form.register("note")}
+          />
+        </FormField>
+
+        {preset ? (
+          <div className="rounded-2xl bg-muted/50 px-3.5 py-3">
+            <p className="type-caption text-muted-foreground">
+              قیمت قبلی در <span className="font-medium text-foreground">{formatPersianDate(preset.quote.quotedAt)}</span>{" "}
+              ثبت شده و بعد از ذخیره، هر دو نسخه در تاریخچه همان فروشنده دیده می‌شوند.
+            </p>
+          </div>
+        ) : null}
+
+        <div className="sticky bottom-0 -mx-4 -mb-6 mt-1 grid grid-cols-2 gap-2 border-t border-border bg-popover/95 px-4 py-4 backdrop-blur sm:-mx-5 sm:px-5">
+          {!preset ? (
+            <Button
+              type="submit"
+              name="submitMode"
+              value="next"
+              variant="outline"
+              disabled={form.formState.isSubmitting}
+            >
+              <CirclePlus />
+              ثبت و بعدی
+            </Button>
+          ) : (
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              انصراف
+            </Button>
+          )}
+          <Button
+            type="submit"
+            name="submitMode"
+            value="close"
+            loading={form.formState.isSubmitting}
+          >
+            {preset ? "ثبت قیمت جدید" : "ثبت استعلام"}
+          </Button>
+        </div>
+      </form>
+    </ResponsiveSheet>
+  );
+}
