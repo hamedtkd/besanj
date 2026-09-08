@@ -1,4 +1,4 @@
-import { normalizePersianDigits } from "@/lib/normalize-persian-digits";
+import { normalizePersianDigits } from "./normalize-persian-digits.ts";
 
 /** Adapted from PersianLabs/ui iranian-mobile utility. */
 export function normalizeIranPhone(phone: string | null | undefined) {

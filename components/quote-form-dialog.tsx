@@ -89,16 +89,19 @@ export function QuoteFormDialog({
   onOpenChange,
   preset,
   requirements = [],
+  providers = [],
 }: {
   caseId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   preset?: RequotePreset | null;
   requirements?: CaseRequirement[];
+  providers?: Provider[];
 }) {
   const { toast } = useToast();
   const [requirementChecks, setRequirementChecks] = React.useState<Record<string, boolean>>(() => ({ ...(preset?.quote.requirementChecks ?? {}) }));
   const [pendingFiles, setPendingFiles] = React.useState<File[]>([]);
+  const [providerChoice, setProviderChoice] = React.useState("__new__");
 
   const form = useForm<QuoteFormValues>({
     resolver: zodResolver(quoteFormSchema),
@@ -119,11 +122,37 @@ export function QuoteFormDialog({
     () => validityPresets(quotedAt),
     [quotedAt]
   );
+  const providerItems = React.useMemo(
+    () => [
+      { value: "__new__", label: "فروشنده جدید" },
+      ...providers.map((provider) => ({
+        value: provider.id,
+        label: provider.name,
+      })),
+    ],
+    [providers]
+  );
+
+  function chooseProvider(next: string | null) {
+    if (!next) return;
+    setProviderChoice(next);
+    if (next === "__new__") {
+      form.setValue("providerName", "", { shouldValidate: true });
+      form.setValue("phone", "");
+      return;
+    }
+
+    const provider = providers.find((item) => item.id === next);
+    if (!provider) return;
+    form.setValue("providerName", provider.name, { shouldValidate: true });
+    form.setValue("phone", provider.phone ?? "");
+  }
 
   function handleOpenChange(next: boolean) {
     if (!next) {
       setPendingFiles([]);
       setRequirementChecks({});
+      setProviderChoice("__new__");
     }
     onOpenChange(next);
   }
@@ -207,6 +236,30 @@ export function QuoteFormDialog({
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid gap-5 p-4 pb-6 sm:p-5"
       >
+        {!preset && providers.length ? (
+          <FormField
+            label="انتخاب سریع فروشنده قبلی"
+            hint="اگر این فروشنده قبلاً در پرونده بوده، نام و شماره‌اش را با یک انتخاب پر کن."
+          >
+            <Select<string>
+              value={providerChoice}
+              onValueChange={chooseProvider}
+              items={providerItems}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {providerItems.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        ) : null}
+
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             label="فروشنده / ارائه‌دهنده"

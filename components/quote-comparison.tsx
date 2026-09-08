@@ -14,6 +14,7 @@ import {
   Store,
   Truck,
 } from "lucide-react";
+import { ProviderContactActions } from "@/components/provider-contact-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,6 +29,7 @@ import {
   formatToman,
   formatUserText,
 } from "@/lib/format";
+import { buildFollowUpMessage } from "@/lib/contact";
 import { freshnessLabel, getQuoteFreshness, quoteTotal } from "@/lib/quote";
 import { getBudgetState, requirementMatchSummary } from "@/lib/planning";
 import type { CaseRequirement, Provider, Quote } from "@/lib/types";
@@ -46,6 +48,7 @@ export function QuoteComparison({
   targetBudgetToman,
   requirements = [],
   attachmentCounts = {},
+  caseTitle,
 }: {
   quotes: Quote[];
   providers: Provider[];
@@ -59,6 +62,7 @@ export function QuoteComparison({
   targetBudgetToman?: number;
   requirements?: CaseRequirement[];
   attachmentCounts?: Record<string, number>;
+  caseTitle: string;
 }) {
   const providerById = new Map(
     providers.map((provider) => [provider.id, provider])
@@ -154,6 +158,17 @@ export function QuoteComparison({
                           {contactRef}
                         </p>
                       ) : null}
+                      <ProviderContactActions
+                        provider={provider}
+                        compact
+                        className="mt-1.5"
+                        message={buildFollowUpMessage({
+                          caseTitle,
+                          providerName: provider.name,
+                          quotedPriceToman: total,
+                          validUntil: quote.validUntil,
+                        })}
+                      />
                     </div>
                   </div>
 

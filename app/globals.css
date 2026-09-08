@@ -617,3 +617,72 @@ a {
   color: var(--primary);
   box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 16%, transparent);
 }
+
+/* Printable case report: keep the on-screen app intact, but produce a clean A4 view. */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    color-scheme: light !important;
+    background: #fff !important;
+  }
+
+  body {
+    color: #111827 !important;
+  }
+
+  body.mesh-bg {
+    background-image: none !important;
+  }
+
+  body > div,
+  body > div > div {
+    min-height: auto !important;
+  }
+
+  header,
+  .skip-link,
+  .no-print {
+    display: none !important;
+  }
+
+  main#app-main {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .besanj-report-page {
+    width: 100% !important;
+  }
+
+  .print-report {
+    --background: #ffffff;
+    --foreground: #111827;
+    --card: #ffffff;
+    --card-foreground: #111827;
+    --muted: #f3f4f6;
+    --muted-foreground: #4b5563;
+    --border: #d1d5db;
+    --primary: #2563eb;
+    --primary-foreground: #ffffff;
+    border: 0 !important;
+    background: #fff !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+  }
+
+  .print-report .text-muted-foreground {
+    color: #4b5563 !important;
+  }
+
+  .report-break-inside {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
