@@ -5,6 +5,7 @@ import { AppThemeProvider } from "@/components/app-theme";
 import { ToastProvider } from "@/components/toast";
 import { PwaRegister } from "@/components/pwa-register";
 import { PwaInstallProvider } from "@/components/pwa-install-provider";
+import { NotificationProvider } from "@/components/notification-provider";
 import type { ThemeMode } from "@/lib/theme";
 
 export function Providers({
@@ -18,10 +19,12 @@ export function Providers({
     <AppThemeProvider initialTheme={initialTheme}>
       <AppPreferencesProvider>
         <PwaInstallProvider>
-          <ToastProvider>
-            <PwaRegister />
-            {children}
-          </ToastProvider>
+          <NotificationProvider>
+            <ToastProvider>
+              <PwaRegister />
+              {children}
+            </ToastProvider>
+          </NotificationProvider>
         </PwaInstallProvider>
       </AppPreferencesProvider>
     </AppThemeProvider>

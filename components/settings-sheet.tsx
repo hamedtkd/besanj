@@ -10,6 +10,7 @@ import {
 import { CustomThemeColorSheet } from "@/components/custom-theme-color-sheet";
 import { DataBackupSection } from "@/components/data-backup-section";
 import { PwaInstallSection } from "@/components/pwa-install-section";
+import { NotificationSettingsSection } from "@/components/notification-settings-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ResponsiveSheet } from "@/components/ui/responsive-sheet";
@@ -65,7 +66,7 @@ export function SettingsSheet({
         open={open}
         onOpenChange={onOpenChange}
         title="تنظیمات"
-        description="ظاهر، نصب روی دستگاه و پشتیبان داده‌های بسنج را از اینجا مدیریت کن."
+        description="ظاهر، اعلان‌ها، نصب روی دستگاه و پشتیبان داده‌های بسنج را از اینجا مدیریت کن."
         className="sm:max-w-xl"
       >
         <div className="space-y-6 p-4 sm:p-5">
@@ -179,6 +180,8 @@ export function SettingsSheet({
               </Button>
             </div>
           </section>
+
+          <NotificationSettingsSection />
 
           <DataBackupSection />
 

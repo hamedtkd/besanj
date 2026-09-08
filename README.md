@@ -2,7 +2,7 @@
 
 بسنج یک دفتر شخصی و local-first برای استعلام قیمت، پیگیری فروشنده‌ها، مقایسه گزینه‌ها و رسیدن به تصمیم خرید است.
 
-نسخه: **0.7.0**
+نسخه: **0.8.0**
 
 ## فاز 0.7 — ارتباط، گزارش و خط زمانی
 
@@ -161,13 +161,14 @@ check:pwa
 check:workflow
 check:data
 check:report
+check:automation
 typecheck
 lint
 test
 build
 ```
 
-`check:data` بررسی می‌کند که Backup/Restore، نگهداری بایت‌های پیوست، خرید مشابه و انتخاب فروشنده قبلی واقعاً در سورس سیم‌کشی شده باشند. `check:report` نیز صفحه گزارش، چاپ/PDF، اشتراک، خط زمانی و تماس سریع را بررسی می‌کند.
+`check:data` بررسی می‌کند که Backup/Restore، نگهداری بایت‌های پیوست، خرید مشابه و انتخاب فروشنده قبلی واقعاً در سورس سیم‌کشی شده باشند. `check:report` صفحه گزارش، چاپ/PDF، اشتراک، خط زمانی و تماس سریع را بررسی می‌کند و `check:automation` مجوز اعلان، ledger روزانه، App Badge، Snooze و مسیر کلیک Service Worker را کنترل می‌کند.
 
 ## نصب به‌عنوان اپ (PWA)
 
@@ -181,7 +182,18 @@ npm start
 Service Worker cache version در این نسخه:
 
 ```text
-besanj-shell-v8
+besanj-shell-v9
+```
+
+## ساختار مهم فاز 0.8
+
+```text
+components/notification-provider.tsx
+components/notification-settings-section.tsx
+components/task-quick-link.tsx
+lib/notifications.ts
+scripts/check-automation.mjs
+tests/notifications.test.ts
 ```
 
 ## ساختار مهم فاز 0.7
@@ -215,15 +227,19 @@ tests/duplicate-case.test.ts
 
 برای کنترل‌های عمومی ابتدا PersianLabs/ui استفاده می‌شود. DatePicker استثنای مستند است: موتور تقویم Doran است اما primitiveها و ظاهر متعلق به پروژه هستند.
 
-## توسعه امن از نسخه سبز 0.6.0
+## توسعه امن از نسخه سبز 0.7.0
 
-روی branch فاز 0.7 این نسخه را تست کن. نسخه 0.6.0 روی سیستم کاربر گیت کامل را پاس کرده است. بعد از سبز شدن `npm run check` بهتر است commit مستقل بگیری:
+روی branch `feat/automation-v0.8` این نسخه را تست کن. نسخه 0.7.0 روی سیستم کاربر گیت کامل را پاس کرده است. بعد از سبز شدن `npm run check` بهتر است commit مستقل بگیری:
 
 ```bash
 git add .
-git commit -m "feat: add Besanj reporting timeline and quick contact v0.7.0"
+git commit -m "feat: add Besanj local notifications and daily actions v0.8.0"
 ```
 
 ## منابع
 
-جزئیات کتابخانه‌ها در `THIRD_PARTY.md`، تغییرات این نسخه در `docs/RELEASE_0.7.0.md` و نتیجه QA در `QA.md` آمده است.
+جزئیات کتابخانه‌ها در `THIRD_PARTY.md`، تغییرات این نسخه در `docs/RELEASE_0.8.0.md` و نتیجه QA در `QA.md` آمده است.
+
+## اعلان و اتوماسیون محلی
+
+اعلان‌های اختیاری، App Badge و Snooze پیگیری‌ها در نسخه 0.8 اضافه شده‌اند. اعلان‌ها به‌صورت local-first و بدون Push Server کار می‌کنند؛ بنابراین بررسی در زمان اجرای اپ، بازگشت به آن، تغییر داده و هر ۱۵ دقیقه در حالت visible انجام می‌شود. هر Task در هر روز حداکثر یک بار اعلان می‌شود.

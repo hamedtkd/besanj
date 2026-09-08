@@ -1,5 +1,5 @@
 /* global self, caches, fetch, Response, URL */
-const CACHE_VERSION = "besanj-shell-v8";
+const CACHE_VERSION = "besanj-shell-v9";
 const CORE_ASSETS = [
   "/",
   "/manifest.webmanifest",
@@ -94,5 +94,25 @@ self.addEventListener("fetch", (event) => {
 
       return cached || network;
     })
+  );
+});
+
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const requested = event.notification.data?.url || "/";
+  const target = new URL(requested, self.location.origin);
+  if (target.origin !== self.location.origin) return;
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then(async (clientList) => {
+        for (const client of clientList) {
+          if ("navigate" in client) await client.navigate(target.href);
+          if ("focus" in client) return client.focus();
+        }
+        return self.clients.openWindow ? self.clients.openWindow(target.href) : undefined;
+      })
   );
 });

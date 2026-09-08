@@ -22,6 +22,17 @@ export interface DashboardTask {
 
 const DAY_MS = 86_400_000;
 
+export function snoozeReminderDueAt(days: number, now = new Date()) {
+  const amount = Math.max(1, Math.round(days));
+  const next = new Date(now);
+  next.setHours(12, 0, 0, 0);
+  next.setDate(next.getDate() + amount);
+  const year = next.getFullYear();
+  const month = String(next.getMonth() + 1).padStart(2, "0");
+  const day = String(next.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}T23:59:59.999`;
+}
+
 function localDayNumber(value: Date) {
   return Math.floor(
     Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()) / DAY_MS

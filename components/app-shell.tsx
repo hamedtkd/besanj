@@ -7,6 +7,7 @@ import { ArrowRight, Home, Settings } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { SettingsSheet } from "@/components/settings-sheet";
 import { ThemeQuickActions } from "@/components/theme-quick-actions";
+import { TaskQuickLink } from "@/components/task-quick-link";
 import { Button } from "@/components/ui/button";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -60,6 +61,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Button>
             ) : null}
 
+            <TaskQuickLink />
             <ThemeQuickActions onOpenSettings={() => setSettingsOpen(true)} />
 
             <span className="mx-0.5 h-5 w-px bg-border" aria-hidden />

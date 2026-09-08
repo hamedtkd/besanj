@@ -47,3 +47,12 @@ UI فونت variable Mikhak را از همان منبع عمومی GitHub/jsDeli
 ## Recharts
 
 نمودار تاریخچه قیمت با Recharts ساخته شده و از tokenهای رنگی تم بسنج استفاده می‌کند.
+
+
+## Browser platform APIs used in v0.8
+
+- Web Notifications API
+- Service Worker notification click handling
+- Badging API (feature-detected, optional)
+
+No third-party notification or push SDK was added.

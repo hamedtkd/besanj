@@ -2,6 +2,7 @@
 
 import Dexie, { type EntityTable } from "dexie";
 import { sanitizeRequirementChecks } from "@/lib/planning";
+import { snoozeReminderDueAt } from "@/lib/follow-up";
 import { cloneRequirementsForNewCase, makeRepeatedCaseTitle } from "@/lib/duplicate-case";
 import type {
   CaseReminder,
@@ -479,6 +480,23 @@ export async function setReminderDone(id: string, done: boolean) {
     completedAt: done ? now : undefined,
     updatedAt: now,
   });
+}
+
+export async function snoozeReminder(id: string, days: number, now = new Date()) {
+  const reminder = await db.reminders.get(id);
+  if (!reminder) throw new Error("پیگیری پیدا نشد.");
+  const dueAt = snoozeReminderDueAt(days, now);
+  const updatedAt = now.toISOString();
+  await db.transaction("rw", db.reminders, db.purchaseCases, async () => {
+    await db.reminders.update(id, {
+      dueAt,
+      status: "open",
+      completedAt: undefined,
+      updatedAt,
+    });
+    await db.purchaseCases.update(reminder.caseId, { updatedAt });
+  });
+  return dueAt;
 }
 
 export async function deleteReminder(id: string) {

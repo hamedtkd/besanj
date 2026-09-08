@@ -97,7 +97,7 @@ export function CaseFollowUpSheet({
         <div className="flex items-start gap-3 rounded-2xl border border-primary/15 bg-primary/[0.055] p-3.5">
           <BellRing className="mt-0.5 size-4.5 shrink-0 text-primary" />
           <p className="type-caption text-muted-foreground">
-            یادآوری‌ها داخل خود بسنج هستند؛ برای هشدار سیستم‌عامل باید بعداً اعلان Push اضافه کنیم.
+            این پیگیری در «کارهای امروز» می‌ماند. اگر اعلان‌های بسنج را در تنظیمات فعال کرده باشی، هنگام اجرای اپ یا برگشتن به آن هشدار سیستم‌عامل هم می‌گیری.
           </p>
         </div>
 

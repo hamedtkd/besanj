@@ -1,3 +1,48 @@
+# QA — Besanj 0.8.0
+
+## فاز اعلان و اقدام روزانه
+
+- Web Notification permission/settings UI
+- daily notification dedupe ledger
+- service-worker notification click routing
+- app badge + navbar task badge
+- reminder snooze / done actions
+- `check:automation` guard
+
+## بررسی‌های اجراشده در محیط ساخت
+
+- `npm test`: **67/67 PASS**
+- `TZ=Asia/Tehran npm test`: **67/67 PASS**
+- `check:ui`: **PASS**
+- `check:theme`: **PASS**
+- `check:pwa`: **PASS**
+- `check:workflow`: **PASS**
+- `check:data`: **PASS**
+- `check:report`: **PASS**
+- `check:automation`: **PASS**
+- TypeScript syntax/transpile scan: **109 فایل TS/TSX، 0 خطای syntax**
+- Local import resolution: **397 import محلی، 0 مسیر شکسته**
+- Unused import candidate scan: **0 مورد**
+- JavaScript syntax check برای Service Worker و scriptهای `.mjs`: **PASS**
+- typecheck هدفمند برای `notifications/follow-up/quote/types`: **PASS**
+
+Dependencyهای کامل npm داخل sandbox موجود نیستند؛ بنابراین `tsc --noEmit`، ESLint و Next production build کامل را باید روی سیستم مقصد با `npm run check` اجرا کرد.
+
+## گیت مرجع روی سیستم مقصد
+
+```bash
+npm install
+npm run check
+```
+
+برای regression تاریخ نیز:
+
+```bash
+TZ=Asia/Tehran npm test
+```
+
+---
+
 # QA — Besanj 0.7.0
 
 ## مبنای شروع
