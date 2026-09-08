@@ -14,7 +14,7 @@ import {
 } from "./theme";
 import { normalizeHexColor, normalizeSavedThemeColors } from "./theme-color";
 
-export const BESANJ_APP_VERSION = "1.1.0";
+export const BESANJ_APP_VERSION = "1.2.0";
 
 const PALETTE_STORAGE_KEY = "estelamkoo:palette";
 const CUSTOM_COLOR_STORAGE_KEY = "estelamkoo:custom-color";
@@ -88,17 +88,18 @@ function writePreferences(preferences?: PortablePreferences) {
 }
 
 export async function createFullBackup() {
-  const [purchaseCases, providers, quotes, reminders, attachments] =
+  const [purchaseCases, providers, quotes, reminders, attachments, budgetPlans] =
     await Promise.all([
       db.purchaseCases.toArray(),
       db.providers.toArray(),
       db.quotes.toArray(),
       db.reminders.toArray(),
       db.attachments.toArray(),
+      db.budgetPlans.toArray(),
     ]);
 
   return buildBesanjBackupFile(
-    { purchaseCases, providers, quotes, reminders, attachments },
+    { purchaseCases, providers, quotes, reminders, attachments, budgetPlans },
     {
       appVersion: BESANJ_APP_VERSION,
       preferences: readPreferences(),
@@ -111,13 +112,17 @@ export async function replaceWithBackup(backup: BesanjBackupFile) {
 
   await db.transaction(
     "rw",
-    db.purchaseCases,
-    db.providers,
-    db.quotes,
-    db.reminders,
-    db.attachments,
+    [
+      db.purchaseCases,
+      db.providers,
+      db.quotes,
+      db.reminders,
+      db.attachments,
+      db.budgetPlans,
+    ],
     async () => {
       await db.attachments.clear();
+      await db.budgetPlans.clear();
       await db.reminders.clear();
       await db.quotes.clear();
       await db.providers.clear();
@@ -138,6 +143,9 @@ export async function replaceWithBackup(backup: BesanjBackupFile) {
       if (attachments.length) {
         await db.attachments.bulkAdd(attachments);
       }
+      if (backup.data.budgetPlans?.length) {
+        await db.budgetPlans.bulkAdd(backup.data.budgetPlans);
+      }
     }
   );
 
@@ -145,12 +153,13 @@ export async function replaceWithBackup(backup: BesanjBackupFile) {
 }
 
 export async function readBackupStats() {
-  const [cases, providers, quotes, reminders, attachments] = await Promise.all([
+  const [cases, providers, quotes, reminders, attachments, budgetPlans] = await Promise.all([
     db.purchaseCases.count(),
     db.providers.count(),
     db.quotes.count(),
     db.reminders.count(),
     db.attachments.toArray(),
+    db.budgetPlans.count(),
   ]);
 
   return {
@@ -159,6 +168,7 @@ export async function readBackupStats() {
     quotes,
     reminders,
     attachments: attachments.length,
+    budgetPlans,
     attachmentBytes: attachments.reduce(
       (sum, attachment) => sum + attachment.size,
       0

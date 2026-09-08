@@ -47,6 +47,9 @@ export interface PurchaseCase {
   status: PurchaseStatus;
   selectedQuoteId?: string;
   targetBudgetToman?: number;
+  categoryKey?: string;
+  categoryLabel?: string;
+  tags?: string[];
   requirements?: CaseRequirement[];
   purchaseOutcome?: PurchaseOutcome;
   createdAt: string;
@@ -108,6 +111,14 @@ export interface QuoteAttachment {
   size: number;
   blob: Blob;
   createdAt: string;
+}
+
+
+export interface BudgetPlan {
+  id: "monthly";
+  monthlyLimitToman?: number;
+  categoryLimits?: Record<string, number>;
+  updatedAt: string;
 }
 
 export interface CaseMetrics {

@@ -32,6 +32,7 @@ import {
 } from "@/lib/format";
 import { requirementMatchSummary } from "@/lib/planning";
 import { purchaseOutcomeStatusLabel } from "@/lib/purchase-outcome";
+import { categoryLabelForCase } from "@/lib/categories";
 
 export function CaseReportPage({ caseId }: { caseId: string }) {
   const { toast } = useToast();
@@ -141,6 +142,10 @@ export function CaseReportPage({ caseId }: { caseId: string }) {
               <Badge variant="outline">
                 {snapshot.purchaseCase.kind === "product" ? "کالا" : "خدمت"}
               </Badge>
+              <Badge variant="outline">{categoryLabelForCase(snapshot.purchaseCase)}</Badge>
+              {(snapshot.purchaseCase.tags ?? []).slice(0, 3).map((tag) => (
+                <Badge key={tag} variant="secondary">{tag}</Badge>
+              ))}
               <Badge
                 variant={
                   snapshot.purchaseCase.status === "decided"

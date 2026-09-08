@@ -9,6 +9,8 @@ import {
   Package,
   PackageCheck,
   RefreshCw,
+  Shapes,
+  Tags,
   Stethoscope,
   Store,
   WalletCards,
@@ -17,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { TomanIcon } from "@/components/ui/toman-icon";
 import { formatCompactPersianDate, formatToman, kindLabel } from "@/lib/format";
+import { categoryLabelForCase } from "@/lib/categories";
 import { buildCaseMetrics, getQuoteFreshness } from "@/lib/quote";
 import { getBudgetState } from "@/lib/planning";
 import type { PurchaseCase, Quote } from "@/lib/types";
@@ -84,6 +87,23 @@ export function CaseCard({
                     ? ` · ${metrics.providerCount.toLocaleString("fa-IR")} فروشنده`
                     : " · هنوز استعلامی ندارد"}
                 </p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <Badge variant="outline">
+                    <Shapes />
+                    {categoryLabelForCase(purchaseCase)}
+                  </Badge>
+                  {(purchaseCase.tags ?? []).slice(0, 2).map((tag) => (
+                    <Badge key={tag} variant="secondary">
+                      <Tags />
+                      {tag}
+                    </Badge>
+                  ))}
+                  {(purchaseCase.tags?.length ?? 0) > 2 ? (
+                    <Badge variant="secondary">
+                      +{((purchaseCase.tags?.length ?? 0) - 2).toLocaleString("fa-IR")}
+                    </Badge>
+                  ) : null}
+                </div>
               </div>
             </div>
 

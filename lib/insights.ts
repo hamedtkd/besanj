@@ -1,5 +1,6 @@
 import { normalizePersianDigits } from "./normalize-persian-digits.ts";
 import { latestQuotesByProvider, quoteTotal } from "./quote.ts";
+import { caseMatchesTag, categoryLabelForCase } from "./categories.ts";
 import type { Provider, PurchaseCase, Quote } from "./types.ts";
 
 const DAY_MS = 86_400_000;
@@ -18,6 +19,9 @@ export interface PurchaseInsightRow {
   decisionDays: number | null;
   providerKey: string | null;
   providerName: string;
+  categoryKey: string | null;
+  categoryLabel: string;
+  tags: string[];
   providerPhone?: string;
   deliveryMeasured: boolean;
   deliveredOnTime: boolean;
@@ -28,6 +32,18 @@ export interface MonthlySpendPoint {
   label: string;
   totalToman: number;
   purchaseCount: number;
+}
+
+export interface CategorySpendPoint {
+  key: string;
+  label: string;
+  totalToman: number;
+  purchaseCount: number;
+}
+
+export interface PurchaseInsightFilters {
+  categoryKey?: string;
+  tag?: string;
 }
 
 export interface SellerInsight {
@@ -63,6 +79,7 @@ export interface PurchaseInsightSummary {
 export interface PurchaseInsights {
   summary: PurchaseInsightSummary;
   monthlySpend: MonthlySpendPoint[];
+  categorySpend: CategorySpendPoint[];
   sellers: SellerInsight[];
   purchases: PurchaseInsightRow[];
   largestSaving: PurchaseInsightRow | null;
@@ -163,12 +180,30 @@ function monthLabel(key: string) {
 export function buildPurchaseInsights(
   cases: PurchaseCase[],
   quotes: Quote[],
-  providers: Provider[]
+  providers: Provider[],
+  filters: PurchaseInsightFilters = {}
 ): PurchaseInsights {
-  const quoteById = new Map(quotes.map((quote) => [quote.id, quote]));
-  const providerById = new Map(providers.map((provider) => [provider.id, provider]));
+  const includedCases = cases.filter((purchaseCase) => {
+    if (filters.categoryKey && filters.categoryKey !== "all") {
+      if (filters.categoryKey === "uncategorized") {
+        if (purchaseCase.categoryKey) return false;
+      } else if (purchaseCase.categoryKey !== filters.categoryKey) {
+        return false;
+      }
+    }
+    if (filters.tag && filters.tag !== "all" && !caseMatchesTag(purchaseCase, filters.tag)) {
+      return false;
+    }
+    return true;
+  });
+  const includedCaseIds = new Set(includedCases.map((purchaseCase) => purchaseCase.id));
+  const filteredQuotes = quotes.filter((quote) => includedCaseIds.has(quote.caseId));
+  const filteredProviders = providers.filter((provider) => includedCaseIds.has(provider.caseId));
+
+  const quoteById = new Map(filteredQuotes.map((quote) => [quote.id, quote]));
+  const providerById = new Map(filteredProviders.map((provider) => [provider.id, provider]));
   const quotesByCase = new Map<string, Quote[]>();
-  for (const quote of quotes) {
+  for (const quote of filteredQuotes) {
     const rows = quotesByCase.get(quote.caseId) ?? [];
     rows.push(quote);
     quotesByCase.set(quote.caseId, rows);
@@ -176,7 +211,7 @@ export function buildPurchaseInsights(
 
   const purchases: PurchaseInsightRow[] = [];
 
-  for (const purchaseCase of cases) {
+  for (const purchaseCase of includedCases) {
     const outcome = purchaseCase.purchaseOutcome;
     if (!outcome) continue;
     const selectedQuote = quoteById.get(outcome.quoteId);
@@ -208,6 +243,9 @@ export function buildPurchaseInsights(
       providerKey: provider ? providerIdentity(provider) : null,
       providerName: provider?.name ?? "فروشنده حذف‌شده",
       providerPhone: provider?.phone,
+      categoryKey: purchaseCase.categoryKey ?? null,
+      categoryLabel: categoryLabelForCase(purchaseCase),
+      tags: purchaseCase.tags ?? [],
       deliveryMeasured: delivery.measured,
       deliveredOnTime: delivery.onTime,
     });
@@ -233,6 +271,22 @@ export function buildPurchaseInsights(
     .sort((a, b) => a.key.localeCompare(b.key))
     .slice(-12);
 
+  const categoryMap = new Map<string, CategorySpendPoint>();
+  for (const purchase of purchases) {
+    const key = purchase.categoryKey ?? "uncategorized";
+    const current = categoryMap.get(key) ?? {
+      key,
+      label: purchase.categoryLabel,
+      totalToman: 0,
+      purchaseCount: 0,
+    };
+    current.totalToman += purchase.actualPaidToman;
+    current.purchaseCount += 1;
+    categoryMap.set(key, current);
+  }
+  const categorySpend = Array.from(categoryMap.values())
+    .sort((left, right) => right.totalToman - left.totalToman);
+
   const sellerMap = new Map<
     string,
     {
@@ -251,7 +305,7 @@ export function buildPurchaseInsights(
     }
   >();
 
-  for (const provider of providers) {
+  for (const provider of filteredProviders) {
     const key = providerIdentity(provider);
     const current = sellerMap.get(key) ?? {
       key,
@@ -280,7 +334,7 @@ export function buildPurchaseInsights(
     sellerMap.set(key, current);
   }
 
-  for (const quote of quotes) {
+  for (const quote of filteredQuotes) {
     const provider = providerById.get(quote.providerId);
     if (!provider) continue;
     const current = sellerMap.get(providerIdentity(provider));
@@ -392,6 +446,7 @@ export function buildPurchaseInsights(
   return {
     summary,
     monthlySpend,
+    categorySpend,
     sellers,
     purchases,
     largestSaving,

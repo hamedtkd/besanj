@@ -2,10 +2,13 @@
 
 import Dexie, { type EntityTable } from "dexie";
 import { sanitizeRequirementChecks } from "@/lib/planning";
+import { normalizeTags, resolveCategory } from "@/lib/categories";
+import { normalizeBudgetPlan } from "@/lib/budget";
 import { snoozeReminderDueAt } from "@/lib/follow-up";
 import { cloneRequirementsForNewCase, makeRepeatedCaseTitle } from "@/lib/duplicate-case";
 import { normalizePurchaseOutcome, type PurchaseOutcomeInput } from "@/lib/purchase-outcome";
 import type {
+  BudgetPlan,
   CaseReminder,
   CaseRequirement,
   Provider,
@@ -24,6 +27,7 @@ class BesanjDB extends Dexie {
   quotes!: EntityTable<Quote, "id">;
   reminders!: EntityTable<CaseReminder, "id">;
   attachments!: EntityTable<QuoteAttachment, "id">;
+  budgetPlans!: EntityTable<BudgetPlan, "id">;
 
   constructor() {
     super("estelamkoo-local");
@@ -105,6 +109,28 @@ class BesanjDB extends Dexie {
           }
         });
       });
+
+    this.version(5)
+      .stores({
+        purchaseCases: "&id, status, kind, createdAt, updatedAt",
+        providers: "&id, caseId, name, rating, updatedAt",
+        quotes:
+          "&id, caseId, providerId, channel, quotedAt, validUntil, [caseId+providerId], [caseId+quotedAt], createdAt, updatedAt",
+        reminders:
+          "&id, caseId, providerId, quoteId, status, dueAt, [caseId+status], createdAt, updatedAt",
+        attachments: "&id, caseId, quoteId, createdAt",
+        budgetPlans: "&id, updatedAt",
+      })
+      .upgrade(async (tx) => {
+        const cases = tx.table<PurchaseCase, string>("purchaseCases");
+        await cases.toCollection().modify((row) => {
+          const category = resolveCategory(row.categoryKey, row.categoryLabel);
+          row.categoryKey = category.categoryKey;
+          row.categoryLabel = category.categoryLabel;
+          row.tags = normalizeTags(row.tags);
+        });
+      });
+
   }
 }
 
@@ -162,9 +188,13 @@ export async function createPurchaseCase(input: {
   kind: PurchaseKind;
   description?: string;
   targetBudgetToman?: number | null;
+  categoryKey?: string | null;
+  categoryLabel?: string | null;
+  tags?: string[];
   requirements?: CaseRequirement[];
 }) {
   const now = new Date().toISOString();
+  const category = resolveCategory(input.categoryKey, input.categoryLabel);
   const row: PurchaseCase = {
     id: makeId(),
     title: normalizeOptionalText(input.title) ?? "پرونده بدون نام",
@@ -172,6 +202,9 @@ export async function createPurchaseCase(input: {
     description: normalizeOptionalText(input.description),
     status: "active",
     targetBudgetToman: normalizeBudget(input.targetBudgetToman),
+    categoryKey: category.categoryKey,
+    categoryLabel: category.categoryLabel,
+    tags: normalizeTags(input.tags),
     requirements: normalizeRequirements(input.requirements),
     createdAt: now,
     updatedAt: now,
@@ -191,6 +224,9 @@ export async function updatePurchaseCase(
       | "status"
       | "selectedQuoteId"
       | "targetBudgetToman"
+      | "categoryKey"
+      | "categoryLabel"
+      | "tags"
       | "requirements"
     >
   >
@@ -204,6 +240,14 @@ export async function updatePurchaseCase(
   }
   if ("targetBudgetToman" in nextPatch) {
     nextPatch.targetBudgetToman = normalizeBudget(nextPatch.targetBudgetToman);
+  }
+  if ("categoryKey" in nextPatch || "categoryLabel" in nextPatch) {
+    const category = resolveCategory(nextPatch.categoryKey, nextPatch.categoryLabel);
+    nextPatch.categoryKey = category.categoryKey;
+    nextPatch.categoryLabel = category.categoryLabel;
+  }
+  if ("tags" in nextPatch) {
+    nextPatch.tags = normalizeTags(nextPatch.tags);
   }
   if ("requirements" in nextPatch) {
     nextPatch.requirements = normalizeRequirements(nextPatch.requirements);
@@ -461,6 +505,9 @@ export async function duplicatePurchaseCase(input: {
     description: source.description,
     status: "active",
     targetBudgetToman: input.copyBudget === false ? undefined : source.targetBudgetToman,
+    categoryKey: source.categoryKey,
+    categoryLabel: source.categoryLabel,
+    tags: normalizeTags(source.tags),
     requirements:
       input.copyRequirements === false
         ? undefined
@@ -486,6 +533,24 @@ export async function duplicatePurchaseCase(input: {
   });
 
   return { purchaseCase, providers };
+}
+
+
+export async function saveBudgetPlan(input: {
+  monthlyLimitToman?: number | null;
+  categoryLimits?: Record<string, number>;
+}) {
+  const row = normalizeBudgetPlan({
+    id: "monthly",
+    monthlyLimitToman: input.monthlyLimitToman ?? undefined,
+    categoryLimits: input.categoryLimits,
+  });
+  await db.budgetPlans.put(row);
+  return row;
+}
+
+export async function clearBudgetPlan() {
+  await db.budgetPlans.delete("monthly");
 }
 
 export async function createReminder(input: {

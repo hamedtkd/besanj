@@ -16,6 +16,7 @@ import { CaseCard } from "@/components/case-card";
 import { CreateCaseDialog } from "@/components/create-case-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { TodayQueue } from "@/components/today-queue";
+import { MonthlyBudgetSummary } from "@/components/monthly-budget-summary";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,8 @@ import {
   type HomeCaseSort,
 } from "@/lib/case-filters";
 import { db } from "@/lib/db";
+import { buildMonthlyBudgetSnapshot } from "@/lib/budget";
+import { collectCategoryOptions, collectTagOptions } from "@/lib/categories";
 import { buildDashboardTasks } from "@/lib/follow-up";
 import type { PurchaseStatus } from "@/lib/types";
 
@@ -69,16 +72,19 @@ export function HomeScreen() {
   const [status, setStatus] = React.useState<PurchaseStatus>("active");
   const [search, setSearch] = React.useState("");
   const [kind, setKind] = React.useState<HomeCaseKindFilter>("all");
+  const [categoryKey, setCategoryKey] = React.useState("all");
+  const [tag, setTag] = React.useState("all");
   const [health, setHealth] = React.useState<HomeCaseHealthFilter>("all");
   const [sort, setSort] = React.useState<HomeCaseSort>("updated");
 
   const data = useLiveQuery(async () => {
-    const [cases, quotes, reminders] = await Promise.all([
+    const [cases, quotes, reminders, budgetPlan] = await Promise.all([
       db.purchaseCases.orderBy("updatedAt").reverse().toArray(),
       db.quotes.toArray(),
       db.reminders.toArray(),
+      db.budgetPlans.get("monthly"),
     ]);
-    return { cases, quotes, reminders };
+    return { cases, quotes, reminders, budgetPlan };
   }, []);
 
   if (!data) return <HomeSkeleton />;
@@ -94,6 +100,8 @@ export function HomeScreen() {
     status,
     search,
     kind,
+    categoryKey,
+    tag,
     health,
     sort,
   });
@@ -106,15 +114,22 @@ export function HomeScreen() {
   const decidedCount = data.cases.filter((row) => row.status === "decided").length;
   const purchasedCount = data.cases.filter((row) => Boolean(row.purchaseOutcome)).length;
   const dashboardTasks = buildDashboardTasks(data.cases, data.quotes, data.reminders);
+  const categoryOptions = collectCategoryOptions(data.cases, { includeUncategorized: true });
+  const tagOptions = collectTagOptions(data.cases);
+  const budgetSnapshot = buildMonthlyBudgetSnapshot(data.cases, data.budgetPlan);
   const activeFilterCount =
     Number(Boolean(search.trim())) +
     Number(kind !== "all") +
+    Number(categoryKey !== "all") +
+    Number(tag !== "all") +
     Number(health !== "all") +
     Number(sort !== "updated");
 
   function clearFilters() {
     setSearch("");
     setKind("all");
+    setCategoryKey("all");
+    setTag("all");
     setHealth("all");
     setSort("updated");
   }
@@ -178,6 +193,7 @@ export function HomeScreen() {
       </section>
 
       <TodayQueue tasks={dashboardTasks} />
+      <MonthlyBudgetSummary snapshot={budgetSnapshot} />
 
       <Tabs
         value={status}
@@ -200,7 +216,7 @@ export function HomeScreen() {
         </div>
 
         <Card className="overflow-hidden border-border/90 bg-card/75 shadow-sm">
-          <div className="grid gap-2 p-3 sm:grid-cols-[minmax(15rem,1fr)_10.5rem_10.5rem_10.5rem_auto] sm:items-center">
+          <div className="grid gap-2 p-3 sm:grid-cols-2 xl:grid-cols-[minmax(14rem,1fr)_9rem_10.5rem_9.5rem_10.5rem_10.5rem_auto] sm:items-center">
             <div className="relative">
               <Search className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -223,6 +239,48 @@ export function HomeScreen() {
                 {KIND_ITEMS.map((item) => (
                   <SelectItem key={item.value} value={item.value}>
                     {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select<string>
+              value={categoryKey}
+              onValueChange={(next) => { if (next !== null) setCategoryKey(next); }}
+              items={[
+                { value: "all", label: "همه دسته‌ها" },
+                ...categoryOptions.map((item) => ({ value: item.key, label: item.label })),
+              ]}
+            >
+              <SelectTrigger aria-label="فیلتر دسته‌بندی">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">همه دسته‌ها</SelectItem>
+                {categoryOptions.map((item) => (
+                  <SelectItem key={item.key} value={item.key}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select<string>
+              value={tag}
+              onValueChange={(next) => { if (next !== null) setTag(next); }}
+              items={[
+                { value: "all", label: "همه برچسب‌ها" },
+                ...tagOptions.map((item) => ({ value: item, label: item })),
+              ]}
+            >
+              <SelectTrigger aria-label="فیلتر برچسب">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">همه برچسب‌ها</SelectItem>
+                {tagOptions.map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {item}
                   </SelectItem>
                 ))}
               </SelectContent>
