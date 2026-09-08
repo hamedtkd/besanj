@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { ListChecks, WalletCards } from "lucide-react";
+import { ListChecks, Shapes, Tags, WalletCards } from "lucide-react";
 import { useToast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
@@ -12,8 +13,23 @@ import {
 } from "@/components/ui/input-group";
 import { PriceInput } from "@/components/ui/price-input";
 import { ResponsiveSheet } from "@/components/ui/responsive-sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { TomanIcon } from "@/components/ui/toman-icon";
+import {
+  BUILTIN_CATEGORIES,
+  CUSTOM_CATEGORY_VALUE,
+  NO_CATEGORY_KEY,
+  parseTagsText,
+  resolveCategory,
+  tagsToText,
+} from "@/lib/categories";
 import { updatePurchaseCase } from "@/lib/db";
 import { mergeRequirements, requirementsToText } from "@/lib/planning";
 import type { PurchaseCase } from "@/lib/types";
@@ -29,22 +45,42 @@ export function CasePlanningSheet({
   const [budget, setBudget] = React.useState<number | null>(
     purchaseCase.targetBudgetToman ?? null
   );
+  const initialCategory = purchaseCase.categoryKey?.startsWith("custom:")
+    ? CUSTOM_CATEGORY_VALUE
+    : purchaseCase.categoryKey ?? NO_CATEGORY_KEY;
+  const [categoryKey, setCategoryKey] = React.useState(initialCategory);
+  const [customCategory, setCustomCategory] = React.useState(
+    purchaseCase.categoryKey?.startsWith("custom:") ? purchaseCase.categoryLabel ?? "" : ""
+  );
+  const [tagsText, setTagsText] = React.useState(tagsToText(purchaseCase.tags));
   const [requirementsText, setRequirementsText] = React.useState(
     requirementsToText(purchaseCase.requirements)
   );
   const [saving, setSaving] = React.useState(false);
 
   async function save() {
+    const category = resolveCategory(
+      categoryKey,
+      categoryKey === CUSTOM_CATEGORY_VALUE ? customCategory : undefined
+    );
+    if (categoryKey === CUSTOM_CATEGORY_VALUE && customCategory.trim().length < 2) {
+      toast("نام دسته سفارشی را کامل وارد کن.", "error");
+      return;
+    }
+
     setSaving(true);
     try {
       await updatePurchaseCase(purchaseCase.id, {
         targetBudgetToman: budget ?? undefined,
+        categoryKey: category.categoryKey,
+        categoryLabel: category.categoryLabel,
+        tags: parseTagsText(tagsText),
         requirements: mergeRequirements(
           purchaseCase.requirements,
           requirementsText
         ),
       });
-      toast("بودجه و شرط‌های خرید ذخیره شد.");
+      toast("برنامه و دسته‌بندی خرید ذخیره شد.");
       onOpenChange(false);
     } catch {
       toast("ذخیره برنامه خرید انجام نشد.", "error");
@@ -57,11 +93,63 @@ export function CasePlanningSheet({
     <ResponsiveSheet
       open
       onOpenChange={onOpenChange}
-      title="بودجه و شرط‌های خرید"
-      description="معیارهایی را ثبت کن که موقع مقایسه فروشنده‌ها واقعاً مهم‌اند."
+      title="برنامه و دسته‌بندی خرید"
+      description="دسته، برچسب، بودجه و معیارهایی را ثبت کن که برای این تصمیم مهم‌اند."
       className="sm:max-w-xl"
     >
       <div className="grid gap-5 p-4 pb-6 sm:p-5">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField label="دسته‌بندی">
+            <Select
+              value={categoryKey}
+              onValueChange={(value) => {
+                if (value !== null) setCategoryKey(value);
+              }}
+              items={[
+                { value: NO_CATEGORY_KEY, label: "بدون دسته" },
+                ...BUILTIN_CATEGORIES.map((item) => ({ value: item.key, label: item.label })),
+                { value: CUSTOM_CATEGORY_VALUE, label: "دسته سفارشی" },
+              ]}
+            >
+              <SelectTrigger aria-label="دسته‌بندی پرونده">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_CATEGORY_KEY}>بدون دسته</SelectItem>
+                {BUILTIN_CATEGORIES.map((item) => (
+                  <SelectItem key={item.key} value={item.key}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+                <SelectItem value={CUSTOM_CATEGORY_VALUE}>دسته سفارشی</SelectItem>
+              </SelectContent>
+            </Select>
+            {categoryKey === CUSTOM_CATEGORY_VALUE ? (
+              <div className="relative mt-2">
+                <Shapes className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pe-9"
+                  value={customCategory}
+                  onChange={(event) => setCustomCategory(event.target.value)}
+                  placeholder="نام دسته سفارشی"
+                />
+              </div>
+            ) : null}
+          </FormField>
+
+          <FormField label="برچسب‌ها" hint="با ویرگول جدا کن. حداکثر ۸ برچسب.">
+            <div className="relative">
+              <Tags className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="pe-9"
+                value={tagsText}
+                onChange={(event) => setTagsText(event.target.value)}
+                placeholder="ضروری، کاری، تعمیر"
+              />
+            </div>
+          </FormField>
+        </div>
+
         <FormField
           label="بودجه هدف"
           hint="اختیاری؛ قیمت‌ها نسبت به این سقف برچسب می‌خورند و تصمیم‌یار هم از آن استفاده می‌کند."
@@ -87,7 +175,7 @@ export function CasePlanningSheet({
           <div className="flex items-start gap-2.5">
             <WalletCards className="mt-0.5 size-4.5 shrink-0 text-primary" />
             <p className="type-caption text-muted-foreground">
-              بودجه «قیمت بالاتر» را مخفی نمی‌کند؛ فقط کمک می‌کند سریع بفهمی کدام گزینه داخل سقف توست.
+              بودجه هدف این پرونده با بودجه ماهانه فرق دارد. این عدد برای انتخاب همین خرید است و بودجه ماهانه برای کنترل مجموع خریدها استفاده می‌شود.
             </p>
           </div>
         </div>

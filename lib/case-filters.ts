@@ -1,4 +1,5 @@
 import { getQuoteFreshness, buildCaseMetrics } from "./quote.ts";
+import { caseMatchesTag } from "./categories.ts";
 import type { PurchaseCase, PurchaseKind, PurchaseStatus, Quote } from "./types.ts";
 
 export type HomeCaseKindFilter = "all" | PurchaseKind;
@@ -10,6 +11,8 @@ export interface HomeCaseFilterState {
   search: string;
   kind: HomeCaseKindFilter;
   health: HomeCaseHealthFilter;
+  categoryKey?: string;
+  tag?: string;
   sort: HomeCaseSort;
 }
 
@@ -48,6 +51,16 @@ export function applyHomeCaseFilters(
     .filter((purchaseCase) => purchaseCase.status === filters.status)
     .filter((purchaseCase) => {
       if (filters.kind !== "all" && purchaseCase.kind !== filters.kind) return false;
+      if (filters.categoryKey && filters.categoryKey !== "all") {
+        if (filters.categoryKey === "uncategorized") {
+          if (purchaseCase.categoryKey) return false;
+        } else if (purchaseCase.categoryKey !== filters.categoryKey) {
+          return false;
+        }
+      }
+      if (filters.tag && filters.tag !== "all" && !caseMatchesTag(purchaseCase, filters.tag)) {
+        return false;
+      }
 
       const caseQuotes = quoteMap.get(purchaseCase.id) ?? [];
       if (filters.health === "followUp" && !caseNeedsFollowUp(caseQuotes)) return false;
@@ -59,6 +72,8 @@ export function applyHomeCaseFilters(
         [
           purchaseCase.title,
           purchaseCase.description ?? "",
+          purchaseCase.categoryLabel ?? "",
+          ...(purchaseCase.tags ?? []),
           ...(purchaseCase.requirements ?? []).map((item) => item.label),
         ].join(" ")
       );

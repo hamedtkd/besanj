@@ -12,7 +12,9 @@ import {
   ListChecks,
   Pencil,
   RotateCcw,
+  Shapes,
   Star,
+  Tags,
   Trash2,
   WalletCards,
 } from "lucide-react";
@@ -34,6 +36,7 @@ import {
   setReminderDone,
 } from "@/lib/db";
 import { formatPersianDate, formatToman, kindLabel } from "@/lib/format";
+import { categoryLabelForCase } from "@/lib/categories";
 import { quoteTotal } from "@/lib/quote";
 import type {
   CaseReminder,
@@ -129,6 +132,12 @@ export function CaseDetailsPanel({
           <h3 className="type-section-title">اطلاعات پرونده</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Row label="نوع">{kindLabel(purchaseCase.kind)}</Row>
+            <Row label="دسته‌بندی">
+              <span className="inline-flex items-center gap-1.5">
+                <Shapes className="size-3.5 text-muted-foreground" />
+                {categoryLabelForCase(purchaseCase)}
+              </span>
+            </Row>
             <Row label="وضعیت">
               <Badge
                 variant={
@@ -154,6 +163,20 @@ export function CaseDetailsPanel({
             <div className="mt-4 rounded-2xl bg-muted/50 p-3.5">
               <div className="type-caption text-muted-foreground">توضیحات</div>
               <p className="type-body mt-1 whitespace-pre-wrap">{purchaseCase.description}</p>
+            </div>
+          ) : null}
+
+          {purchaseCase.tags?.length ? (
+            <div className="mt-4 rounded-2xl bg-muted/50 p-3.5">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Tags className="size-4" />
+                <span className="type-caption">برچسب‌ها</span>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {purchaseCase.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary">{tag}</Badge>
+                ))}
+              </div>
             </div>
           ) : null}
 
@@ -209,7 +232,7 @@ export function CaseDetailsPanel({
                 <h3 className="type-section-title">برنامه خرید</h3>
               </div>
               <p className="type-caption mt-1 text-muted-foreground">
-                بودجه و شرط‌هایی که باید موقع تصمیم نهایی جلوی چشم بمانند.
+                دسته، برچسب، بودجه و شرط‌هایی که باید موقع تصمیم نهایی جلوی چشم بمانند.
               </p>
             </div>
             <Button type="button" size="sm" variant="outline" onClick={() => setPlanningOpen(true)}>

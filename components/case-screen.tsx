@@ -16,7 +16,9 @@ import {
   RefreshCw,
   ScrollText,
   ShoppingBag,
+  Shapes,
   Sparkles,
+  Tags,
   Stethoscope,
   X,
 } from "lucide-react";
@@ -41,6 +43,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TomanIcon } from "@/components/ui/toman-icon";
 import { db, selectQuote } from "@/lib/db";
 import { cleanDisplayText, formatToman, kindLabel } from "@/lib/format";
+import { categoryLabelForCase } from "@/lib/categories";
 import { EMPTY_QUOTE_FILTERS, filterQuotes } from "@/lib/quote-filters";
 import { buildCaseMetrics } from "@/lib/quote";
 import { MAX_COMPARE_QUOTES, toggleShortlist } from "@/lib/shortlist";
@@ -225,8 +228,18 @@ export function CaseScreen({ caseId }: { caseId: string }) {
         <MetricCard label="اختلاف" value={metrics.spread} />
       </section>
 
-      {purchaseCase.targetBudgetToman || purchaseCase.requirements?.length ? (
+      {purchaseCase.targetBudgetToman || purchaseCase.requirements?.length || purchaseCase.categoryKey || purchaseCase.tags?.length ? (
         <section className="mb-6 flex flex-wrap gap-2 rounded-2xl border border-border bg-card/65 p-3">
+          <span className="inline-flex items-center gap-1.5 rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
+            <Shapes className="size-4" />
+            {categoryLabelForCase(purchaseCase)}
+          </span>
+          {(purchaseCase.tags ?? []).map((tag) => (
+            <span key={tag} className="inline-flex items-center gap-1.5 rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
+              <Tags className="size-4" />
+              {tag}
+            </span>
+          ))}
           {purchaseCase.targetBudgetToman ? (
             <span className="inline-flex items-center gap-1.5 rounded-xl bg-primary/[0.07] px-3 py-2 text-sm text-primary">
               <WalletCards className="size-4" />

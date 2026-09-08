@@ -1,3 +1,53 @@
+# QA | Besanj 1.2.0
+
+## فاز دسته بندی، برچسب و بودجه ماهانه
+
+- دسته آماده و سفارشی برای پرونده
+- چند برچسب آزاد با نرمال سازی و dedupe
+- فیلتر Dashboard بر اساس دسته و برچسب
+- بودجه کل ماه و سقف دسته ها
+- محاسبه ماه جاری با تقویم فارسی و منطقه زمانی تهران
+- هشدار ۸۰ درصد و عبور از سقف
+- خلاصه بودجه Dashboard و تنظیمات `/insights#budget`
+- فیلتر دسته و برچسب در Insights
+- نمودار هزینه بر اساس دسته
+- Backup/Restore کامل داده جدید
+- Dexie schema v5 با store جدید `budgetPlans`
+- Service Worker `besanj-shell-v13`
+- Guard جدید `check:categories-budget`
+
+## بررسی های اجراشده در محیط ساخت
+
+- `npm test`: **92/92 PASS**
+- `TZ=Asia/Tehran npm test`: **92/92 PASS**
+- `check:ui`: **PASS**
+- `check:theme`: **PASS**
+- `check:pwa`: **PASS**
+- `check:workflow`: **PASS**
+- `check:data`: **PASS**
+- `check:report`: **PASS**
+- `check:automation`: **PASS**
+- `check:capture`: **PASS**
+- `check:purchase`: **PASS**
+- `check:insights`: **PASS**
+- `check:categories-budget`: **PASS**
+- TS/TSX syntax/transpile: **129 فایل، 0 خطا**
+- Local import resolution: **512 import، 0 مسیر شکسته**
+- JavaScript syntax برای Service Worker و scriptهای `.mjs`: **PASS**
+
+## محدودیت محیط ساخت
+
+`npm install` در sandbox به Registry دسترسی شبکه ای نداشت. در نتیجه `doctor` وجود dependencyهای runtime را تایید نکرد و `typecheck`، ESLint و Next production build کامل در این محیط قابل اجرای معتبر نبودند. این سه مرحله باید روی سیستم مقصد با dependencyهای نصب شده اجرا شوند.
+
+## گیت مرجع روی سیستم مقصد
+
+```bash
+npm install
+npm run check
+```
+
+---
+
 # QA — Besanj 1.1.0
 
 ## فاز بینش خرید و حافظه فروشنده

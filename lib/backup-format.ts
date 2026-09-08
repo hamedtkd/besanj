@@ -1,4 +1,5 @@
 import type {
+  BudgetPlan,
   CaseReminder,
   Provider,
   PurchaseCase,
@@ -24,6 +25,7 @@ export interface BackupSnapshot {
   quotes: Quote[];
   reminders: CaseReminder[];
   attachments: QuoteAttachment[];
+  budgetPlans?: BudgetPlan[];
 }
 
 export interface PortableAttachment extends Omit<QuoteAttachment, "blob"> {
@@ -43,6 +45,7 @@ export interface BesanjBackupFile {
     reminders: number;
     attachments: number;
     attachmentBytes: number;
+    budgetPlans?: number;
   };
   data: {
     purchaseCases: PurchaseCase[];
@@ -50,6 +53,7 @@ export interface BesanjBackupFile {
     quotes: Quote[];
     reminders: CaseReminder[];
     attachments: PortableAttachment[];
+    budgetPlans?: BudgetPlan[];
   };
 }
 
@@ -179,6 +183,7 @@ export async function buildBesanjBackupFile(
       reminders: snapshot.reminders.length,
       attachments: portableAttachments.length,
       attachmentBytes,
+      budgetPlans: snapshot.budgetPlans?.length ?? 0,
     },
     data: {
       purchaseCases: snapshot.purchaseCases,
@@ -186,6 +191,7 @@ export async function buildBesanjBackupFile(
       quotes: snapshot.quotes,
       reminders: snapshot.reminders,
       attachments: portableAttachments,
+      budgetPlans: snapshot.budgetPlans ?? [],
     },
   };
 }
@@ -218,6 +224,9 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
   const quotes = requireArray(data.quotes, "استعلام‌ها");
   const reminders = requireArray(data.reminders, "پیگیری‌ها");
   const attachments = requireArray(data.attachments, "پیوست‌ها");
+  const budgetPlans = data.budgetPlans === undefined
+    ? []
+    : requireArray(data.budgetPlans, "بودجه‌ها");
 
   const caseIds = new Set<string>();
   const selectedQuotes: Array<{ caseId: string; quoteId: string }> = [];
@@ -237,6 +246,17 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
       row.status !== "archived"
     ) {
       throw new Error("وضعیت یکی از پرونده‌های فایل پشتیبان معتبر نیست.");
+    }
+    if (row.categoryKey !== undefined && typeof row.categoryKey !== "string") {
+      throw new Error("دسته‌بندی یکی از پرونده‌های فایل پشتیبان معتبر نیست.");
+    }
+    if (row.categoryLabel !== undefined && typeof row.categoryLabel !== "string") {
+      throw new Error("نام دسته‌بندی یکی از پرونده‌های فایل پشتیبان معتبر نیست.");
+    }
+    if (row.tags !== undefined) {
+      if (!Array.isArray(row.tags) || row.tags.some((tag) => typeof tag !== "string")) {
+        throw new Error("برچسب‌های یکی از پرونده‌های فایل پشتیبان معتبر نیست.");
+      }
     }
     if (caseIds.has(id)) throw new Error("شناسه تکراری در پرونده‌های پشتیبان وجود دارد.");
     caseIds.add(id);
@@ -375,6 +395,35 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
     attachmentBytes += row.size;
   }
 
+  const budgetPlanIds = new Set<string>();
+  for (const raw of budgetPlans) {
+    const row = requireRow(raw, "بودجه‌ها");
+    const id = requireStringField(row, "id", "بودجه‌ها");
+    requireStringField(row, "updatedAt", "بودجه‌ها");
+    if (id !== "monthly") {
+      throw new Error("شناسه تنظیمات بودجه در فایل پشتیبان معتبر نیست.");
+    }
+    if (
+      row.monthlyLimitToman !== undefined &&
+      (typeof row.monthlyLimitToman !== "number" ||
+        !Number.isFinite(row.monthlyLimitToman) ||
+        row.monthlyLimitToman <= 0)
+    ) {
+      throw new Error("سقف ماهانه در فایل پشتیبان معتبر نیست.");
+    }
+    if (row.categoryLimits !== undefined) {
+      const limits = objectRecord(row.categoryLimits);
+      if (!limits) throw new Error("سقف دسته‌ها در فایل پشتیبان معتبر نیست.");
+      for (const [key, limit] of Object.entries(limits)) {
+        if (!key.trim() || typeof limit !== "number" || !Number.isFinite(limit) || limit <= 0) {
+          throw new Error("یکی از سقف‌های دسته در فایل پشتیبان معتبر نیست.");
+        }
+      }
+    }
+    if (budgetPlanIds.has(id)) throw new Error("شناسه تکراری در بودجه‌های پشتیبان وجود دارد.");
+    budgetPlanIds.add(id);
+  }
+
   return {
     format: BESANJ_BACKUP_FORMAT,
     version: BESANJ_BACKUP_VERSION,
@@ -391,6 +440,7 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
       reminders: reminders.length,
       attachments: attachments.length,
       attachmentBytes,
+      budgetPlans: budgetPlans.length,
     },
     data: {
       purchaseCases: purchaseCases as PurchaseCase[],
@@ -398,6 +448,7 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
       quotes: quotes as Quote[],
       reminders: reminders as CaseReminder[],
       attachments: attachments as PortableAttachment[],
+      budgetPlans: budgetPlans as BudgetPlan[],
     },
   };
 }

@@ -1,11 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { ListChecks, Package, Stethoscope, WalletCards } from "lucide-react";
+import { ListChecks, Package, Shapes, Stethoscope, Tags, WalletCards } from "lucide-react";
 import { createPurchaseCase } from "@/lib/db";
 import { mergeRequirements } from "@/lib/planning";
+import { BUILTIN_CATEGORIES, CUSTOM_CATEGORY_VALUE, parseTagsText, resolveCategory } from "@/lib/categories";
 import { purchaseCaseSchema, type PurchaseCaseFormValues } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/input-group";
 import { PriceInput } from "@/components/ui/price-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResponsiveSheet } from "@/components/ui/responsive-sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { TomanIcon } from "@/components/ui/toman-icon";
@@ -39,17 +41,27 @@ export function CreateCaseDialog({
       kind: "product",
       description: "",
       targetBudgetToman: null,
+      categoryKey: "other",
+      customCategory: "",
+      tagsText: "",
       requirementsText: "",
     },
   });
 
   async function onSubmit(values: PurchaseCaseFormValues) {
     try {
+      const category = resolveCategory(
+        values.categoryKey,
+        values.categoryKey === CUSTOM_CATEGORY_VALUE ? values.customCategory : undefined
+      );
       const row = await createPurchaseCase({
         title: values.title,
         kind: values.kind,
         description: values.description,
         targetBudgetToman: values.targetBudgetToman,
+        categoryKey: category.categoryKey,
+        categoryLabel: category.categoryLabel,
+        tags: parseTagsText(values.tagsText),
         requirements: mergeRequirements(undefined, values.requirementsText ?? ""),
       });
       toast("پرونده ساخته شد.");
@@ -60,6 +72,11 @@ export function CreateCaseDialog({
       toast("ساخت پرونده انجام نشد. دوباره تلاش کن.", "error");
     }
   }
+
+  const selectedCategory = useWatch({
+    control: form.control,
+    name: "categoryKey",
+  });
 
   return (
     <ResponsiveSheet
@@ -90,6 +107,68 @@ export function CreateCaseDialog({
             )}
           />
         </FormField>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            label="دسته‌بندی"
+            required
+            error={form.formState.errors.customCategory?.message}
+          >
+            <Controller
+              control={form.control}
+              name="categoryKey"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={(value) => {
+                    if (value !== null) field.onChange(value);
+                  }}
+                  items={[
+                    ...BUILTIN_CATEGORIES.map((item) => ({ value: item.key, label: item.label })),
+                    { value: CUSTOM_CATEGORY_VALUE, label: "دسته سفارشی" },
+                  ]}
+                >
+                  <SelectTrigger aria-label="دسته‌بندی پرونده">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BUILTIN_CATEGORIES.map((item) => (
+                      <SelectItem key={item.key} value={item.key}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value={CUSTOM_CATEGORY_VALUE}>دسته سفارشی</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {selectedCategory === CUSTOM_CATEGORY_VALUE ? (
+              <div className="relative mt-2">
+                <Shapes className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pe-9"
+                  placeholder="مثلاً آموزش یا حیوانات خانگی"
+                  {...form.register("customCategory")}
+                />
+              </div>
+            ) : null}
+          </FormField>
+
+          <FormField
+            label="برچسب‌ها"
+            hint="اختیاری؛ با ویرگول جدا کن. حداکثر ۸ برچسب."
+            error={form.formState.errors.tagsText?.message}
+          >
+            <div className="relative">
+              <Tags className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="pe-9"
+                placeholder="ضروری، کاری، هدیه"
+                {...form.register("tagsText")}
+              />
+            </div>
+          </FormField>
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField

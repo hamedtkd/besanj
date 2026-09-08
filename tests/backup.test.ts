@@ -174,3 +174,60 @@ test("backup validates purchase outcome against the selected quote", async () =>
     /همان استعلام انتخاب نهایی/
   );
 });
+
+test("backup preserves category tags and monthly budget settings", async () => {
+  const backup = await buildBesanjBackupFile(
+    {
+      purchaseCases: [
+        {
+          id: "case-budget",
+          title: "موبایل",
+          kind: "product",
+          status: "active",
+          categoryKey: "digital",
+          categoryLabel: "دیجیتال",
+          tags: ["ضروری", "شخصی"],
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+      providers: [],
+      quotes: [],
+      reminders: [],
+      attachments: [],
+      budgetPlans: [
+        {
+          id: "monthly",
+          monthlyLimitToman: 100_000_000,
+          categoryLimits: { digital: 70_000_000 },
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+    },
+    { appVersion: "1.2.0" }
+  );
+
+  const parsed = parseBesanjBackupText(JSON.stringify(backup));
+  assert.equal(parsed.data.purchaseCases[0]?.categoryKey, "digital");
+  assert.deepEqual(parsed.data.purchaseCases[0]?.tags, ["ضروری", "شخصی"]);
+  assert.equal(parsed.data.budgetPlans?.[0]?.monthlyLimitToman, 100_000_000);
+  assert.equal(parsed.stats.budgetPlans, 1);
+});
+
+test("backup parser accepts older files without budget settings", async () => {
+  const backup = await buildBesanjBackupFile(
+    {
+      purchaseCases: [],
+      providers: [],
+      quotes: [],
+      reminders: [],
+      attachments: [],
+    },
+    { appVersion: "1.1.0" }
+  );
+  const oldShape = JSON.parse(JSON.stringify(backup));
+  delete oldShape.data.budgetPlans;
+  delete oldShape.stats.budgetPlans;
+  const parsed = parseBesanjBackupText(JSON.stringify(oldShape));
+  assert.deepEqual(parsed.data.budgetPlans, []);
+});

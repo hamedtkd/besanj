@@ -1,6 +1,7 @@
 import { requirementMatchSummary } from "./planning.ts";
 import { buildCaseMetrics, quoteTotal } from "./quote.ts";
 import { purchaseOutcomeStatusLabel } from "./purchase-outcome.ts";
+import { categoryLabelForCase } from "./categories.ts";
 import type {
   CaseReminder,
   Provider,
@@ -142,7 +143,12 @@ export function buildCaseReportText(snapshot: CaseReportSnapshot) {
     `گزارش بسنج — ${purchaseCase.title}`,
     `وضعیت: ${purchaseCase.status === "active" ? "فعال" : purchaseCase.status === "decided" ? "تصمیم‌گرفته" : "آرشیو"}`,
     `فروشنده: ${formatNumber(snapshot.providerCount)} · کل استعلام‌ها: ${formatNumber(snapshot.quoteCount)}`,
+    `دسته‌بندی: ${categoryLabelForCase(purchaseCase)}`,
   ];
+
+  if (purchaseCase.tags?.length) {
+    lines.push(`برچسب‌ها: ${purchaseCase.tags.join("، ")}`);
+  }
 
   if (purchaseCase.targetBudgetToman) {
     lines.push(`بودجه هدف: ${formatNumber(purchaseCase.targetBudgetToman)} تومان`);

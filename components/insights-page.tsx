@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
@@ -12,6 +13,7 @@ import {
   Star,
   Store,
   Target,
+  Tags,
   Truck,
   WalletCards,
 } from "lucide-react";
@@ -24,27 +26,41 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { BudgetOverview } from "@/components/budget-overview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { db } from "@/lib/db";
+import { buildMonthlyBudgetSnapshot } from "@/lib/budget";
+import { collectCategoryOptions, collectTagOptions } from "@/lib/categories";
 import { formatInteger, formatPersianDate, formatPhone, formatToman } from "@/lib/format";
 import { buildPurchaseInsights } from "@/lib/insights";
 import { cn } from "@/lib/utils";
 
 export function InsightsPage() {
+  const [categoryKey, setCategoryKey] = React.useState("all");
+  const [tag, setTag] = React.useState("all");
+
   const data = useLiveQuery(async () => {
-    const [cases, quotes, providers] = await Promise.all([
+    const [cases, quotes, providers, budgetPlan] = await Promise.all([
       db.purchaseCases.toArray(),
       db.quotes.toArray(),
       db.providers.toArray(),
+      db.budgetPlans.get("monthly"),
     ]);
-    return { cases, quotes, providers };
+    return { cases, quotes, providers, budgetPlan };
   }, []);
 
   if (!data) return <InsightsSkeleton />;
 
-  const insights = buildPurchaseInsights(data.cases, data.quotes, data.providers);
+  const categoryOptions = collectCategoryOptions(data.cases, { includeUncategorized: true });
+  const tagOptions = collectTagOptions(data.cases);
+  const insights = buildPurchaseInsights(data.cases, data.quotes, data.providers, {
+    categoryKey,
+    tag,
+  });
+  const budgetSnapshot = buildMonthlyBudgetSnapshot(data.cases, data.budgetPlan);
   const { summary } = insights;
 
   return (
@@ -78,6 +94,55 @@ export function InsightsPage() {
           </div>
         </div>
       </section>
+
+      <BudgetOverview cases={data.cases} plan={data.budgetPlan} snapshot={budgetSnapshot} />
+
+      <Card className="p-3 sm:p-4">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-center">
+          <Select<string>
+            value={categoryKey}
+            onValueChange={(value) => { if (value !== null) setCategoryKey(value); }}
+            items={[
+              { value: "all", label: "همه دسته‌ها" },
+              ...categoryOptions.map((item) => ({ value: item.key, label: item.label })),
+            ]}
+          >
+            <SelectTrigger aria-label="فیلتر دسته‌بندی بینش‌ها">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">همه دسته‌ها</SelectItem>
+              {categoryOptions.map((item) => (
+                <SelectItem key={item.key} value={item.key}>{item.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select<string>
+            value={tag}
+            onValueChange={(value) => { if (value !== null) setTag(value); }}
+            items={[
+              { value: "all", label: "همه برچسب‌ها" },
+              ...tagOptions.map((item) => ({ value: item, label: item })),
+            ]}
+          >
+            <SelectTrigger aria-label="فیلتر برچسب بینش‌ها">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">همه برچسب‌ها</SelectItem>
+              {tagOptions.map((item) => (
+                <SelectItem key={item} value={item}>{item}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="type-caption flex items-center gap-1.5 text-muted-foreground lg:justify-end">
+            <Tags className="size-3.5" />
+            {summary.purchaseCount.toLocaleString("fa-IR")} خرید در این نما
+          </div>
+        </div>
+      </Card>
 
       {summary.purchaseCount === 0 ? (
         <EmptyInsights />
@@ -130,6 +195,8 @@ export function InsightsPage() {
               totalDifferenceFromQuoteToman={summary.totalDifferenceFromQuoteToman}
             />
           </section>
+
+          <CategorySpendChart data={insights.categorySpend} />
 
           {(insights.largestSaving || insights.largestOverBudget || insights.mostUsedSeller) && (
             <section className="grid gap-3 lg:grid-cols-3">
@@ -261,6 +328,61 @@ function SpendChart({
       ) : (
         <div className="grid min-h-56 place-items-center p-6 text-center">
           <p className="type-caption text-muted-foreground">داده ماهانه کافی نیست.</p>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function CategorySpendChart({
+  data,
+}: {
+  data: Array<{ key: string; label: string; totalToman: number; purchaseCount: number }>;
+}) {
+  return (
+    <Card className="overflow-hidden">
+      <div className="border-b border-border/80 p-4 sm:p-5">
+        <h2 className="type-section-title">هزینه بر اساس دسته</h2>
+        <p className="type-caption mt-1 text-muted-foreground">
+          مبلغ واقعی خریدها را بر اساس دسته‌بندی پرونده‌ها کنار هم ببین.
+        </p>
+      </div>
+      {data.length ? (
+        <div className="h-80 w-full p-3 sm:p-4" dir="ltr">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} margin={{ top: 12, right: 8, left: 8, bottom: 4 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" vertical={false} />
+              <XAxis
+                dataKey="label"
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                axisLine={{ stroke: "var(--border)" }}
+                tickLine={false}
+                interval={0}
+              />
+              <YAxis
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                width={72}
+                tickFormatter={(value) => compactAxisValue(Number(value))}
+              />
+              <Tooltip
+                formatter={(value) => [`${formatToman(Number(value))} تومان`, "هزینه واقعی"]}
+                labelFormatter={(label, payload) => {
+                  const point = payload?.[0]?.payload as { purchaseCount?: number } | undefined;
+                  return point?.purchaseCount
+                    ? `${String(label)} · ${point.purchaseCount.toLocaleString("fa-IR")} خرید`
+                    : String(label);
+                }}
+                contentStyle={tooltipStyle}
+              />
+              <Bar dataKey="totalToman" fill="var(--primary)" radius={[7, 7, 0, 0]} maxBarSize={52} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ) : (
+        <div className="grid min-h-48 place-items-center p-6 text-center">
+          <p className="type-caption text-muted-foreground">داده دسته‌بندی کافی نیست.</p>
         </div>
       )}
     </Card>
@@ -458,6 +580,7 @@ function RecentPurchases({
     purchasedAt: string;
     actualPaidToman: number;
     providerName: string;
+    categoryLabel: string;
     differenceFromBudgetToman: number | null;
     savingsVsHighestToman: number;
     status: "ordered" | "received";
@@ -484,6 +607,7 @@ function RecentPurchases({
                 <Badge variant={purchase.status === "received" ? "secondary" : "outline"}>
                   {purchase.status === "received" ? "دریافت شده" : "سفارش ثبت شده"}
                 </Badge>
+                <Badge variant="outline">{purchase.categoryLabel}</Badge>
               </div>
               <p className="type-caption mt-1 text-muted-foreground">
                 {purchase.providerName} · {formatPersianDate(purchase.purchasedAt)}

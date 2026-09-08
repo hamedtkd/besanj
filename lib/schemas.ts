@@ -1,14 +1,28 @@
 import { z } from "zod";
 import { isValidIranPhone } from "@/lib/iranian-mobile";
 import { isValidQuoteDateRange } from "@/lib/validation-rules";
+import { BUILTIN_CATEGORY_KEYS } from "@/lib/categories";
 
-export const purchaseCaseSchema = z.object({
-  title: z.string().trim().min(2, "عنوان را وارد کن.").max(80, "عنوان خیلی طولانی است."),
-  kind: z.enum(["product", "service"]),
-  description: z.string().trim().max(500, "توضیح خیلی طولانی است.").optional(),
-  targetBudgetToman: z.number().positive("بودجه باید بیشتر از صفر باشد.").nullable().optional(),
-  requirementsText: z.string().trim().max(1200, "فهرست شرط‌ها خیلی طولانی است.").optional(),
-});
+export const purchaseCaseSchema = z
+  .object({
+    title: z.string().trim().min(2, "عنوان را وارد کن.").max(80, "عنوان خیلی طولانی است."),
+    kind: z.enum(["product", "service"]),
+    description: z.string().trim().max(500, "توضیح خیلی طولانی است.").optional(),
+    targetBudgetToman: z.number().positive("بودجه باید بیشتر از صفر باشد.").nullable().optional(),
+    categoryKey: z.enum([...BUILTIN_CATEGORY_KEYS, "custom"]),
+    customCategory: z.string().trim().max(40, "نام دسته خیلی طولانی است.").optional(),
+    tagsText: z.string().trim().max(320, "برچسب‌ها خیلی طولانی هستند.").optional(),
+    requirementsText: z.string().trim().max(1200, "فهرست شرط‌ها خیلی طولانی است.").optional(),
+  })
+  .superRefine((data, context) => {
+    if (data.categoryKey === "custom" && (data.customCategory?.trim().length ?? 0) < 2) {
+      context.addIssue({
+        code: "custom",
+        message: "نام دسته سفارشی را وارد کن.",
+        path: ["customCategory"],
+      });
+    }
+  });
 
 export type PurchaseCaseFormValues = z.infer<typeof purchaseCaseSchema>;
 

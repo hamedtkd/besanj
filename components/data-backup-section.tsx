@@ -110,7 +110,8 @@ export function DataBackupSection() {
     ((stats?.cases ?? 0) +
       (stats?.quotes ?? 0) +
       (stats?.reminders ?? 0) +
-      (stats?.attachments ?? 0) >
+      (stats?.attachments ?? 0) +
+      (stats?.budgetPlans ?? 0) >
       0);
 
   return (
@@ -120,7 +121,7 @@ export function DataBackupSection() {
         <div>
           <h3 className="type-card-title">پشتیبان و انتقال داده</h3>
           <p className="type-caption mt-0.5 text-muted-foreground">
-            پرونده‌ها، استعلام‌ها، پیگیری‌ها، پیوست‌ها و تنظیمات ظاهری را در یک
+            پرونده‌ها، دسته‌ها، برچسب‌ها، بودجه‌ها، استعلام‌ها، پیگیری‌ها، پیوست‌ها و تنظیمات ظاهری را در یک
             فایل نگه دار یا روی دستگاه دیگری بازیابی کن.
           </p>
         </div>
@@ -136,6 +137,7 @@ export function DataBackupSection() {
                 {stats.quotes.toLocaleString("fa-IR")} استعلام ·{" "}
                 {stats.reminders.toLocaleString("fa-IR")} پیگیری ·{" "}
                 {stats.attachments.toLocaleString("fa-IR")} پیوست
+                {stats.budgetPlans ? " · بودجه ماهانه تنظیم شده" : ""}
                 {stats.attachmentBytes
                   ? ` · ${formatFileSize(stats.attachmentBytes)} فایل`
                   : ""}
