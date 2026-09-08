@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock3, ExternalLink, ShieldCheck, Truck, X } from "lucide-react";
+import { Clock3, ExternalLink, ListChecks, ShieldCheck, Star, Truck, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,7 +15,8 @@ import {
   formatUserText,
 } from "@/lib/format";
 import { freshnessLabel, getQuoteFreshness, quoteTotal } from "@/lib/quote";
-import type { Provider, Quote } from "@/lib/types";
+import { getBudgetState, requirementMatchSummary } from "@/lib/planning";
+import type { CaseRequirement, Provider, Quote } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function SideBySideComparison({
@@ -25,6 +26,8 @@ export function SideBySideComparison({
   providers,
   onRemove,
   onOpenDecision,
+  targetBudgetToman,
+  requirements = [],
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,6 +35,8 @@ export function SideBySideComparison({
   providers: Provider[];
   onRemove: (quoteId: string) => void;
   onOpenDecision: () => void;
+  targetBudgetToman?: number;
+  requirements?: CaseRequirement[];
 }) {
   const providerById = new Map(providers.map((provider) => [provider.id, provider]));
   const totals = quotes.map(quoteTotal);
@@ -69,6 +74,8 @@ export function SideBySideComparison({
               const total = quoteTotal(quote);
               const freshness = getQuoteFreshness(quote);
               const contactRef = cleanDisplayText(quote.contactRef);
+              const budgetState = getBudgetState({ targetBudgetToman }, quote);
+              const requirementSummary = requirementMatchSummary(quote, requirements);
               return (
                 <Card key={quote.id} className="relative overflow-hidden p-4">
                   <Button
@@ -112,6 +119,9 @@ export function SideBySideComparison({
                       >
                         {freshnessLabel(freshness)}
                       </Badge>
+                      {budgetState === "within" ? <Badge variant="success">داخل بودجه</Badge> : null}
+                      {budgetState === "near" ? <Badge variant="warning">نزدیک بودجه</Badge> : null}
+                      {budgetState === "over" ? <Badge variant="destructive">بالاتر از بودجه</Badge> : null}
                     </div>
                   </div>
 
@@ -136,6 +146,24 @@ export function SideBySideComparison({
                     />
                     <CompareRow label="گارانتی" value={formatUserText(quote.warranty)} icon={<ShieldCheck />} />
                     <CompareRow label="پرداخت" value={formatUserText(quote.paymentTerms)} />
+                    <CompareRow
+                      label="شرط‌های خرید"
+                      value={
+                        requirementSummary.total
+                          ? requirementSummary.evaluated
+                            ? `${requirementSummary.matched.toLocaleString("fa-IR")} از ${requirementSummary.total.toLocaleString("fa-IR")} مورد`
+                            : "هنوز بررسی نشده"
+                          : "شرطی ثبت نشده"
+                      }
+                      icon={<ListChecks />}
+                      highlight={requirementSummary.total > 0 && requirementSummary.evaluated && requirementSummary.matched === requirementSummary.total}
+                    />
+                    <CompareRow
+                      label="اعتماد فروشنده"
+                      value={provider.rating ? `${provider.rating.toLocaleString("fa-IR")} از ۵` : "ثبت نشده"}
+                      icon={<Star />}
+                      highlight={Boolean(provider.rating && provider.rating >= 4)}
+                    />
                     <CompareRow label="مرجع تماس" value={
                         contactRef
                           ? contactRef

@@ -4,8 +4,9 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { DoranDate } from "@doranjs/core";
-import { Calculator, CirclePlus } from "lucide-react";
+import { Calculator, CirclePlus, ListChecks, Paperclip, X } from "lucide-react";
 import { addQuote } from "@/lib/db";
+import { formatFileSize, validateAttachmentSelection } from "@/lib/attachments";
 import {
   channelContactMeta,
   dateToIso,
@@ -14,9 +15,10 @@ import {
 } from "@/lib/format";
 import { quoteTotal } from "@/lib/quote";
 import { quoteFormSchema, type QuoteFormValues } from "@/lib/schemas";
-import type { Provider, Quote, QuoteChannel } from "@/lib/types";
+import type { CaseRequirement, Provider, Quote, QuoteChannel } from "@/lib/types";
 import { useToast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { FormField } from "@/components/ui/form-field";
 import {
@@ -86,13 +88,17 @@ export function QuoteFormDialog({
   open,
   onOpenChange,
   preset,
+  requirements = [],
 }: {
   caseId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   preset?: RequotePreset | null;
+  requirements?: CaseRequirement[];
 }) {
   const { toast } = useToast();
+  const [requirementChecks, setRequirementChecks] = React.useState<Record<string, boolean>>(() => ({ ...(preset?.quote.requirementChecks ?? {}) }));
+  const [pendingFiles, setPendingFiles] = React.useState<File[]>([]);
 
   const form = useForm<QuoteFormValues>({
     resolver: zodResolver(quoteFormSchema),
@@ -113,6 +119,25 @@ export function QuoteFormDialog({
     () => validityPresets(quotedAt),
     [quotedAt]
   );
+
+  function handleOpenChange(next: boolean) {
+    if (!next) {
+      setPendingFiles([]);
+      setRequirementChecks({});
+    }
+    onOpenChange(next);
+  }
+
+  function handleFilesChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.currentTarget.files ?? []);
+    const error = validateAttachmentSelection(files);
+    if (error) {
+      toast(error, "error");
+      event.currentTarget.value = "";
+      return;
+    }
+    setPendingFiles(files);
+  }
 
   async function onSubmit(
     values: QuoteFormValues,
@@ -139,15 +164,24 @@ export function QuoteFormDialog({
         channel: values.channel,
         contactRef: values.contactRef,
         note: values.note,
+        requirementChecks,
         previousQuoteId: preset?.quote.id,
+        attachments: pendingFiles.map((file) => ({
+          fileName: file.name,
+          mimeType: file.type,
+          size: file.size,
+          blob: file,
+        })),
       });
 
       toast(preset ? "قیمت جدید ثبت شد." : "استعلام ثبت شد.");
 
       if (!preset && submitMode === "next") {
         form.reset(blankValues());
+        setPendingFiles([]);
+        setRequirementChecks({});
       } else {
-        onOpenChange(false);
+        handleOpenChange(false);
       }
     } catch (error) {
       toast(
@@ -160,7 +194,7 @@ export function QuoteFormDialog({
   return (
     <ResponsiveSheet
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       title={preset ? `استعلام مجدد از ${preset.provider.name}` : "ثبت استعلام"}
       description={
         preset
@@ -396,6 +430,81 @@ export function QuoteFormDialog({
           />
         </FormField>
 
+        {requirements.length ? (
+          <FormField
+            label="پوشش شرط‌های خرید"
+            hint="تیک بزن این فروشنده کدام شرط‌های مهم پرونده را پوشش می‌دهد."
+          >
+            <div className="grid gap-2 sm:grid-cols-2">
+              {requirements.map((requirement) => {
+                const checked = requirementChecks[requirement.id] === true;
+                return (
+                  <label
+                    key={requirement.id}
+                    className={
+                      checked
+                        ? "flex cursor-pointer items-start gap-2.5 rounded-xl border border-primary/30 bg-primary/[0.06] p-3"
+                        : "flex cursor-pointer items-start gap-2.5 rounded-xl border border-border bg-background/50 p-3"
+                    }
+                  >
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(next) =>
+                        setRequirementChecks((current) => ({
+                          ...current,
+                          [requirement.id]: next === true,
+                        }))
+                      }
+                      className="mt-0.5"
+                    />
+                    <span className="type-label min-w-0 flex-1">{requirement.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </FormField>
+        ) : null}
+
+        <FormField
+          label="پیوست‌ها"
+          hint="عکس، پیش‌فاکتور یا فایل مربوط به همین استعلام؛ حداکثر ۵ فایل و هر فایل ۸ مگابایت."
+        >
+          <div className="grid gap-2">
+            <Input
+              type="file"
+              multiple
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+              onChange={handleFilesChange}
+              className="h-auto min-h-10 py-1.5 file:me-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-2.5 file:py-1 file:text-xs file:font-medium file:text-primary"
+            />
+            {pendingFiles.length ? (
+              <div className="grid gap-1.5">
+                {pendingFiles.map((file, index) => (
+                  <div key={`${file.name}-${file.size}-${index}`} className="flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2">
+                    <Paperclip className="size-4 shrink-0 text-primary" />
+                    <span className="type-caption min-w-0 flex-1 truncate">{file.name}</span>
+                    <span className="type-caption shrink-0 text-muted-foreground">{formatFileSize(file.size)}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`حذف ${file.name}`}
+                      onClick={() => setPendingFiles((current) => current.filter((_, fileIndex) => fileIndex !== index))}
+                    >
+                      <X />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 rounded-xl border border-dashed border-border px-3 py-2.5 text-muted-foreground">
+                <ListChecks className="size-4" />
+                <span className="type-caption">پیوستی انتخاب نشده است.</span>
+              </div>
+            )}
+          </div>
+        </FormField>
+
         <FormField label="یادداشت" error={form.formState.errors.note?.message}>
           <Textarea
             placeholder="هر چیزی که بعداً ممکن است یادت برود..."
@@ -425,7 +534,7 @@ export function QuoteFormDialog({
               ثبت و بعدی
             </Button>
           ) : (
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               انصراف
             </Button>
           )}

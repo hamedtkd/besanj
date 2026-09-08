@@ -1,6 +1,6 @@
 {
   "name": "besanj",
-  "version": "0.4.9",
+  "version": "0.5.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,12 +11,13 @@
     "lint": "eslint . --max-warnings=0",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "check:ui": "node scripts/cleanup-stale-ui.mjs && node scripts/check-ui-components.mjs",
-    "check": "npm run doctor && npm run check:ui && npm run check:theme && npm run check:pwa && npm run typecheck && npm run lint && npm test && npm run build",
+    "check": "npm run doctor && npm run check:ui && npm run check:theme && npm run check:pwa && npm run check:workflow && npm run typecheck && npm run lint && npm test && npm run build",
     "predev": "node scripts/cleanup-stale-ui.mjs && node scripts/doctor.mjs",
     "postinstall": "node scripts/cleanup-stale-ui.mjs",
     "doctor": "node scripts/doctor.mjs",
     "check:theme": "node scripts/check-theme-runtime.mjs",
-    "check:pwa": "node scripts/check-pwa.mjs"
+    "check:pwa": "node scripts/check-pwa.mjs",
+    "check:workflow": "node scripts/check-workflow.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

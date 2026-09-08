@@ -13,6 +13,7 @@ import {
 import { CaseCard } from "@/components/case-card";
 import { CreateCaseDialog } from "@/components/create-case-dialog";
 import { EmptyState } from "@/components/empty-state";
+import { TodayQueue } from "@/components/today-queue";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ import {
   type HomeCaseSort,
 } from "@/lib/case-filters";
 import { db } from "@/lib/db";
+import { buildDashboardTasks } from "@/lib/follow-up";
 import type { PurchaseStatus } from "@/lib/types";
 
 const statusTabs: Array<{ value: PurchaseStatus; label: string }> = [
@@ -69,11 +71,12 @@ export function HomeScreen() {
   const [sort, setSort] = React.useState<HomeCaseSort>("updated");
 
   const data = useLiveQuery(async () => {
-    const [cases, quotes] = await Promise.all([
+    const [cases, quotes, reminders] = await Promise.all([
       db.purchaseCases.orderBy("updatedAt").reverse().toArray(),
       db.quotes.toArray(),
+      db.reminders.toArray(),
     ]);
-    return { cases, quotes };
+    return { cases, quotes, reminders };
   }, []);
 
   if (!data) return <HomeSkeleton />;
@@ -99,6 +102,7 @@ export function HomeScreen() {
   ).length;
   const activeCount = activeCases.length;
   const decidedCount = data.cases.filter((row) => row.status === "decided").length;
+  const dashboardTasks = buildDashboardTasks(data.cases, data.quotes, data.reminders);
   const activeFilterCount =
     Number(Boolean(search.trim())) +
     Number(kind !== "all") +
@@ -158,6 +162,8 @@ export function HomeScreen() {
           <SummaryMetric label="تصمیم نهایی" value={decidedCount} />
         </div>
       </section>
+
+      <TodayQueue tasks={dashboardTasks} />
 
       <Tabs
         value={status}

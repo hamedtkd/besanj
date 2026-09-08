@@ -6,6 +6,9 @@ import { useLiveQuery } from "dexie-react-hooks";
 import {
   Archive,
   BarChart3,
+  BellRing,
+  ListChecks,
+  WalletCards,
   CirclePlus,
   GitCompareArrows,
   Package,
@@ -15,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { CaseDetailsPanel } from "@/components/case-details-panel";
+import { CaseFollowUpSheet } from "@/components/case-follow-up-sheet";
 import { DecisionAssistant } from "@/components/decision-assistant";
 import { EmptyState } from "@/components/empty-state";
 import { PriceHistoryChart } from "@/components/price-history-chart";
@@ -39,6 +43,8 @@ import type { Provider, Quote, QuoteFilterState } from "@/lib/types";
 export function CaseScreen({ caseId }: { caseId: string }) {
   const { toast } = useToast();
   const [quoteOpen, setQuoteOpen] = React.useState(false);
+  const [followUpOpen, setFollowUpOpen] = React.useState(false);
+  const [followUpProviderId, setFollowUpProviderId] = React.useState<string | undefined>(undefined);
   const [preset, setPreset] = React.useState<RequotePreset | null>(null);
   const [activeTab, setActiveTab] = React.useState("compare");
   const [historyProviderId, setHistoryProviderId] = React.useState("all");
@@ -47,12 +53,14 @@ export function CaseScreen({ caseId }: { caseId: string }) {
   const [filters, setFilters] = React.useState<QuoteFilterState>({ ...EMPTY_QUOTE_FILTERS });
 
   const data = useLiveQuery(async () => {
-    const [purchaseCase, providers, quotes] = await Promise.all([
+    const [purchaseCase, providers, quotes, reminders, attachments] = await Promise.all([
       db.purchaseCases.get(caseId),
       db.providers.where("caseId").equals(caseId).toArray(),
       db.quotes.where("caseId").equals(caseId).toArray(),
+      db.reminders.where("caseId").equals(caseId).toArray(),
+      db.attachments.where("caseId").equals(caseId).toArray(),
     ]);
-    return { purchaseCase, providers, quotes };
+    return { purchaseCase, providers, quotes, reminders, attachments };
   }, [caseId]);
 
   const availableQuoteIds = data
@@ -87,6 +95,10 @@ export function CaseScreen({ caseId }: { caseId: string }) {
   const selectedIsLatest =
     !selectedQuoteId ||
     metrics.latestQuotes.some((quote) => quote.id === selectedQuoteId);
+  const attachmentCounts = data.attachments.reduce<Record<string, number>>((counts, attachment) => {
+    counts[attachment.quoteId] = (counts[attachment.quoteId] ?? 0) + 1;
+    return counts;
+  }, {});
 
   function openNewQuote() {
     setPreset(null);
@@ -146,17 +158,48 @@ export function CaseScreen({ caseId }: { caseId: string }) {
             {caseDescription ? <p className="type-body mt-2 max-w-2xl text-muted-foreground">{caseDescription}</p> : null}
           </div>
 
-          <Button type="button" size="lg" className="shrink-0" onClick={openNewQuote}>
-            <CirclePlus />ثبت استعلام
-          </Button>
+          <div className="flex shrink-0 gap-2">
+            <Button
+              type="button"
+              size="lg"
+              variant="outline"
+              onClick={() => {
+                setFollowUpProviderId(undefined);
+                setFollowUpOpen(true);
+              }}
+            >
+              <BellRing />پیگیری
+            </Button>
+            <Button type="button" size="lg" onClick={openNewQuote}>
+              <CirclePlus />ثبت استعلام
+            </Button>
+          </div>
         </div>
       </section>
 
-      <section className="mb-6 grid grid-cols-3 gap-2 sm:gap-3">
+      <section className="mb-3 grid grid-cols-3 gap-2 sm:gap-3">
         <MetricCard label="کمترین قیمت" value={metrics.minTotal} />
         <MetricCard label="بیشترین قیمت" value={metrics.maxTotal} />
         <MetricCard label="اختلاف" value={metrics.spread} />
       </section>
+
+      {purchaseCase.targetBudgetToman || purchaseCase.requirements?.length ? (
+        <section className="mb-6 flex flex-wrap gap-2 rounded-2xl border border-border bg-card/65 p-3">
+          {purchaseCase.targetBudgetToman ? (
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-primary/[0.07] px-3 py-2 text-sm text-primary">
+              <WalletCards className="size-4" />
+              بودجه هدف: <span className="type-data">{formatToman(purchaseCase.targetBudgetToman)}</span>
+              <TomanIcon className="size-3.5" />
+            </span>
+          ) : null}
+          {purchaseCase.requirements?.length ? (
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
+              <ListChecks className="size-4" />
+              {purchaseCase.requirements.length.toLocaleString("fa-IR")} شرط مهم
+            </span>
+          ) : null}
+        </section>
+      ) : null}
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(String(value))} variant="line">
         <TabsList className="overflow-x-auto hide-scrollbar">
@@ -201,6 +244,13 @@ export function CaseScreen({ caseId }: { caseId: string }) {
                   onToggleCompare={toggleCompare}
                   onRequote={openRequote}
                   onOpenHistory={openProviderHistory}
+                  onFollowUp={(provider) => {
+                    setFollowUpProviderId(provider.id);
+                    setFollowUpOpen(true);
+                  }}
+                  targetBudgetToman={purchaseCase.targetBudgetToman}
+                  requirements={purchaseCase.requirements}
+                  attachmentCounts={attachmentCounts}
                 />
               ) : (
                 <EmptyState
@@ -256,6 +306,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
 
         <TabsContent value="decision">
           <DecisionAssistant
+            key={`${purchaseCase.targetBudgetToman ?? "none"}:${(purchaseCase.requirements ?? []).map((item) => item.id).join("|")}`}
             availableQuotes={metrics.latestQuotes}
             selectedQuoteIds={comparedQuoteIds}
             providers={data.providers}
@@ -264,11 +315,19 @@ export function CaseScreen({ caseId }: { caseId: string }) {
             onClearQuotes={() => setRequestedComparedQuoteIds([])}
             onOpenSideBySide={() => setSideBySideOpen(true)}
             onSelect={chooseQuote}
+            targetBudgetToman={purchaseCase.targetBudgetToman}
+            requirements={purchaseCase.requirements}
           />
         </TabsContent>
 
         <TabsContent value="details">
-          <CaseDetailsPanel purchaseCase={purchaseCase} quotes={data.quotes} providers={data.providers} />
+          <CaseDetailsPanel
+            purchaseCase={purchaseCase}
+            quotes={data.quotes}
+            providers={data.providers}
+            reminders={data.reminders}
+            attachments={data.attachments}
+          />
         </TabsContent>
       </Tabs>
 
@@ -279,6 +338,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
       ) : null}
 
       <QuoteFormDialog
+        key={`${quoteOpen ? "open" : "closed"}:${preset?.quote.id ?? "new"}`}
         caseId={caseId}
         open={quoteOpen}
         onOpenChange={(open) => {
@@ -286,13 +346,29 @@ export function CaseScreen({ caseId }: { caseId: string }) {
           if (!open) setPreset(null);
         }}
         preset={preset}
+        requirements={purchaseCase.requirements}
       />
+
+      {followUpOpen ? (
+        <CaseFollowUpSheet
+          key={followUpProviderId ?? "case"}
+          caseId={caseId}
+          providers={data.providers}
+          initialProviderId={followUpProviderId}
+          onOpenChange={(open) => {
+            setFollowUpOpen(open);
+            if (!open) setFollowUpProviderId(undefined);
+          }}
+        />
+      ) : null}
 
       <SideBySideComparison
         open={sideBySideOpen}
         onOpenChange={setSideBySideOpen}
         quotes={comparedQuotes}
         providers={data.providers}
+        targetBudgetToman={purchaseCase.targetBudgetToman}
+        requirements={purchaseCase.requirements}
         onRemove={(quoteId) => setRequestedComparedQuoteIds((current) => current.filter((id) => id !== quoteId))}
         onOpenDecision={() => {
           setSideBySideOpen(false);

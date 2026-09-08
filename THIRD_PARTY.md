@@ -29,7 +29,7 @@
 
 ## Doran
 
-تقویم شمسی نسخه 0.4 از موتور Doran استفاده می‌کند:
+تقویم شمسی از نسخه 0.4 به بعد از موتور Doran استفاده می‌کند:
 
 - https://github.com/amiralibg/Doran
 - https://amiralibg.github.io/Doran/guide/getting-started

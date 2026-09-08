@@ -1,5 +1,7 @@
+import { requirementMatchSummary } from "./planning.ts";
 import { getQuoteFreshness, quoteTotal } from "./quote.ts";
 import type {
+  CaseRequirement,
   DecisionPreferences,
   DecisionProfile,
   DecisionResult,
@@ -24,6 +26,11 @@ export const DEFAULT_DECISION_PREFERENCES: DecisionPreferences = {
   requireFresh: false,
 };
 
+export interface DecisionContext {
+  providerRatings?: Record<string, number | undefined>;
+  requirements?: CaseRequirement[];
+}
+
 function inverseScale(value: number, min: number, max: number) {
   if (max <= min) return 100;
   return Math.max(0, Math.min(100, ((max - value) / (max - min)) * 100));
@@ -40,7 +47,8 @@ function freshnessScore(quote: Quote, now: Date) {
 export function scoreQuotesForDecision(
   quotes: Quote[],
   preferences: DecisionPreferences,
-  now = new Date()
+  now = new Date(),
+  context: DecisionContext = {}
 ): DecisionResult[] {
   if (!quotes.length) return [];
 
@@ -72,16 +80,41 @@ export function scoreQuotesForDecision(
           : inverseScale(quote.deliveryDays, minDelivery, maxDelivery);
       const freshnessValue = freshnessScore(quote, now);
       const warranty = quote.warranty ? 100 : 35;
-      const score =
+      const baseScore =
         price * weights.price +
         delivery * weights.delivery +
         freshnessValue * weights.freshness +
         warranty * weights.warranty;
 
+      const requirementSummary = requirementMatchSummary(
+        quote,
+        context.requirements
+      );
+      const requirementScore = requirementSummary.total
+        ? requirementSummary.evaluated
+          ? requirementSummary.ratio * 100
+          : 60
+        : 100;
+      const providerRating = context.providerRatings?.[quote.providerId];
+      const providerScore = providerRating
+        ? Math.max(0, Math.min(100, (providerRating / 5) * 100))
+        : 60;
+      const score = baseScore * 0.78 + requirementScore * 0.12 + providerScore * 0.1;
+
       const reasons: string[] = [];
       if (total === minTotal) reasons.push("کمترین قیمت بین گزینه‌های منتخب");
       if (quote.deliveryDays !== undefined && quote.deliveryDays === minDelivery) {
         reasons.push(quote.deliveryDays === 0 ? "تحویل فوری" : "سریع‌ترین تحویل");
+      }
+      if (requirementSummary.total && requirementSummary.evaluated && requirementSummary.matched === requirementSummary.total) {
+        reasons.push("همه شرط‌های ثبت‌شده را پوشش می‌دهد");
+      } else if (requirementSummary.total && requirementSummary.evaluated && requirementSummary.matched > 0) {
+        reasons.push(
+          `${requirementSummary.matched.toLocaleString("fa-IR")} از ${requirementSummary.total.toLocaleString("fa-IR")} شرط را پوشش می‌دهد`
+        );
+      }
+      if (providerRating && providerRating >= 4) {
+        reasons.push(`امتیاز اعتماد ${providerRating.toLocaleString("fa-IR")} از ۵`);
       }
       if (freshness === "today") reasons.push("قیمت امروز است");
       if (quote.warranty) reasons.push("اطلاعات گارانتی ثبت شده");

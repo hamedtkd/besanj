@@ -6,6 +6,8 @@ export const purchaseCaseSchema = z.object({
   title: z.string().trim().min(2, "عنوان را وارد کن.").max(80, "عنوان خیلی طولانی است."),
   kind: z.enum(["product", "service"]),
   description: z.string().trim().max(500, "توضیح خیلی طولانی است.").optional(),
+  targetBudgetToman: z.number().positive("بودجه باید بیشتر از صفر باشد.").nullable().optional(),
+  requirementsText: z.string().trim().max(1200, "فهرست شرط‌ها خیلی طولانی است.").optional(),
 });
 
 export type PurchaseCaseFormValues = z.infer<typeof purchaseCaseSchema>;
