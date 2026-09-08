@@ -2,6 +2,7 @@
 
 import Dexie, { type EntityTable } from "dexie";
 import { sanitizeRequirementChecks } from "@/lib/planning";
+import { cloneRequirementsForNewCase, makeRepeatedCaseTitle } from "@/lib/duplicate-case";
 import type {
   CaseReminder,
   CaseRequirement,
@@ -384,6 +385,57 @@ export async function deleteQuote(quoteId: string) {
       });
     }
   );
+}
+
+export async function duplicatePurchaseCase(input: {
+  caseId: string;
+  title?: string;
+  copyBudget?: boolean;
+  copyRequirements?: boolean;
+  copyProviders?: boolean;
+}) {
+  const source = await db.purchaseCases.get(input.caseId);
+  if (!source) throw new Error("پرونده پیدا نشد.");
+
+  const sourceProviders = input.copyProviders
+    ? await db.providers.where("caseId").equals(source.id).toArray()
+    : [];
+  const now = new Date().toISOString();
+  const caseId = makeId();
+  const purchaseCase: PurchaseCase = {
+    id: caseId,
+    title:
+      normalizeOptionalText(input.title) ??
+      makeRepeatedCaseTitle(source.title),
+    kind: source.kind,
+    description: source.description,
+    status: "active",
+    targetBudgetToman: input.copyBudget === false ? undefined : source.targetBudgetToman,
+    requirements:
+      input.copyRequirements === false
+        ? undefined
+        : cloneRequirementsForNewCase(source.requirements, makeId, now),
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const providers: Provider[] = sourceProviders.map((provider) => ({
+    id: makeId(),
+    caseId,
+    name: provider.name,
+    phone: provider.phone,
+    rating: provider.rating,
+    ratingNote: provider.ratingNote,
+    createdAt: now,
+    updatedAt: now,
+  }));
+
+  await db.transaction("rw", db.purchaseCases, db.providers, async () => {
+    await db.purchaseCases.add(purchaseCase);
+    if (providers.length) await db.providers.bulkAdd(providers);
+  });
+
+  return { purchaseCase, providers };
 }
 
 export async function createReminder(input: {

@@ -6,6 +6,7 @@ import {
   BellRing,
   Check,
   CheckCircle2,
+  CopyPlus,
   Download,
   FileText,
   ListChecks,
@@ -16,6 +17,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import { CaseFollowUpSheet } from "@/components/case-follow-up-sheet";
+import { DuplicateCaseSheet } from "@/components/duplicate-case-sheet";
 import { CasePlanningSheet } from "@/components/case-planning-sheet";
 import { ProviderRatingSheet } from "@/components/provider-rating-sheet";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +59,7 @@ export function CaseDetailsPanel({
   const { toast } = useToast();
   const [planningOpen, setPlanningOpen] = React.useState(false);
   const [followUpOpen, setFollowUpOpen] = React.useState(false);
+  const [duplicateOpen, setDuplicateOpen] = React.useState(false);
   const [ratingProvider, setRatingProvider] = React.useState<Provider | null>(null);
   const selected = quotes.find((quote) => quote.id === purchaseCase.selectedQuoteId);
   const selectedProvider = selected
@@ -154,7 +157,11 @@ export function CaseDetailsPanel({
             </div>
           ) : null}
 
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button type="button" variant="outline" onClick={() => setDuplicateOpen(true)}>
+              <CopyPlus />
+              خرید مشابه
+            </Button>
             <Button type="button" variant="outline" onClick={toggleArchive}>
               {purchaseCase.status === "archived" ? <RotateCcw /> : <Archive />}
               {purchaseCase.status === "archived" ? "بازگرداندن پرونده" : "آرشیو پرونده"}
@@ -375,6 +382,15 @@ export function CaseDetailsPanel({
           )}
         </Card>
       </div>
+
+      {duplicateOpen ? (
+        <DuplicateCaseSheet
+          purchaseCase={purchaseCase}
+          providerCount={providers.length}
+          open={duplicateOpen}
+          onOpenChange={setDuplicateOpen}
+        />
+      ) : null}
 
       {planningOpen ? (
         <CasePlanningSheet purchaseCase={purchaseCase} onOpenChange={setPlanningOpen} />

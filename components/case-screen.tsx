@@ -7,18 +7,21 @@ import {
   Archive,
   BarChart3,
   BellRing,
+  FileDown,
   ListChecks,
   WalletCards,
   CirclePlus,
   GitCompareArrows,
   Package,
   RefreshCw,
+  ScrollText,
   Sparkles,
   Stethoscope,
   X,
 } from "lucide-react";
 import { CaseDetailsPanel } from "@/components/case-details-panel";
 import { CaseFollowUpSheet } from "@/components/case-follow-up-sheet";
+import { CaseTimeline } from "@/components/case-timeline";
 import { DecisionAssistant } from "@/components/decision-assistant";
 import { EmptyState } from "@/components/empty-state";
 import { PriceHistoryChart } from "@/components/price-history-chart";
@@ -158,7 +161,15 @@ export function CaseScreen({ caseId }: { caseId: string }) {
             {caseDescription ? <p className="type-body mt-2 max-w-2xl text-muted-foreground">{caseDescription}</p> : null}
           </div>
 
-          <div className="flex shrink-0 gap-2">
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Button
+              nativeButton={false}
+              render={<Link href={`/cases/${caseId}/report`} />}
+              size="lg"
+              variant="outline"
+            >
+              <FileDown />گزارش
+            </Button>
             <Button
               type="button"
               size="lg"
@@ -207,6 +218,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
           <TabsTrigger value="decision"><Sparkles className="size-3.5" />تصمیم‌یار {comparedQuoteIds.length ? <span className="type-data text-xs opacity-60">{comparedQuoteIds.length.toLocaleString("fa-IR")}</span> : null}</TabsTrigger>
           <TabsTrigger value="chart"><BarChart3 className="size-3.5" />نمودار</TabsTrigger>
           <TabsTrigger value="history">تاریخچه <span className="type-data text-xs opacity-60">{data.quotes.length.toLocaleString("fa-IR")}</span></TabsTrigger>
+          <TabsTrigger value="timeline"><ScrollText className="size-3.5" />رویدادها</TabsTrigger>
           <TabsTrigger value="details">جزئیات</TabsTrigger>
         </TabsList>
 
@@ -251,6 +263,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
                   targetBudgetToman={purchaseCase.targetBudgetToman}
                   requirements={purchaseCase.requirements}
                   attachmentCounts={attachmentCounts}
+                  caseTitle={purchaseCase.title}
                 />
               ) : (
                 <EmptyState
@@ -304,6 +317,16 @@ export function CaseScreen({ caseId }: { caseId: string }) {
           )}
         </TabsContent>
 
+        <TabsContent value="timeline">
+          <CaseTimeline
+            purchaseCase={purchaseCase}
+            providers={data.providers}
+            quotes={data.quotes}
+            reminders={data.reminders}
+            attachments={data.attachments}
+          />
+        </TabsContent>
+
         <TabsContent value="decision">
           <DecisionAssistant
             key={`${purchaseCase.targetBudgetToman ?? "none"}:${(purchaseCase.requirements ?? []).map((item) => item.id).join("|")}`}
@@ -347,6 +370,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
         }}
         preset={preset}
         requirements={purchaseCase.requirements}
+        providers={data.providers}
       />
 
       {followUpOpen ? (

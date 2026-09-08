@@ -8,6 +8,7 @@ import {
   type AppPalette,
 } from "@/components/app-preferences";
 import { CustomThemeColorSheet } from "@/components/custom-theme-color-sheet";
+import { DataBackupSection } from "@/components/data-backup-section";
 import { PwaInstallSection } from "@/components/pwa-install-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -64,7 +65,7 @@ export function SettingsSheet({
         open={open}
         onOpenChange={onOpenChange}
         title="تنظیمات"
-        description="ظاهر برنامه و نصب روی دستگاه را از اینجا مدیریت کن."
+        description="ظاهر، نصب روی دستگاه و پشتیبان داده‌های بسنج را از اینجا مدیریت کن."
         className="sm:max-w-xl"
       >
         <div className="space-y-6 p-4 sm:p-5">
@@ -179,6 +180,8 @@ export function SettingsSheet({
             </div>
           </section>
 
+          <DataBackupSection />
+
           <PwaInstallSection />
 
           <div className="rounded-2xl border border-border bg-muted/45 p-3.5">
@@ -186,8 +189,8 @@ export function SettingsSheet({
               <div>
                 <div className="type-label">ذخیره روی همین دستگاه</div>
                 <p className="type-caption mt-0.5 text-muted-foreground">
-                  تم و رنگ انتخابی در مرورگر ذخیره می‌شوند و با بازگشت دوباره باقی
-                  می‌مانند.
+                  اطلاعات بسنج روی همین مرورگر می‌ماند؛ برای انتقال دستگاه یا
+                  اطمینان از حفظ پیوست‌ها، از بخش پشتیبان فایل خروجی بگیر.
                 </p>
               </div>
               <Badge variant="secondary">محلی</Badge>
