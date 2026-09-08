@@ -48,3 +48,35 @@ test("requireFresh rejects stale quote", () => {
   assert.equal(result.find((item) => item.quoteId === "stale")?.eligible, false);
   assert.equal(result[0].quoteId, "fresh");
 });
+
+test("provider rating can break an otherwise equal decision tie", () => {
+  const rows = [
+    quote("a", 100_000, { providerId: "provider-a", deliveryDays: 2 }),
+    quote("b", 100_000, { providerId: "provider-b", deliveryDays: 2 }),
+  ];
+  const result = scoreQuotesForDecision(
+    rows,
+    DEFAULT_DECISION_PREFERENCES,
+    new Date("2026-09-06T12:00:00Z"),
+    { providerRatings: { "provider-a": 5, "provider-b": 2 } }
+  );
+  assert.equal(result[0].quoteId, "a");
+});
+
+test("requirement coverage improves otherwise equal score", () => {
+  const requirements = [
+    { id: "r1", label: "گارانتی", createdAt: "2026-09-01T00:00:00Z" },
+    { id: "r2", label: "تحویل سریع", createdAt: "2026-09-01T00:00:00Z" },
+  ];
+  const rows = [
+    quote("a", 100_000, { requirementChecks: { r1: true, r2: true } }),
+    quote("b", 100_000, { requirementChecks: { r1: true } }),
+  ];
+  const result = scoreQuotesForDecision(
+    rows,
+    DEFAULT_DECISION_PREFERENCES,
+    new Date("2026-09-06T12:00:00Z"),
+    { requirements }
+  );
+  assert.equal(result[0].quoteId, "a");
+});

@@ -19,6 +19,12 @@ export type QuoteChannel =
 
 export type QuoteFreshness = "today" | "recent" | "stale" | "expired";
 
+export interface CaseRequirement {
+  id: string;
+  label: string;
+  createdAt: string;
+}
+
 export interface PurchaseCase {
   id: string;
   title: string;
@@ -26,6 +32,8 @@ export interface PurchaseCase {
   description?: string;
   status: PurchaseStatus;
   selectedQuoteId?: string;
+  targetBudgetToman?: number;
+  requirements?: CaseRequirement[];
   createdAt: string;
   updatedAt: string;
 }
@@ -35,6 +43,8 @@ export interface Provider {
   caseId: string;
   name: string;
   phone?: string;
+  rating?: number;
+  ratingNote?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -53,9 +63,36 @@ export interface Quote {
   channel: QuoteChannel;
   contactRef?: string;
   note?: string;
+  requirementChecks?: Record<string, boolean>;
   previousQuoteId?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export type ReminderStatus = "open" | "done";
+
+export interface CaseReminder {
+  id: string;
+  caseId: string;
+  providerId?: string;
+  quoteId?: string;
+  title: string;
+  dueAt: string;
+  status: ReminderStatus;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface QuoteAttachment {
+  id: string;
+  caseId: string;
+  quoteId: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  blob: Blob;
+  createdAt: string;
 }
 
 export interface CaseMetrics {

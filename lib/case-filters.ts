@@ -56,7 +56,11 @@ export function applyHomeCaseFilters(
 
       if (!search) return true;
       const haystack = normalizeSearch(
-        [purchaseCase.title, purchaseCase.description ?? ""].join(" ")
+        [
+          purchaseCase.title,
+          purchaseCase.description ?? "",
+          ...(purchaseCase.requirements ?? []).map((item) => item.label),
+        ].join(" ")
       );
       return haystack.includes(search);
     })

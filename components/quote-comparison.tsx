@@ -2,12 +2,15 @@
 
 import { motion } from "motion/react";
 import {
+  BellRing,
   Check,
   Clock3,
   GitCompareArrows,
   History,
   RefreshCw,
   ShieldCheck,
+  Star,
+  Paperclip,
   Store,
   Truck,
 } from "lucide-react";
@@ -26,7 +29,8 @@ import {
   formatUserText,
 } from "@/lib/format";
 import { freshnessLabel, getQuoteFreshness, quoteTotal } from "@/lib/quote";
-import type { Provider, Quote } from "@/lib/types";
+import { getBudgetState, requirementMatchSummary } from "@/lib/planning";
+import type { CaseRequirement, Provider, Quote } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function QuoteComparison({
@@ -38,6 +42,10 @@ export function QuoteComparison({
   onToggleCompare,
   onRequote,
   onOpenHistory,
+  onFollowUp,
+  targetBudgetToman,
+  requirements = [],
+  attachmentCounts = {},
 }: {
   quotes: Quote[];
   providers: Provider[];
@@ -47,6 +55,10 @@ export function QuoteComparison({
   onToggleCompare: (quote: Quote) => void;
   onRequote: (quote: Quote, provider: Provider) => void;
   onOpenHistory: (providerId: string) => void;
+  onFollowUp: (provider: Provider) => void;
+  targetBudgetToman?: number;
+  requirements?: CaseRequirement[];
+  attachmentCounts?: Record<string, number>;
 }) {
   const providerById = new Map(
     providers.map((provider) => [provider.id, provider])
@@ -71,6 +83,9 @@ export function QuoteComparison({
           new Date(quote.quotedAt).getTime() === newestTime;
         const freshness = getQuoteFreshness(quote);
         const contactRef = cleanDisplayText(quote.contactRef);
+        const budgetState = getBudgetState({ targetBudgetToman }, quote);
+        const requirementSummary = requirementMatchSummary(quote, requirements);
+        const attachmentCount = attachmentCounts[quote.id] ?? 0;
 
         return (
           <motion.div
@@ -117,6 +132,12 @@ export function QuoteComparison({
                         </h3>
                         {selected ? (
                           <Badge variant="success">انتخاب نهایی</Badge>
+                        ) : null}
+                        {provider.rating ? (
+                          <Badge variant="outline">
+                            <Star className="fill-current text-amber-500" />
+                            {provider.rating.toLocaleString("fa-IR")}/۵
+                          </Badge>
                         ) : null}
                       </div>
                       <p className="type-caption mt-1 truncate text-muted-foreground">
@@ -169,6 +190,24 @@ export function QuoteComparison({
                       <Badge variant="secondary">جدیدترین</Badge>
                     ) : null}
                     <FreshnessBadge freshness={freshness} />
+                    {budgetState === "within" ? <Badge variant="success">داخل بودجه</Badge> : null}
+                    {budgetState === "near" ? <Badge variant="warning">کمی بالاتر از بودجه</Badge> : null}
+                    {budgetState === "over" ? <Badge variant="destructive">بالاتر از بودجه</Badge> : null}
+                    {requirementSummary.total ? (
+                      requirementSummary.evaluated ? (
+                        <Badge variant={requirementSummary.matched === requirementSummary.total ? "success" : "outline"}>
+                          {requirementSummary.matched.toLocaleString("fa-IR")}/{requirementSummary.total.toLocaleString("fa-IR")} شرط
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline">شرط‌ها بررسی نشده</Badge>
+                      )
+                    ) : null}
+                    {attachmentCount ? (
+                      <Badge variant="outline">
+                        <Paperclip />
+                        {attachmentCount.toLocaleString("fa-IR")} فایل
+                      </Badge>
+                    ) : null}
                   </div>
                 </div>
 
@@ -233,7 +272,7 @@ export function QuoteComparison({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 border-t border-border bg-muted/20 p-3">
+              <div className="grid grid-cols-3 gap-2 border-t border-border bg-muted/20 p-3">
                 <Button
                   type="button"
                   size="sm"
@@ -242,6 +281,15 @@ export function QuoteComparison({
                 >
                   <History />
                   تاریخچه
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onFollowUp(provider)}
+                >
+                  <BellRing />
+                  پیگیری
                 </Button>
                 <Button
                   type="button"

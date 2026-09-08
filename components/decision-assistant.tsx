@@ -28,7 +28,7 @@ import { DEFAULT_DECISION_PREFERENCES, scoreQuotesForDecision } from "@/lib/deci
 import { channelLabel, formatToman } from "@/lib/format";
 import { freshnessLabel, getQuoteFreshness, quoteTotal } from "@/lib/quote";
 import { MAX_COMPARE_QUOTES } from "@/lib/shortlist";
-import type { DecisionPreferences, DecisionProfile, Provider, Quote } from "@/lib/types";
+import type { CaseRequirement, DecisionPreferences, DecisionProfile, Provider, Quote } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const PROFILE_LABELS: Record<DecisionProfile, string> = {
@@ -62,6 +62,8 @@ export function DecisionAssistant({
   onClearQuotes,
   onOpenSideBySide,
   onSelect,
+  targetBudgetToman,
+  requirements = [],
 }: {
   availableQuotes: Quote[];
   selectedQuoteIds: string[];
@@ -71,14 +73,23 @@ export function DecisionAssistant({
   onClearQuotes: () => void;
   onOpenSideBySide: () => void;
   onSelect: (quote: Quote) => void;
+  targetBudgetToman?: number;
+  requirements?: CaseRequirement[];
 }) {
   const [preferences, setPreferences] = React.useState<DecisionPreferences>({
     ...DEFAULT_DECISION_PREFERENCES,
+    maxBudgetToman: targetBudgetToman ?? null,
   });
   const providerById = new Map(providers.map((provider) => [provider.id, provider]));
   const selectedQuotes = availableQuotes.filter((quote) => selectedQuoteIds.includes(quote.id));
   const quoteById = new Map(selectedQuotes.map((quote) => [quote.id, quote]));
-  const results = scoreQuotesForDecision(selectedQuotes, preferences);
+  const providerRatings = Object.fromEntries(
+    providers.map((provider) => [provider.id, provider.rating])
+  );
+  const results = scoreQuotesForDecision(selectedQuotes, preferences, new Date(), {
+    providerRatings,
+    requirements,
+  });
   const best = results.find((result) => result.eligible);
 
   const patch = <K extends keyof DecisionPreferences>(key: K, value: DecisionPreferences[K]) =>
@@ -206,6 +217,19 @@ export function DecisionAssistant({
                     </InputGroupText>
                   </InputGroupAddon>
                 </InputGroup>
+                {targetBudgetToman ? (
+                  <div className="mt-1.5 flex items-center justify-between gap-2">
+                    <span className="type-caption text-muted-foreground">بودجه ثبت‌شده پرونده</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => patch("maxBudgetToman", targetBudgetToman ?? null)}
+                    >
+                      استفاده از بودجه پرونده
+                    </Button>
+                  </div>
+                ) : null}
               </FormField>
 
               <FormField label="حداکثر زمان تحویل">

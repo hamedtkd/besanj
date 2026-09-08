@@ -10,12 +10,14 @@ import {
   RefreshCw,
   Stethoscope,
   Store,
+  WalletCards,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { TomanIcon } from "@/components/ui/toman-icon";
 import { formatCompactPersianDate, formatToman, kindLabel } from "@/lib/format";
 import { buildCaseMetrics, getQuoteFreshness } from "@/lib/quote";
+import { getBudgetState } from "@/lib/planning";
 import type { PurchaseCase, Quote } from "@/lib/types";
 
 export function CaseCard({
@@ -30,6 +32,9 @@ export function CaseCard({
     const freshness = getQuoteFreshness(quote);
     return freshness === "stale" || freshness === "expired";
   });
+  const budgetState = metrics.latestQuotes[0]
+    ? getBudgetState(purchaseCase, metrics.latestQuotes[0])
+    : "none";
   const status =
     purchaseCase.status === "decided"
       ? { label: "تصمیم‌گرفته", variant: "success" as const }
@@ -94,6 +99,17 @@ export function CaseCard({
                     <Badge variant="warning">
                       <RefreshCw />
                       بعضی قیمت‌ها قدیمی‌اند
+                    </Badge>
+                  ) : null}
+                  {budgetState === "within" ? (
+                    <Badge variant="success">
+                      <WalletCards />
+                      گزینه داخل بودجه داری
+                    </Badge>
+                  ) : budgetState === "over" ? (
+                    <Badge variant="destructive">
+                      <WalletCards />
+                      همه گزینه‌ها بالای بودجه‌اند
                     </Badge>
                   ) : null}
                 </div>

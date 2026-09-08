@@ -1,71 +1,50 @@
 # بسنج — Besanj
 
-دفتر شخصی استعلام قیمت برای ثبت قیمت‌های چند فروشنده یا ارائه‌دهنده، نگه‌داشتن تاریخچه و مقایسهٔ گزینه‌ها قبل از تصمیم نهایی.
+بسنج یک دفتر شخصی و local-first برای استعلام قیمت، پیگیری فروشنده‌ها، مقایسه گزینه‌ها و رسیدن به تصمیم خرید است.
 
-نسخه: **0.4.9**
+نسخه: **0.5.1**
 
-## قابلیت‌های فعلی
+## فاز 0.5 — از «ثبت قیمت» تا «پیگیری خرید»
+
+این نسخه بسنج را از یک دفتر مقایسه قیمت به یک فضای کاری کوچک برای پیگیری خرید تبدیل می‌کند:
+
+- بودجه هدف برای هر پرونده و نمایش وضعیت هر پیشنهاد نسبت به بودجه.
+- شروط و معیارهای خرید برای هر پرونده، مثل برند، مدل، گارانتی، رنگ یا زمان تحویل.
+- ثبت پوشش شروط روی هر استعلام و استفاده از آن در مقایسه و تصمیم‌یار.
+- امتیاز اعتماد فروشنده از ۱ تا ۵ همراه با یادداشت تجربه.
+- یادآوری پیگیری برای پرونده/فروشنده با تاریخ سررسید.
+- بخش «کارهای امروز» در داشبورد برای یادآوری‌ها، قیمت‌های رو به انقضا، پرونده‌های قدیمی و پرونده‌های آماده تصمیم.
+- پیوست عکس، PDF و فایل به استعلام‌ها؛ فایل‌ها داخل IndexedDB همان مرورگر ذخیره می‌شوند.
+- دکمه پیگیری سریع از کارت استعلام.
+- تصمیم‌یار به بودجه پرونده، میزان پوشش شروط و امتیاز فروشنده توجه می‌کند.
+
+## قابلیت‌های پایه
 
 - پرونده جدا برای هر خرید یا خدمت.
 - ثبت چند استعلام با فروشنده، قیمت، هزینه جانبی، تاریخ، اعتبار قیمت، تحویل، گارانتی، پرداخت، کانال تماس و یادداشت.
-- کانال‌های تلفن، واتساپ، اینستاگرام، تلگرام، حضوری، وب، پیامک، ایمیل، بله، ایتا، روبیکا، دیوار، شیپور و سایر.
-- تاریخچهٔ کامل هر فروشنده و استعلام مجدد بدون overwrite قیمت قبلی.
-- انتخاب تا ۴ گزینه برای مقایسهٔ کنار هم.
+- تاریخچه کامل هر فروشنده و استعلام مجدد بدون overwrite قیمت قبلی.
+- انتخاب تا ۴ گزینه برای مقایسه کنار هم.
 - تب مقایسه، نمودار قیمت، تاریخچه، تصمیم‌یار و جزئیات.
-- Bar chart برای آخرین قیمت‌ها و Timeline/Scatter برای روند همهٔ استعلام‌ها.
-- فیلترهای فروشنده، کانال، تازگی، قیمت، تحویل، گارانتی و بازهٔ تاریخ.
-- تصمیم‌یار با اولویت قیمت، زمان تحویل، تازگی، گارانتی یا حالت متعادل.
-- انتخاب و لغو شفاف گزینهٔ نهایی.
-- Light / Dark / System با **آبی برند به‌عنوان رنگ پیش‌فرض** + سه پالت جایگزین و رنگ سفارشی.
-- تغییر سریع Light/Dark و پالت از Navbar، با runtime داخلی بدون hydration mismatch.
+- فیلترهای فروشنده، کانال، تازگی، قیمت، تحویل، گارانتی و بازه تاریخ.
+- انتخاب و لغو شفاف گزینه نهایی.
 - Dashboard با جست‌وجو، فیلتر نوع/پیگیری و چند حالت مرتب‌سازی.
-- لوگوی رسمی Besanj در Navbar، favicon، Apple Touch Icon و آیکن‌های نصب.
-- PWA قابل نصب با Web Manifest، Service Worker، آیکن maskable و نصب مستقیم از تنظیمات.
+- Light / Dark / System با آبی برند به‌عنوان رنگ پیش‌فرض، چند پالت جایگزین و رنگ سفارشی.
+- تغییر سریع Light/Dark و پالت از Navbar.
+- PWA قابل نصب با Web Manifest، Service Worker و آیکن maskable.
 - local-first با Dexie؛ بدون Login و Backend.
 
 ## رابط فارسی
 
 - `lang="fa"` و `dir="rtl"` از root.
-- فونت Mikhak.
-- ارقام نمایشی فارسی.
-- PriceInput با گروه‌بندی زنده و فقط `TomanIcon` به‌عنوان واحد دیداری.
-- شماره موبایل و ورودی عدد صحیح با ارقام فارسی.
-- Selectهای PersianLabs با `items` map؛ value داخلی یا UUID در Trigger نمایش داده نمی‌شود.
-- DatePicker جلالی با موتور Doran و bridge کامل به tokenهای Light/Dark/Custom Theme.
+- فونت Mikhak و ارقام نمایشی فارسی.
+- PriceInput و IntegerInput فارسی.
+- Selectهای PersianLabs با `items` map.
+- DatePicker جلالی با موتور Doran و هماهنگی با Light/Dark/Custom Theme.
 - Popover در دسکتاپ و Bottom Sheet قابل drag-to-dismiss در موبایل.
-- انتخاب سریع اعتبار قیمت: همان روز، ۳ روز، ۱ هفته، ۲ هفته و ۱ ماه.
-
-## تقویم Doran
-
-DatePicker نسخه 0.4 از موتور Doran استفاده می‌کند و UI را با primitiveهای خود پروژه می‌سازد. این معماری مطابق راهنمای shadcn خود Doran است.
-
-Dependencyها:
-
-```text
-@doranjs/core
-@doranjs/react
-@doranjs/ui
-```
-
-## تم سفارشی
-
-تنظیمات ظاهر شامل:
-
-- سیستم
-- روشن
-- تاریک
-- آبی برند (پیش‌فرض)
-- بنفش
-- کهربایی
-- رز
-- رنگ سفارشی با Hue / Saturation / Value و Hex
-- ذخیره حداکثر ۸ رنگ روی همین مرورگر
-
-رنگ سفارشی روی Primary، Ring، نمودارها و Glass border اعمال می‌شود و در حالت تاریک نیز دوباره محاسبه می‌شود.
 
 ## داده و Migration
 
-Database:
+نام دیتابیس عمداً تغییر نکرده است تا داده کاربران نسخه‌های قبلی از بین نرود:
 
 ```text
 estelamkoo-local
@@ -74,22 +53,35 @@ estelamkoo-local
 Schema version:
 
 ```text
-3
+4
 ```
 
-Migration نسخه 3 داده‌های نسخه‌های قبلی را حفظ می‌کند و فقط مقادیر optional ناسالم را پاک‌سازی می‌کند. رشته‌هایی مثل `null`، `undefined` و `NaN` دیگر در UI نمایش داده نمی‌شوند.
-
-Tableها:
+جدول‌ها:
 
 ```text
 purchaseCases
 providers
 quotes
+reminders
+attachments
 ```
 
-## نصب
+Migration نسخه 4 داده‌های قبلی را حفظ می‌کند و قابلیت‌های جدید را به‌صورت optional اضافه می‌کند. `reminders` و `attachments` جدول‌های جدید هستند.
 
-Node نسخهٔ پیشنهادی در `.nvmrc` ثبت شده است.
+### محدودیت مهم local-first
+
+یادآوری‌های این نسخه **داخل خود بسنج** نمایش داده می‌شوند و Push Notification سیستم‌عامل نیستند. فایل‌های پیوست نیز فقط در IndexedDB همان Browser/Profile قرار دارند و با پاک‌کردن داده سایت از بین می‌روند. Backup/Cloud Sync باید در فازهای بعدی اضافه شود.
+
+## محدودیت فایل‌های پیوست
+
+- حداکثر ۵ فایل برای هر استعلام.
+- حداکثر ۸ مگابایت برای هر فایل.
+- حداکثر ۲۴ مگابایت مجموع فایل‌های یک استعلام.
+- تصویر، PDF، Word، Excel و فایل متنی در فرم انتخاب می‌شوند.
+
+## نصب و اجرا
+
+نسخه پیشنهادی Node در `.nvmrc` ثبت شده است.
 
 ```bash
 npm install
@@ -104,106 +96,70 @@ npm run dev
 npm run check
 ```
 
-این دستور به ترتیب doctor، UI policy، Theme guard، PWA/brand guard، TypeScript، ESLint، تست‌ها و production build را اجرا می‌کند:
+ترتیب اجرا:
 
 ```text
 doctor
 check:ui
 check:theme
 check:pwa
+check:workflow
 typecheck
 lint
 test
 build
 ```
 
-تست‌های مستقل از dependency با:
-
-```bash
-npm test
-```
-
-و سیاست UI با:
-
-```bash
-npm run check:ui
-```
+Guard جدید `check:workflow` بررسی می‌کند که Schema v4، یادآوری‌ها، پیوست‌ها، بودجه/شروط و Today Queue به‌صورت اتفاقی از سورس حذف نشده باشند.
 
 ## نصب به‌عنوان اپ (PWA)
 
-نسخه 0.4.9 دارای `manifest.webmanifest`، Service Worker و آیکن‌های 192/512/Maskable است. Service Worker عمداً فقط در production ثبت می‌شود تا در `next dev` فایل‌های قدیمی cache نشوند.
-
-برای تست واقعی نصب روی localhost:
+Service Worker فقط در production ثبت می‌شود تا `next dev` درگیر cache قدیمی نشود.
 
 ```bash
 npm run build
 npm start
 ```
 
-سپس `http://localhost:3000` را باز کن. در Chrome/Edge در صورت فراهم بودن شرایط، دکمه «نصب بسنج» در تنظیمات فعال می‌شود. روی iPhone/iPad از Safari > Share > Add to Home Screen استفاده می‌شود. در انتشار عمومی، PWA باید روی HTTPS باشد.
+سپس `http://localhost:3000` را باز کن. برای انتشار عمومی PWA باید روی HTTPS باشد.
 
-## ساختار مهم
-
-```text
-app/
-components/
-  ui/
-lib/
-tests/
-docs/
-scripts/
-```
-
-فایل‌های مهم:
+## ساختار مهم فاز 0.5
 
 ```text
-components/ui/date-picker.tsx
-components/ui/responsive-sheet.tsx
-components/ui/price-input.tsx
-components/ui/integer-input.tsx
-components/app-theme.tsx
-components/app-preferences.tsx
-components/custom-theme-color-sheet.tsx
-components/pwa-register.tsx
-components/pwa-install-provider.tsx
-components/pwa-install-section.tsx
+components/case-planning-sheet.tsx
+components/case-follow-up-sheet.tsx
+components/provider-rating-sheet.tsx
+components/today-queue.tsx
+components/case-details-panel.tsx
+components/quote-form-dialog.tsx
 components/quote-comparison.tsx
 components/decision-assistant.tsx
+lib/planning.ts
+lib/follow-up.ts
+lib/attachments.ts
 lib/db.ts
-lib/theme-color.ts
-lib/validation-rules.ts
+scripts/check-workflow.mjs
 ```
 
 ## قانون UI
 
-برای کنترل‌های عمومی ابتدا PersianLabs/ui بررسی می‌شود. کنترل native مرورگر در product layer جایگزین قابل قبول نیست مگر در یک primitive تخصصی و با دلیل مشخص.
+برای کنترل‌های عمومی ابتدا PersianLabs/ui استفاده می‌شود. DatePicker استثنای مستند است: موتور تقویم Doran است اما primitiveها و ظاهر متعلق به پروژه هستند.
 
-DatePicker استثنای مستند است: موتور تقویم Doran است، اما Button / Popover / Bottom Sheet و ظاهر آن متعلق به همین پروژه است.
+## توسعه امن از نسخه پایدار
 
-`npm run check:ui` جلوی بازگشت موارد زیر را می‌گیرد:
-
-- native `<select>`
-- `input[type=date]`
-- checkbox native
-- raw Button/Input/Textarea در product layer
-- PriceInput بدون InputGroup
-- Select بدون `items` map
-
-## انتشار
-
-بعد از سبز بودن `npm run check`:
+پیشنهاد برای شروع این فاز از main پایدار:
 
 ```bash
-git init
-git add .
-git commit -m "fix: remove render-time ref access in Besanj v0.4.9"
-git branch -M main
-git remote add origin <YOUR_GITHUB_REPO>
-git push -u origin main
+git switch -c feat/follow-up-workspace-v0.5
 ```
 
-برای Vercel، پروژه Next.js بدون Backend قابل Deploy است. داده‌ها در مرورگر کاربر می‌مانند.
+پس از Replace کردن سورس و سبز شدن `npm run check`:
+
+```bash
+git add .
+git commit -m "feat: add Besanj follow-up workspace v0.5.1"
+```
 
 ## منابع
 
-جزئیات کدهای اقتباسی و کتابخانه‌ها در `THIRD_PARTY.md` ثبت شده است. تغییرات نسخه 0.4.9 در `docs/RELEASE_0.4.9.md` و چک‌لیست QA در `QA.md` آمده است.
+جزئیات کتابخانه‌ها در `THIRD_PARTY.md`، تغییرات این نسخه در `docs/RELEASE_0.5.1.md` و نتیجه QA در `QA.md` آمده است.

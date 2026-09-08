@@ -3,15 +3,23 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { Package, Stethoscope } from "lucide-react";
+import { ListChecks, Package, Stethoscope, WalletCards } from "lucide-react";
 import { createPurchaseCase } from "@/lib/db";
+import { mergeRequirements } from "@/lib/planning";
 import { purchaseCaseSchema, type PurchaseCaseFormValues } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+} from "@/components/ui/input-group";
+import { PriceInput } from "@/components/ui/price-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ResponsiveSheet } from "@/components/ui/responsive-sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { TomanIcon } from "@/components/ui/toman-icon";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
 
@@ -26,12 +34,24 @@ export function CreateCaseDialog({
   const { toast } = useToast();
   const form = useForm<PurchaseCaseFormValues>({
     resolver: zodResolver(purchaseCaseSchema),
-    defaultValues: { title: "", kind: "product", description: "" },
+    defaultValues: {
+      title: "",
+      kind: "product",
+      description: "",
+      targetBudgetToman: null,
+      requirementsText: "",
+    },
   });
 
   async function onSubmit(values: PurchaseCaseFormValues) {
     try {
-      const row = await createPurchaseCase(values);
+      const row = await createPurchaseCase({
+        title: values.title,
+        kind: values.kind,
+        description: values.description,
+        targetBudgetToman: values.targetBudgetToman,
+        requirements: mergeRequirements(undefined, values.requirementsText ?? ""),
+      });
       toast("پرونده ساخته شد.");
       onOpenChange(false);
       form.reset();
@@ -46,7 +66,8 @@ export function CreateCaseDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="پرونده جدید"
-      description="برای یک خرید یا خدمت، همه قیمت‌ها را یک‌جا نگه دار."
+      description="برای یک خرید یا خدمت، قیمت‌ها، شرط‌ها و پیگیری‌ها را یک‌جا نگه دار."
+      className="sm:max-w-2xl"
     >
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-5 p-4 pb-6 sm:p-5">
         <FormField label="عنوان" required error={form.formState.errors.title?.message}>
@@ -68,6 +89,60 @@ export function CreateCaseDialog({
               </RadioGroup>
             )}
           />
+        </FormField>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            label="بودجه هدف"
+            hint="اختیاری؛ بعداً هر قیمت نسبت به این بودجه سنجیده می‌شود."
+            error={form.formState.errors.targetBudgetToman?.message}
+          >
+            <InputGroup className="h-10">
+              <Controller
+                control={form.control}
+                name="targetBudgetToman"
+                render={({ field }) => (
+                  <PriceInput
+                    data-slot="input-group-control"
+                    value={field.value ?? null}
+                    onValueChange={field.onChange}
+                    min={0}
+                    className="flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
+                  />
+                )}
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupText>
+                  <TomanIcon className="size-4" />
+                  <span className="sr-only">تومان</span>
+                </InputGroupText>
+              </InputGroupAddon>
+            </InputGroup>
+          </FormField>
+
+          <div className="flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary/[0.06] px-3.5 py-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+              <WalletCards className="size-4" />
+            </span>
+            <p className="type-caption text-muted-foreground">
+              بودجه فقط معیار تصمیم است؛ قیمت بالاتر حذف نمی‌شود و همچنان در مقایسه می‌ماند.
+            </p>
+          </div>
+        </div>
+
+        <FormField
+          label="شرط‌ها و مشخصات مهم"
+          hint="هر شرط را در یک خط بنویس؛ حداکثر ۱۲ مورد."
+          error={form.formState.errors.requirementsText?.message}
+        >
+          <div className="relative">
+            <ListChecks className="pointer-events-none absolute end-3 top-3 size-4 text-muted-foreground" />
+            <Textarea
+              className="min-h-28 pe-9"
+              placeholder={"مثلاً:\nگارانتی رسمی\nتحویل زیر ۳ روز\nرنگ مشکی"}
+              {...form.register("requirementsText")}
+            />
+          </div>
         </FormField>
 
         <FormField label="توضیح" hint="اختیاری؛ مدل، مشخصات یا محدوده کاری را بنویس." error={form.formState.errors.description?.message}>
