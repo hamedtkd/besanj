@@ -7,7 +7,9 @@ import {
   CheckCircle2,
   ClipboardCopy,
   ListChecks,
+  PackageCheck,
   Printer,
+  ReceiptText,
   Share2,
   Store,
 } from "lucide-react";
@@ -29,6 +31,7 @@ import {
   formatUserText,
 } from "@/lib/format";
 import { requirementMatchSummary } from "@/lib/planning";
+import { purchaseOutcomeStatusLabel } from "@/lib/purchase-outcome";
 
 export function CaseReportPage({ caseId }: { caseId: string }) {
   const { toast } = useToast();
@@ -222,6 +225,57 @@ export function CaseReportPage({ caseId }: { caseId: string }) {
                   <TomanIcon className="size-4" />
                 </div>
               </div>
+            </section>
+          ) : null}
+
+          {snapshot.purchaseCase.purchaseOutcome && snapshot.purchaseRow ? (
+            <section className="report-break-inside rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.055] p-4 sm:p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                  <PackageCheck className="size-5" />
+                  <h2 className="type-section-title">نتیجه واقعی خرید</h2>
+                </div>
+                <Badge variant="success">
+                  {purchaseOutcomeStatusLabel(snapshot.purchaseCase.purchaseOutcome.status)}
+                </Badge>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <div className="type-caption text-muted-foreground">فروشنده خرید</div>
+                  <div className="type-label mt-1">{snapshot.purchaseRow.provider.name}</div>
+                </div>
+                <div>
+                  <div className="type-caption text-muted-foreground">مبلغ واقعی</div>
+                  <div className="type-data mt-1 inline-flex items-center gap-1 text-lg text-emerald-700 dark:text-emerald-300">
+                    {formatToman(snapshot.purchaseCase.purchaseOutcome.actualPaidToman)}
+                    <TomanIcon className="size-3.5" />
+                  </div>
+                </div>
+                <div>
+                  <div className="type-caption text-muted-foreground">تاریخ خرید</div>
+                  <div className="type-label mt-1">{formatPersianDate(snapshot.purchaseCase.purchaseOutcome.purchasedAt)}</div>
+                </div>
+                <div>
+                  <div className="type-caption text-muted-foreground">مرجع سفارش</div>
+                  <div className="type-label mt-1">{formatUserText(snapshot.purchaseCase.purchaseOutcome.orderReference)}</div>
+                </div>
+              </div>
+              {(snapshot.purchaseCase.purchaseOutcome.expectedDeliveryAt || snapshot.purchaseCase.purchaseOutcome.receivedAt || snapshot.purchaseCase.purchaseOutcome.note) ? (
+                <div className="mt-4 grid gap-2 border-t border-emerald-500/15 pt-3 text-sm text-muted-foreground sm:grid-cols-2">
+                  {snapshot.purchaseCase.purchaseOutcome.expectedDeliveryAt ? (
+                    <div>تحویل مورد انتظار: {formatPersianDate(snapshot.purchaseCase.purchaseOutcome.expectedDeliveryAt)}</div>
+                  ) : null}
+                  {snapshot.purchaseCase.purchaseOutcome.receivedAt ? (
+                    <div>دریافت: {formatPersianDate(snapshot.purchaseCase.purchaseOutcome.receivedAt)}</div>
+                  ) : null}
+                  {snapshot.purchaseCase.purchaseOutcome.note ? (
+                    <div className="sm:col-span-2 inline-flex items-start gap-1.5">
+                      <ReceiptText className="mt-0.5 size-4 shrink-0" />
+                      یادداشت: {formatUserText(snapshot.purchaseCase.purchaseOutcome.note)}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </section>
           ) : null}
 

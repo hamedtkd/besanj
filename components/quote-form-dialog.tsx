@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { DoranDate } from "@doranjs/core";
 import { Calculator, CirclePlus, ListChecks, Paperclip, X } from "lucide-react";
+import { QuoteCapturePanel } from "@/components/quote-capture-panel";
 import { addQuote } from "@/lib/db";
 import { formatFileSize, validateAttachmentSelection } from "@/lib/attachments";
 import {
@@ -14,6 +15,8 @@ import {
   QUOTE_CHANNELS,
 } from "@/lib/format";
 import { quoteTotal } from "@/lib/quote";
+import { buildProviderSuggestions } from "@/lib/provider-history";
+import type { QuoteCaptureDraft } from "@/lib/quote-capture";
 import { quoteFormSchema, type QuoteFormValues } from "@/lib/schemas";
 import type { CaseRequirement, Provider, Quote, QuoteChannel } from "@/lib/types";
 import { useToast } from "@/components/toast";
@@ -90,6 +93,7 @@ export function QuoteFormDialog({
   preset,
   requirements = [],
   providers = [],
+  allProviders = [],
 }: {
   caseId: string;
   open: boolean;
@@ -97,6 +101,7 @@ export function QuoteFormDialog({
   preset?: RequotePreset | null;
   requirements?: CaseRequirement[];
   providers?: Provider[];
+  allProviders?: Provider[];
 }) {
   const { toast } = useToast();
   const [requirementChecks, setRequirementChecks] = React.useState<Record<string, boolean>>(() => ({ ...(preset?.quote.requirementChecks ?? {}) }));
@@ -122,15 +127,22 @@ export function QuoteFormDialog({
     () => validityPresets(quotedAt),
     [quotedAt]
   );
+  const providerSuggestions = React.useMemo(
+    () => buildProviderSuggestions(caseId, allProviders.length ? allProviders : providers),
+    [allProviders, caseId, providers]
+  );
   const providerItems = React.useMemo(
     () => [
       { value: "__new__", label: "فروشنده جدید" },
-      ...providers.map((provider) => ({
-        value: provider.id,
-        label: provider.name,
+      ...providerSuggestions.map((suggestion) => ({
+        value: suggestion.value,
+        label:
+          suggestion.scope === "current"
+            ? suggestion.provider.name
+            : `${suggestion.provider.name} · از سابقه`,
       })),
     ],
-    [providers]
+    [providerSuggestions]
   );
 
   function chooseProvider(next: string | null) {
@@ -142,10 +154,48 @@ export function QuoteFormDialog({
       return;
     }
 
-    const provider = providers.find((item) => item.id === next);
-    if (!provider) return;
-    form.setValue("providerName", provider.name, { shouldValidate: true });
-    form.setValue("phone", provider.phone ?? "");
+    const suggestion = providerSuggestions.find((item) => item.value === next);
+    if (!suggestion) return;
+    form.setValue("providerName", suggestion.provider.name, { shouldValidate: true });
+    form.setValue("phone", suggestion.provider.phone ?? "");
+  }
+
+  function applyCapturedQuote(draft: QuoteCaptureDraft, sourceText: string) {
+    if (draft.providerName) {
+      form.setValue("providerName", draft.providerName, { shouldValidate: true });
+      setProviderChoice("__new__");
+    }
+    if (draft.phone) form.setValue("phone", draft.phone, { shouldValidate: true });
+    if (draft.priceToman) {
+      form.setValue("priceToman", draft.priceToman, { shouldValidate: true });
+    }
+    if (draft.extraCostToman !== undefined) {
+      form.setValue("extraCostToman", draft.extraCostToman, { shouldValidate: true });
+    }
+    if (draft.deliveryDays !== undefined) {
+      form.setValue("deliveryDays", draft.deliveryDays, { shouldValidate: true });
+    }
+    if (draft.warranty) form.setValue("warranty", draft.warranty);
+    if (draft.paymentTerms) form.setValue("paymentTerms", draft.paymentTerms);
+    if (draft.channel) form.setValue("channel", draft.channel);
+    if (draft.contactRef) form.setValue("contactRef", draft.contactRef);
+    if (draft.validForDays !== undefined) {
+      form.setValue(
+        "validUntil",
+        DoranDate.fromGregorian(quotedAt).addDays(draft.validForDays).toGregorian(),
+        { shouldValidate: true }
+      );
+    }
+    if (sourceText && !form.getValues("note")) {
+      const preserved = sourceText.length > 940 ? `${sourceText.slice(0, 937)}...` : sourceText;
+      form.setValue("note", `متن مبنا:\n${preserved}`);
+    }
+
+    toast(
+      draft.detectedFields.length
+        ? `${draft.detectedFields.length.toLocaleString("fa-IR")} بخش از متن در فرم قرار گرفت.`
+        : "اطلاعات مشخصی از متن پیدا نشد؛ فرم را دستی کامل کن."
+    );
   }
 
   function handleOpenChange(next: boolean) {
@@ -236,10 +286,12 @@ export function QuoteFormDialog({
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid gap-5 p-4 pb-6 sm:p-5"
       >
-        {!preset && providers.length ? (
+        {!preset ? <QuoteCapturePanel onApply={applyCapturedQuote} /> : null}
+
+        {!preset && providerSuggestions.length ? (
           <FormField
             label="انتخاب سریع فروشنده قبلی"
-            hint="اگر این فروشنده قبلاً در پرونده بوده، نام و شماره‌اش را با یک انتخاب پر کن."
+            hint="فروشنده‌های همین پرونده و سابقه خریدهای قبلی را بدون تایپ دوباره استفاده کن."
           >
             <Select<string>
               value={providerChoice}

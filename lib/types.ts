@@ -25,6 +25,20 @@ export interface CaseRequirement {
   createdAt: string;
 }
 
+export type PurchaseOutcomeStatus = "ordered" | "received";
+
+export interface PurchaseOutcome {
+  quoteId: string;
+  status: PurchaseOutcomeStatus;
+  purchasedAt: string;
+  actualPaidToman: number;
+  orderReference?: string;
+  expectedDeliveryAt?: string;
+  receivedAt?: string;
+  note?: string;
+  updatedAt: string;
+}
+
 export interface PurchaseCase {
   id: string;
   title: string;
@@ -34,6 +48,7 @@ export interface PurchaseCase {
   selectedQuoteId?: string;
   targetBudgetToman?: number;
   requirements?: CaseRequirement[];
+  purchaseOutcome?: PurchaseOutcome;
   createdAt: string;
   updatedAt: string;
 }

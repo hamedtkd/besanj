@@ -118,3 +118,59 @@ test("backup filename uses export calendar date", () => {
     "besanj-backup-20260908.json"
   );
 });
+
+test("backup validates purchase outcome against the selected quote", async () => {
+  const backup = await buildBesanjBackupFile(
+    {
+      purchaseCases: [
+        {
+          id: "case-1",
+          title: "لپ‌تاپ",
+          kind: "product",
+          status: "decided",
+          selectedQuoteId: "quote-1",
+          purchaseOutcome: {
+            quoteId: "quote-1",
+            status: "ordered",
+            purchasedAt: "2026-09-08T23:59:59.999Z",
+            actualPaidToman: 100,
+            updatedAt: "2026-09-08T12:00:00.000Z",
+          },
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T12:00:00.000Z",
+        },
+      ],
+      providers: [
+        {
+          id: "provider-1",
+          caseId: "case-1",
+          name: "فروشنده",
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+      quotes: [
+        {
+          id: "quote-1",
+          caseId: "case-1",
+          providerId: "provider-1",
+          priceToman: 100,
+          quotedAt: "2026-09-08T00:00:00.000Z",
+          channel: "phone",
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+      reminders: [],
+      attachments: [],
+    },
+    { appVersion: "1.0.0" }
+  );
+
+  parseBesanjBackupText(JSON.stringify(backup));
+  backup.data.purchaseCases[0]!.purchaseOutcome!.quoteId = "quote-other";
+  assert.throws(
+    () => parseBesanjBackupText(JSON.stringify(backup)),
+    /همان استعلام انتخاب نهایی/
+  );
+});

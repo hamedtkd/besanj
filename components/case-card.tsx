@@ -7,6 +7,7 @@ import {
   BadgeCheck,
   Clock3,
   Package,
+  PackageCheck,
   RefreshCw,
   Stethoscope,
   Store,
@@ -89,7 +90,14 @@ export function CaseCard({
             {metrics.providerCount ? (
               <>
                 <div className="mt-4 flex flex-wrap gap-1.5">
-                  {purchaseCase.selectedQuoteId ? (
+                  {purchaseCase.purchaseOutcome ? (
+                    <Badge variant="success">
+                      <PackageCheck />
+                      {purchaseCase.purchaseOutcome.status === "received"
+                        ? "خرید دریافت شده"
+                        : "خرید ثبت شده"}
+                    </Badge>
+                  ) : purchaseCase.selectedQuoteId ? (
                     <Badge variant="success">
                       <BadgeCheck />
                       گزینه نهایی انتخاب شده

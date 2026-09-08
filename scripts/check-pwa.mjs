@@ -48,7 +48,7 @@ if (!/maskable-512\.png/.test(manifest) || !/purpose:\s*"maskable"/.test(manifes
 if (!/navigator\.serviceWorker/.test(providers + (await readFile("components/pwa-register.tsx", "utf8")))) {
   violations.push("Service worker registration is missing.");
 }
-if (!/CACHE_VERSION/.test(serviceWorker) || !/besanj-shell-v8/.test(serviceWorker) || !/fetch/.test(serviceWorker)) {
+if (!/CACHE_VERSION/.test(serviceWorker) || !/besanj-shell-v12/.test(serviceWorker) || !/fetch/.test(serviceWorker)) {
   violations.push("Service worker cache/fetch strategy or Besanj cache version is missing.");
 }
 if (!/manifest:\s*"\/manifest\.webmanifest"/.test(layout)) {

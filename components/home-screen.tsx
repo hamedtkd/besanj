@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
+  ChartNoAxesCombined,
   CirclePlus,
   Filter,
   RefreshCw,
@@ -102,6 +104,7 @@ export function HomeScreen() {
   ).length;
   const activeCount = activeCases.length;
   const decidedCount = data.cases.filter((row) => row.status === "decided").length;
+  const purchasedCount = data.cases.filter((row) => Boolean(row.purchaseOutcome)).length;
   const dashboardTasks = buildDashboardTasks(data.cases, data.quotes, data.reminders);
   const activeFilterCount =
     Number(Boolean(search.trim())) +
@@ -131,27 +134,37 @@ export function HomeScreen() {
                 دفتر شخصی استعلام قیمت
               </div>
               <h1 className="type-page-title max-w-2xl">
-                قبل از خرید، قیمت‌ها را کنار هم ببین.
+                از اولین استعلام تا نتیجه واقعی خرید، همه‌چیز یک‌جا.
               </h1>
               <p className="type-body mt-2 max-w-2xl text-muted-foreground">
-                پرونده بساز، چند قیمت بگیر و وقتی بازار تکان می‌خورد دقیقاً بدان کدام
-                استعلام هنوز قابل اتکاست.
+                قیمت بگیر، مقایسه کن، پیگیری‌ها را انجام بده و بعد مبلغ واقعی و تحویل خرید را هم کنار همان پرونده نگه دار.
               </p>
             </div>
 
-            <Button
-              type="button"
-              size="lg"
-              className="hidden shrink-0 shadow-md sm:inline-flex"
-              onClick={() => setCreateOpen(true)}
-            >
-              <CirclePlus />
-              پرونده جدید
-            </Button>
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+              <Button
+                nativeButton={false}
+                render={<Link href="/insights" />}
+                size="lg"
+                variant="outline"
+              >
+                <ChartNoAxesCombined />
+                بینش خرید
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                className="shadow-md"
+                onClick={() => setCreateOpen(true)}
+              >
+                <CirclePlus />
+                پرونده جدید
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 border-t border-border/80 sm:grid-cols-4">
+        <div className="grid grid-cols-2 border-t border-border/80 sm:grid-cols-5">
           <SummaryMetric label="پرونده فعال" value={activeCount} />
           <SummaryMetric label="کل استعلام‌ها" value={data.quotes.length} />
           <SummaryMetric
@@ -160,6 +173,7 @@ export function HomeScreen() {
             alert={staleCount > 0}
           />
           <SummaryMetric label="تصمیم نهایی" value={decidedCount} />
+          <SummaryMetric label="خرید ثبت‌شده" value={purchasedCount} />
         </div>
       </section>
 

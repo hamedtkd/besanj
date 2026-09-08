@@ -1,18 +1,23 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import {
   BellRing,
   CalendarClock,
   Check,
   CircleAlert,
+  Clock3,
   RefreshCw,
   Sparkles,
+  Truck,
 } from "lucide-react";
+import { useToast } from "@/components/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { setReminderDone } from "@/lib/db";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { setReminderDone, snoozeReminder } from "@/lib/db";
 import type { DashboardTask } from "@/lib/follow-up";
 import { cn } from "@/lib/utils";
 
@@ -21,14 +26,34 @@ const iconByKind = {
   expiring: CalendarClock,
   stale: RefreshCw,
   ready: Sparkles,
+  delivery: Truck,
 } as const;
 
+const snoozeOptions = [
+  { days: 1, label: "فردا" },
+  { days: 3, label: "۳ روز دیگر" },
+  { days: 7, label: "یک هفته دیگر" },
+] as const;
+
 export function TodayQueue({ tasks }: { tasks: DashboardTask[] }) {
+  const { toast } = useToast();
+  const [snoozeOpenId, setSnoozeOpenId] = React.useState<string | null>(null);
   if (!tasks.length) return null;
   const visible = tasks.slice(0, 5);
 
+  async function markDone(reminderId: string) {
+    await setReminderDone(reminderId, true);
+    toast("پیگیری انجام‌شده ثبت شد.");
+  }
+
+  async function snooze(reminderId: string, days: number) {
+    await snoozeReminder(reminderId, days);
+    setSnoozeOpenId(null);
+    toast(days === 1 ? "پیگیری تا فردا عقب افتاد." : `پیگیری ${days.toLocaleString("fa-IR")} روز عقب افتاد.`);
+  }
+
   return (
-    <Card className="mb-6 overflow-hidden border-primary/20 bg-card/82 shadow-sm">
+    <Card id="today-queue" className="mb-6 scroll-mt-24 overflow-hidden border-primary/20 bg-card/82 shadow-sm">
       <div className="flex flex-col gap-2 border-b border-border/85 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div>
           <div className="flex items-center gap-2">
@@ -74,16 +99,51 @@ export function TodayQueue({ tasks }: { tasks: DashboardTask[] }) {
               </Link>
 
               {task.reminderId ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  className="shrink-0"
-                  onClick={() => void setReminderDone(task.reminderId!, true)}
-                >
-                  <Check />
-                  <span className="hidden sm:inline">انجام شد</span>
-                </Button>
+                <div className="flex shrink-0 items-center gap-0.5">
+                  <Popover
+                    open={snoozeOpenId === task.reminderId}
+                    onOpenChange={(open) => setSnoozeOpenId(open ? task.reminderId! : null)}
+                  >
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          type="button"
+                          size="icon-sm"
+                          variant="ghost"
+                          aria-label="عقب انداختن پیگیری"
+                          title="بعداً یادآوری کن"
+                        >
+                          <Clock3 />
+                        </Button>
+                      }
+                    />
+                    <PopoverContent align="end" className="w-44 p-1.5">
+                      <div className="px-2 py-1.5 type-caption text-muted-foreground">بعداً یادآوری کن</div>
+                      {snoozeOptions.map((option) => (
+                        <Button
+                          key={option.days}
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start"
+                          onClick={() => void snooze(task.reminderId!, option.days)}
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </PopoverContent>
+                  </Popover>
+
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => void markDone(task.reminderId!)}
+                  >
+                    <Check />
+                    <span className="hidden sm:inline">انجام شد</span>
+                  </Button>
+                </div>
               ) : (
                 <Button
                   nativeButton={false}

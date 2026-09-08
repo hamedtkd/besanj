@@ -5,7 +5,8 @@ export type DashboardTaskKind =
   | "reminder"
   | "expiring"
   | "stale"
-  | "ready";
+  | "ready"
+  | "delivery";
 
 export type DashboardTaskPriority = "urgent" | "soon" | "normal";
 
@@ -21,6 +22,17 @@ export interface DashboardTask {
 }
 
 const DAY_MS = 86_400_000;
+
+export function snoozeReminderDueAt(days: number, now = new Date()) {
+  const amount = Math.max(1, Math.round(days));
+  const next = new Date(now);
+  next.setHours(12, 0, 0, 0);
+  next.setDate(next.getDate() + amount);
+  const year = next.getFullYear();
+  const month = String(next.getMonth() + 1).padStart(2, "0");
+  const day = String(next.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}T23:59:59.999`;
+}
 
 function localDayNumber(value: Date) {
   return Math.floor(
@@ -94,6 +106,28 @@ export function buildDashboardTasks(
             ? `${purchaseCase.title} · امروز`
             : `${purchaseCase.title} · فردا`,
       dueAt: reminder.dueAt,
+    });
+  }
+
+  for (const purchaseCase of cases) {
+    if (purchaseCase.status === "archived") continue;
+    const outcome = purchaseCase.purchaseOutcome;
+    if (!outcome || outcome.status !== "ordered" || !outcome.expectedDeliveryAt) continue;
+    const diff = dayDiff(outcome.expectedDeliveryAt, now);
+    if (diff > 1) continue;
+    tasks.push({
+      id: `delivery:${purchaseCase.id}:${outcome.quoteId}`,
+      caseId: purchaseCase.id,
+      kind: "delivery",
+      priority: diff <= 0 ? "urgent" : "soon",
+      title:
+        diff < 0
+          ? "تحویل این خرید از موعد گذشته"
+          : diff === 0
+            ? "موعد تحویل این خرید امروز است"
+            : "موعد تحویل این خرید فرداست",
+      detail: purchaseCase.title,
+      dueAt: outcome.expectedDeliveryAt,
     });
   }
 

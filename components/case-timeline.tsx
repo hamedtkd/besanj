@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   FileText,
   FolderPlus,
+  PackageCheck,
   ReceiptText,
   Store,
 } from "lucide-react";
@@ -23,7 +24,7 @@ import type {
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-type TimelineFilter = "all" | "quote" | "reminder" | "attachment" | "decision";
+type TimelineFilter = "all" | "quote" | "reminder" | "attachment" | "decision" | "purchase";
 
 const FILTERS: Array<{ value: TimelineFilter; label: string }> = [
   { value: "all", label: "همه" },
@@ -31,6 +32,7 @@ const FILTERS: Array<{ value: TimelineFilter; label: string }> = [
   { value: "reminder", label: "پیگیری‌ها" },
   { value: "attachment", label: "فایل‌ها" },
   { value: "decision", label: "تصمیم" },
+  { value: "purchase", label: "خرید" },
 ];
 
 export function CaseTimeline({
@@ -70,7 +72,7 @@ export function CaseTimeline({
               <Badge variant="secondary">{timeline.length.toLocaleString("fa-IR")}</Badge>
             </div>
             <p className="type-caption mt-1 text-muted-foreground">
-              استعلام، پیگیری، فایل و انتخاب فعلی را به ترتیب زمان کنار هم می‌بینی.
+              استعلام، پیگیری، فایل، تصمیم و نتیجه خرید را به ترتیب زمان کنار هم می‌بینی.
             </p>
           </div>
 
@@ -99,7 +101,7 @@ export function CaseTimeline({
                 <span
                   className={cn(
                     "absolute -start-[2.18rem] top-4 grid size-8 place-items-center rounded-full border border-border bg-background text-muted-foreground shadow-sm sm:-start-[2.43rem]",
-                    item.kind === "decision" &&
+                    (item.kind === "decision" || item.kind === "purchase") &&
                       "border-primary/35 bg-primary/10 text-primary"
                   )}
                 >
@@ -138,6 +140,7 @@ function TimelineIcon({ kind }: { kind: CaseTimelineKind }) {
   if (kind === "reminder") return <BellRing className="size-3.5" />;
   if (kind === "attachment") return <FileText className="size-3.5" />;
   if (kind === "decision") return <CheckCircle2 className="size-3.5" />;
+  if (kind === "purchase") return <PackageCheck className="size-3.5" />;
   if (kind === "provider") return <Store className="size-3.5" />;
   return <FolderPlus className="size-3.5" />;
 }
