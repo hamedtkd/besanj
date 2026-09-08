@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
+  ChartNoAxesCombined,
   CirclePlus,
   Filter,
   RefreshCw,
@@ -139,15 +141,26 @@ export function HomeScreen() {
               </p>
             </div>
 
-            <Button
-              type="button"
-              size="lg"
-              className="hidden shrink-0 shadow-md sm:inline-flex"
-              onClick={() => setCreateOpen(true)}
-            >
-              <CirclePlus />
-              پرونده جدید
-            </Button>
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+              <Button
+                nativeButton={false}
+                render={<Link href="/insights" />}
+                size="lg"
+                variant="outline"
+              >
+                <ChartNoAxesCombined />
+                بینش خرید
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                className="shadow-md"
+                onClick={() => setCreateOpen(true)}
+              >
+                <CirclePlus />
+                پرونده جدید
+              </Button>
+            </div>
           </div>
         </div>
 

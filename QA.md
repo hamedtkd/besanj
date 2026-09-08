@@ -1,3 +1,40 @@
+# QA — Besanj 1.1.0
+
+## فاز بینش خرید و حافظه فروشنده
+
+- صفحه `/insights` برای تحلیل داده خرید واقعی
+- هزینه، صرفه‌جویی، بودجه، سرعت تصمیم و تحویل به‌موقع
+- نمودار هزینه ماهانه
+- حافظه فروشنده بین پرونده‌ها با نرمال‌سازی شماره/نام
+- `.gitattributes` برای LF پایدار روی Windows
+- `check:insights` guard
+
+## بررسی‌های اجراشده در محیط ساخت
+
+- `npm test`: **84/84 PASS**
+- `TZ=Asia/Tehran npm test`: **84/84 PASS**
+- `check:ui`: **PASS**
+- `check:theme`: **PASS**
+- `check:pwa`: **PASS**
+- `check:workflow`: **PASS**
+- `check:data`: **PASS**
+- `check:report`: **PASS**
+- `check:automation`: **PASS**
+- `check:capture`: **PASS**
+- `check:purchase`: **PASS**
+- `check:insights`: **PASS**
+
+Dependencyهای کامل npm داخل sandbox نصب نشده‌اند؛ بنابراین `tsc --noEmit`، ESLint و Next production build کامل باید روی سیستم مقصد با `npm run check` اجرا شوند.
+
+## گیت مرجع روی سیستم مقصد
+
+```bash
+npm install
+npm run check
+```
+
+---
+
 # QA — Besanj 1.0.0
 
 ## فاز بستن حلقه خرید

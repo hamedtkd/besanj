@@ -40,12 +40,13 @@ if (!report.includes('kind: "purchase"') || !report.includes("نتیجه خری�
 if (!followUp.includes('kind: "delivery"') || !followUp.includes("expectedDeliveryAt")) {
   errors.push("delivery follow-up task is not wired");
 }
-if (!backup.includes("purchaseOutcomes") || !backupRuntime.includes('BESANJ_APP_VERSION = "1.0.0"')) {
+if (!backup.includes("purchaseOutcomes") || !backupRuntime.includes("BESANJ_APP_VERSION")) {
   errors.push("backup validation/version does not cover purchase outcome");
 }
 
 const packageJson = JSON.parse(read("package.json"));
-if (packageJson.version !== "1.0.0") errors.push("package version must be 1.0.0");
+const majorVersion = Number(String(packageJson.version ?? "0").split(".")[0]);
+if (!Number.isFinite(majorVersion) || majorVersion < 1) errors.push("package version must be 1.0.0 or newer");
 if (!packageJson.scripts?.["check:purchase"]) errors.push("check:purchase script is missing");
 if (!String(packageJson.scripts?.check ?? "").includes("check:purchase")) {
   errors.push("main check pipeline does not include check:purchase");
