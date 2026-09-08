@@ -1,5 +1,5 @@
 /* global self, caches, fetch, Response, URL */
-const CACHE_VERSION = "besanj-shell-v9";
+const CACHE_VERSION = "besanj-shell-v10";
 const CORE_ASSETS = [
   "/",
   "/manifest.webmanifest",

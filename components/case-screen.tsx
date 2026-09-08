@@ -56,14 +56,15 @@ export function CaseScreen({ caseId }: { caseId: string }) {
   const [filters, setFilters] = React.useState<QuoteFilterState>({ ...EMPTY_QUOTE_FILTERS });
 
   const data = useLiveQuery(async () => {
-    const [purchaseCase, providers, quotes, reminders, attachments] = await Promise.all([
+    const [purchaseCase, providers, allProviders, quotes, reminders, attachments] = await Promise.all([
       db.purchaseCases.get(caseId),
       db.providers.where("caseId").equals(caseId).toArray(),
+      db.providers.toArray(),
       db.quotes.where("caseId").equals(caseId).toArray(),
       db.reminders.where("caseId").equals(caseId).toArray(),
       db.attachments.where("caseId").equals(caseId).toArray(),
     ]);
-    return { purchaseCase, providers, quotes, reminders, attachments };
+    return { purchaseCase, providers, allProviders, quotes, reminders, attachments };
   }, [caseId]);
 
   const availableQuoteIds = data
@@ -371,6 +372,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
         preset={preset}
         requirements={purchaseCase.requirements}
         providers={data.providers}
+        allProviders={data.allProviders}
       />
 
       {followUpOpen ? (

@@ -1,3 +1,42 @@
+# QA — Besanj 0.9.0
+
+## فاز ثبت سریع و استفاده از سابقه
+
+- paste-to-form quote capture
+- Persian/Arabic/Latin digit normalization
+- Toman/Rial amount parsing
+- delivery / warranty / payment / validity / channel suggestions
+- review-first flow; no automatic save
+- cross-case provider reuse with normalized deduplication
+- `check:capture` guard
+
+## بررسی‌های اجراشده در محیط ساخت
+
+- `npm test`: **72/72 PASS**
+- `TZ=Asia/Tehran npm test`: **72/72 PASS**
+- `check:ui`: **PASS**
+- `check:theme`: **PASS**
+- `check:pwa`: **PASS**
+- `check:workflow`: **PASS**
+- `check:data`: **PASS**
+- `check:report`: **PASS**
+- `check:automation`: **PASS**
+- `check:capture`: **PASS**
+- TypeScript syntax/transpile scan: **115 فایل TS/TSX، 0 خطای syntax**
+- Local import resolution: **412 import محلی، 0 مسیر شکسته**
+- JavaScript syntax check برای Service Worker و scriptهای `.mjs`: **PASS**
+
+Dependencyهای کامل npm داخل sandbox موجود نیستند؛ بنابراین `tsc --noEmit`، ESLint و Next production build کامل را باید روی سیستم مقصد با `npm run check` اجرا کرد.
+
+## گیت مرجع روی سیستم مقصد
+
+```bash
+npm install
+npm run check
+```
+
+---
+
 # QA — Besanj 0.8.0
 
 ## فاز اعلان و اقدام روزانه
