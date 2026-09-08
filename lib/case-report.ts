@@ -1,5 +1,6 @@
 import { requirementMatchSummary } from "./planning.ts";
 import { buildCaseMetrics, quoteTotal } from "./quote.ts";
+import { purchaseOutcomeStatusLabel } from "./purchase-outcome.ts";
 import type {
   CaseReminder,
   Provider,
@@ -14,7 +15,8 @@ export type CaseTimelineKind =
   | "quote"
   | "reminder"
   | "attachment"
-  | "decision";
+  | "decision"
+  | "purchase";
 
 export interface CaseTimelineItem {
   id: string;
@@ -40,6 +42,7 @@ export interface CaseReportSnapshot {
   purchaseCase: PurchaseCase;
   rows: CaseReportQuoteRow[];
   selectedRow?: CaseReportQuoteRow;
+  purchaseRow?: CaseReportQuoteRow;
   openReminders: CaseReminder[];
   providerCount: number;
   quoteCount: number;
@@ -112,11 +115,16 @@ export function buildCaseReportSnapshot(
     : undefined;
   const selectedRow = rows.find((row) => row.selected) ??
     (selectedQuote ? toRow(selectedQuote) ?? undefined : undefined);
+  const purchaseQuote = purchaseCase.purchaseOutcome
+    ? quotes.find((quote) => quote.id === purchaseCase.purchaseOutcome?.quoteId)
+    : undefined;
+  const purchaseRow = purchaseQuote ? toRow(purchaseQuote) ?? undefined : undefined;
 
   return {
     purchaseCase,
     rows,
     selectedRow,
+    purchaseRow,
     openReminders: reminders
       .filter((reminder) => reminder.status === "open")
       .sort((a, b) => validTime(a.dueAt) - validTime(b.dueAt)),
@@ -177,6 +185,21 @@ export function buildCaseReportText(snapshot: CaseReportSnapshot) {
       "",
       `انتخاب نهایی: ${snapshot.selectedRow.provider.name} — ${formatNumber(snapshot.selectedRow.totalToman)} تومان`
     );
+  }
+
+  if (purchaseCase.purchaseOutcome && snapshot.purchaseRow) {
+    const outcome = purchaseCase.purchaseOutcome;
+    lines.push(
+      "",
+      `نتیجه خرید: ${purchaseOutcomeStatusLabel(outcome.status)}`,
+      `فروشنده خرید: ${snapshot.purchaseRow.provider.name}`,
+      `مبلغ واقعی پرداخت‌شده: ${formatNumber(outcome.actualPaidToman)} تومان`,
+      `تاریخ خرید: ${formatDate(outcome.purchasedAt)}`
+    );
+    if (outcome.orderReference) lines.push(`مرجع سفارش: ${outcome.orderReference}`);
+    if (outcome.expectedDeliveryAt) lines.push(`تحویل مورد انتظار: ${formatDate(outcome.expectedDeliveryAt)}`);
+    if (outcome.receivedAt) lines.push(`تاریخ دریافت: ${formatDate(outcome.receivedAt)}`);
+    if (outcome.note) lines.push(`یادداشت نتیجه: ${outcome.note}`);
   }
 
   if (snapshot.openReminders.length) {
@@ -291,6 +314,24 @@ export function buildCaseTimeline(
       kind: "case",
       at: purchaseCase.updatedAt,
       title: "پرونده در وضعیت آرشیو است",
+    });
+  }
+
+  if (purchaseCase.purchaseOutcome) {
+    const outcome = purchaseCase.purchaseOutcome;
+    const quote = quoteById.get(outcome.quoteId);
+    const provider = quote ? providerById.get(quote.providerId) : undefined;
+    items.push({
+      id: `purchase:${purchaseCase.id}:${outcome.quoteId}`,
+      kind: "purchase",
+      at: outcome.updatedAt,
+      title:
+        outcome.status === "received"
+          ? "خرید نهایی دریافت شد"
+          : "خرید نهایی ثبت شد",
+      detail: `${provider ? `${provider.name} · ` : ""}${formatNumber(outcome.actualPaidToman)} تومان`,
+      providerId: quote?.providerId,
+      quoteId: quote?.id,
     });
   }
 

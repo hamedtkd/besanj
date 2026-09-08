@@ -33,7 +33,7 @@ interface NotificationContextValue {
   enable: () => Promise<EnableOutcome>;
   disable: () => void;
   setKindEnabled: (
-    kind: "reminders" | "expiring" | "stale" | "ready" | "appBadge",
+    kind: "reminders" | "expiring" | "delivery" | "stale" | "ready" | "appBadge",
     enabled: boolean
   ) => void;
   sendTest: () => Promise<boolean>;
@@ -227,7 +227,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const setKindEnabled = React.useCallback(
     (
-      kind: "reminders" | "expiring" | "stale" | "ready" | "appBadge",
+      kind: "reminders" | "expiring" | "delivery" | "stale" | "ready" | "appBadge",
       enabled: boolean
     ) => {
       const next = { ...settings, [kind]: enabled };

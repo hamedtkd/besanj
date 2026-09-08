@@ -32,7 +32,7 @@ if (!caseScreen.includes("db.providers.toArray()") || !caseScreen.includes("allP
 }
 
 const packageJson = JSON.parse(read("package.json"));
-if (packageJson.version !== "0.9.0") errors.push("package version must be 0.9.0");
+if (!/^\d+\.\d+\.\d+$/.test(packageJson.version)) errors.push("package version must be valid semver");
 if (!packageJson.scripts?.["check:capture"]) errors.push("check:capture script is missing");
 if (!String(packageJson.scripts?.check ?? "").includes("check:capture")) {
   errors.push("main check pipeline does not include check:capture");

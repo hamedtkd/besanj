@@ -14,7 +14,7 @@ import {
 } from "./theme";
 import { normalizeHexColor, normalizeSavedThemeColors } from "./theme-color";
 
-export const BESANJ_APP_VERSION = "0.6.0";
+export const BESANJ_APP_VERSION = "1.0.0";
 
 const PALETTE_STORAGE_KEY = "estelamkoo:palette";
 const CUSTOM_COLOR_STORAGE_KEY = "estelamkoo:custom-color";

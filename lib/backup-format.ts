@@ -221,6 +221,7 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
 
   const caseIds = new Set<string>();
   const selectedQuotes: Array<{ caseId: string; quoteId: string }> = [];
+  const purchaseOutcomes: Array<{ caseId: string; quoteId: string }> = [];
   for (const raw of purchaseCases) {
     const row = requireRow(raw, "پرونده‌ها");
     const id = requireStringField(row, "id", "پرونده‌ها");
@@ -241,6 +242,31 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
     caseIds.add(id);
     if (typeof row.selectedQuoteId === "string") {
       selectedQuotes.push({ caseId: id, quoteId: row.selectedQuoteId });
+    }
+    if (row.purchaseOutcome !== undefined) {
+      const outcome = requireRow(row.purchaseOutcome, "نتیجه خرید");
+      const quoteId = requireStringField(outcome, "quoteId", "نتیجه خرید");
+      requireStringField(outcome, "purchasedAt", "نتیجه خرید");
+      requireStringField(outcome, "updatedAt", "نتیجه خرید");
+      if (outcome.status !== "ordered" && outcome.status !== "received") {
+        throw new Error("وضعیت نتیجه خرید یکی از پرونده‌ها معتبر نیست.");
+      }
+      if (
+        typeof outcome.actualPaidToman !== "number" ||
+        !Number.isFinite(outcome.actualPaidToman) ||
+        outcome.actualPaidToman <= 0
+      ) {
+        throw new Error("مبلغ واقعی یکی از خریدهای فایل پشتیبان معتبر نیست.");
+      }
+      for (const key of ["expectedDeliveryAt", "receivedAt"] as const) {
+        if (outcome[key] !== undefined && typeof outcome[key] !== "string") {
+          throw new Error("تاریخ نتیجه خرید در فایل پشتیبان معتبر نیست.");
+        }
+      }
+      if (typeof row.selectedQuoteId !== "string" || row.selectedQuoteId !== quoteId) {
+        throw new Error("نتیجه خرید باید به همان استعلام انتخاب نهایی پرونده اشاره کند.");
+      }
+      purchaseOutcomes.push({ caseId: id, quoteId });
     }
   }
 
@@ -286,6 +312,11 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
   for (const selected of selectedQuotes) {
     if (quoteCase.get(selected.quoteId) !== selected.caseId) {
       throw new Error("انتخاب نهایی یکی از پرونده‌ها به استعلام معتبر همان پرونده اشاره نمی‌کند.");
+    }
+  }
+  for (const outcome of purchaseOutcomes) {
+    if (quoteCase.get(outcome.quoteId) !== outcome.caseId) {
+      throw new Error("نتیجه خرید یکی از پرونده‌ها به استعلام معتبر همان پرونده اشاره نمی‌کند.");
     }
   }
 

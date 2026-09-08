@@ -15,6 +15,7 @@ import {
   Package,
   RefreshCw,
   ScrollText,
+  ShoppingBag,
   Sparkles,
   Stethoscope,
   X,
@@ -25,6 +26,8 @@ import { CaseTimeline } from "@/components/case-timeline";
 import { DecisionAssistant } from "@/components/decision-assistant";
 import { EmptyState } from "@/components/empty-state";
 import { PriceHistoryChart } from "@/components/price-history-chart";
+import { PurchaseOutcomeCard } from "@/components/purchase-outcome-card";
+import { PurchaseOutcomeSheet } from "@/components/purchase-outcome-sheet";
 import { QuoteComparison } from "@/components/quote-comparison";
 import { QuoteFilters } from "@/components/quote-filters";
 import { QuoteFormDialog, type RequotePreset } from "@/components/quote-form-dialog";
@@ -47,6 +50,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
   const { toast } = useToast();
   const [quoteOpen, setQuoteOpen] = React.useState(false);
   const [followUpOpen, setFollowUpOpen] = React.useState(false);
+  const [purchaseOutcomeOpen, setPurchaseOutcomeOpen] = React.useState(false);
   const [followUpProviderId, setFollowUpProviderId] = React.useState<string | undefined>(undefined);
   const [preset, setPreset] = React.useState<RequotePreset | null>(null);
   const [activeTab, setActiveTab] = React.useState("compare");
@@ -94,6 +98,18 @@ export function CaseScreen({ caseId }: { caseId: string }) {
 
   const selectedQuoteId = purchaseCase.selectedQuoteId;
   const metrics = buildCaseMetrics(data.quotes);
+  const selectedQuote = selectedQuoteId
+    ? data.quotes.find((quote) => quote.id === selectedQuoteId)
+    : undefined;
+  const selectedProvider = selectedQuote
+    ? data.providers.find((provider) => provider.id === selectedQuote.providerId)
+    : undefined;
+  const outcomeQuote = purchaseCase.purchaseOutcome
+    ? data.quotes.find((quote) => quote.id === purchaseCase.purchaseOutcome?.quoteId)
+    : selectedQuote;
+  const outcomeProvider = outcomeQuote
+    ? data.providers.find((provider) => provider.id === outcomeQuote.providerId)
+    : undefined;
   const filteredQuotes = filterQuotes(metrics.latestQuotes, data.providers, filters);
   const comparedQuotes = metrics.latestQuotes.filter((quote) => comparedQuoteIds.includes(quote.id));
   const selectedIsLatest =
@@ -137,8 +153,11 @@ export function CaseScreen({ caseId }: { caseId: string }) {
         await selectQuote(caseId, quote.id);
         toast("این استعلام به‌عنوان انتخاب نهایی ثبت شد.");
       }
-    } catch {
-      toast("تغییر انتخاب انجام نشد.", "error");
+    } catch (error) {
+      toast(
+        error instanceof Error ? error.message : "تغییر انتخاب انجام نشد.",
+        "error"
+      );
     }
   }
 
@@ -171,6 +190,17 @@ export function CaseScreen({ caseId }: { caseId: string }) {
             >
               <FileDown />گزارش
             </Button>
+            {selectedQuote && selectedProvider ? (
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                onClick={() => setPurchaseOutcomeOpen(true)}
+              >
+                <ShoppingBag />
+                {purchaseCase.purchaseOutcome ? "نتیجه خرید" : "ثبت خرید"}
+              </Button>
+            ) : null}
             <Button
               type="button"
               size="lg"
@@ -211,6 +241,35 @@ export function CaseScreen({ caseId }: { caseId: string }) {
             </span>
           ) : null}
         </section>
+      ) : null}
+
+      {purchaseCase.purchaseOutcome && outcomeQuote && outcomeProvider ? (
+        <PurchaseOutcomeCard
+          purchaseCase={purchaseCase}
+          quote={outcomeQuote}
+          provider={outcomeProvider}
+          latestQuotes={metrics.latestQuotes}
+          onEdit={() => setPurchaseOutcomeOpen(true)}
+        />
+      ) : selectedQuote && selectedProvider ? (
+        <Card className="mb-6 border-primary/20 bg-primary/[0.045] p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
+                <ShoppingBag className="size-5" />
+              </span>
+              <div>
+                <h2 className="type-card-title">تصمیم ثبت شده؛ نتیجه واقعی خرید را هم نگه دار</h2>
+                <p className="type-caption mt-1 text-muted-foreground">
+                  مبلغ پرداخت‌شده، شماره سفارش و وضعیت تحویل را ثبت کن تا این پرونده واقعاً کامل شود.
+                </p>
+              </div>
+            </div>
+            <Button type="button" onClick={() => setPurchaseOutcomeOpen(true)}>
+              <ShoppingBag />ثبت نتیجه خرید
+            </Button>
+          </div>
+        </Card>
       ) : null}
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(String(value))} variant="line">
@@ -374,6 +433,16 @@ export function CaseScreen({ caseId }: { caseId: string }) {
         providers={data.providers}
         allProviders={data.allProviders}
       />
+
+      {purchaseOutcomeOpen && outcomeQuote && outcomeProvider ? (
+        <PurchaseOutcomeSheet
+          key={`${outcomeQuote.id}:${purchaseCase.purchaseOutcome?.updatedAt ?? "new"}`}
+          purchaseCase={purchaseCase}
+          quote={outcomeQuote}
+          provider={outcomeProvider}
+          onOpenChange={setPurchaseOutcomeOpen}
+        />
+      ) : null}
 
       {followUpOpen ? (
         <CaseFollowUpSheet

@@ -10,6 +10,7 @@ import {
   Clock3,
   RefreshCw,
   Sparkles,
+  Truck,
 } from "lucide-react";
 import { useToast } from "@/components/toast";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ const iconByKind = {
   expiring: CalendarClock,
   stale: RefreshCw,
   ready: Sparkles,
+  delivery: Truck,
 } as const;
 
 const snoozeOptions = [

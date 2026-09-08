@@ -1,3 +1,45 @@
+# QA — Besanj 1.0.0
+
+## فاز بستن حلقه خرید
+
+- ثبت مبلغ واقعی و وضعیت سفارش/دریافت
+- تاریخ خرید، مرجع سفارش، تحویل مورد انتظار، تاریخ دریافت و یادداشت
+- مقایسه پرداخت واقعی با استعلام، بودجه و گران‌ترین گزینه
+- قفل انتخاب نهایی بعد از ثبت خرید
+- نتیجه خرید در کارت پرونده، گزارش و Timeline
+- Delivery task در کارهای امروز و اعلان محلی
+- Backup validation برای purchase outcome
+- `check:purchase` guard
+
+## بررسی‌های اجراشده در محیط ساخت
+
+- `npm test`: **80/80 PASS**
+- `TZ=Asia/Tehran npm test`: **80/80 PASS**
+- `check:ui`: **PASS**
+- `check:theme`: **PASS**
+- `check:pwa`: **PASS**
+- `check:workflow`: **PASS**
+- `check:data`: **PASS**
+- `check:report`: **PASS**
+- `check:automation`: **PASS**
+- `check:capture`: **PASS**
+- `check:purchase`: **PASS**
+- TypeScript syntax/transpile scan: **119 فایل TS/TSX، 0 خطای syntax**
+- Local import resolution: **444 import محلی، 0 مسیر شکسته**
+- Unused import candidate scan: **0 مورد**
+- JavaScript syntax check برای Service Worker و scriptهای `.mjs`: **PASS**
+
+Dependencyهای کامل npm داخل sandbox نصب نشدند؛ بنابراین `tsc --noEmit`، ESLint و Next production build کامل باید روی سیستم مقصد با `npm run check` اجرا شوند.
+
+## گیت مرجع روی سیستم مقصد
+
+```bash
+npm install
+npm run check
+```
+
+---
+
 # QA — Besanj 0.9.0
 
 ## فاز ثبت سریع و استفاده از سابقه

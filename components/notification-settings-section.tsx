@@ -19,6 +19,11 @@ const notificationKinds = [
     description: "هشدار اعتبار قیمت امروز یا فردا",
   },
   {
+    key: "delivery" as const,
+    label: "موعد تحویل خرید",
+    description: "امروز، فردا و تحویل‌های عقب‌افتاده",
+  },
+  {
     key: "stale" as const,
     label: "قیمت‌های قدیمی",
     description: "برای پرونده‌هایی که نیاز به استعلام تازه دارند",

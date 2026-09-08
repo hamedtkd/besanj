@@ -88,3 +88,27 @@ test("report keeps a historical selected quote even when a newer quote exists", 
   assert.equal(report.rows.some((row) => row.quote.id === "quote-1"), false);
   assert.equal(report.selectedRow?.quote.id, "quote-1");
 });
+
+test("report and timeline include the recorded purchase outcome", () => {
+  const completedCase: PurchaseCase = {
+    ...purchaseCase,
+    status: "decided",
+    purchaseOutcome: {
+      quoteId: "quote-2",
+      status: "received",
+      purchasedAt: "2026-09-05T23:59:59.999Z",
+      actualPaidToman: 73_500_000,
+      orderReference: "INV-99",
+      receivedAt: "2026-09-07T23:59:59.999Z",
+      updatedAt: "2026-09-07T15:00:00.000Z",
+    },
+    updatedAt: "2026-09-07T15:00:00.000Z",
+  };
+  const report = buildCaseReportSnapshot(completedCase, providers, quotes, reminders, []);
+  const text = buildCaseReportText(report);
+  const timeline = buildCaseTimeline(completedCase, providers, quotes, reminders, []);
+  assert.equal(report.purchaseRow?.quote.id, "quote-2");
+  assert.equal(text.includes("نتیجه خرید: دریافت شده"), true);
+  assert.equal(text.includes("۷۳٬۵۰۰٬۰۰۰ تومان"), true);
+  assert.equal(timeline.some((item) => item.kind === "purchase"), true);
+});

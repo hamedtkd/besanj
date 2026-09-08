@@ -4,6 +4,7 @@ import Dexie, { type EntityTable } from "dexie";
 import { sanitizeRequirementChecks } from "@/lib/planning";
 import { snoozeReminderDueAt } from "@/lib/follow-up";
 import { cloneRequirementsForNewCase, makeRepeatedCaseTitle } from "@/lib/duplicate-case";
+import { normalizePurchaseOutcome, type PurchaseOutcomeInput } from "@/lib/purchase-outcome";
 import type {
   CaseReminder,
   CaseRequirement,
@@ -219,9 +220,48 @@ export async function setPurchaseStatus(id: string, status: PurchaseStatus) {
 }
 
 export async function selectQuote(caseId: string, quoteId?: string) {
+  const purchaseCase = await db.purchaseCases.get(caseId);
+  if (!purchaseCase) throw new Error("پرونده پیدا نشد.");
+  if (purchaseCase.purchaseOutcome && quoteId !== purchaseCase.purchaseOutcome.quoteId) {
+    throw new Error("برای تغییر انتخاب نهایی، ابتدا ثبت خرید را پاک یا ویرایش کن.");
+  }
+
   await updatePurchaseCase(caseId, {
     selectedQuoteId: quoteId,
     status: quoteId ? "decided" : "active",
+  });
+}
+
+export async function setPurchaseOutcome(
+  caseId: string,
+  input: PurchaseOutcomeInput
+) {
+  const [purchaseCase, quote] = await Promise.all([
+    db.purchaseCases.get(caseId),
+    db.quotes.get(input.quoteId),
+  ]);
+  if (!purchaseCase) throw new Error("پرونده پیدا نشد.");
+  if (!quote || quote.caseId !== caseId) {
+    throw new Error("استعلام انتخاب‌شده برای این پرونده معتبر نیست.");
+  }
+
+  const updatedAt = new Date().toISOString();
+  const purchaseOutcome = normalizePurchaseOutcome(input, updatedAt);
+  await db.purchaseCases.update(caseId, {
+    selectedQuoteId: quote.id,
+    status: "decided",
+    purchaseOutcome,
+    updatedAt,
+  });
+  return purchaseOutcome;
+}
+
+export async function clearPurchaseOutcome(caseId: string) {
+  const purchaseCase = await db.purchaseCases.get(caseId);
+  if (!purchaseCase) return;
+  await db.purchaseCases.update(caseId, {
+    purchaseOutcome: undefined,
+    updatedAt: new Date().toISOString(),
   });
 }
 
@@ -371,6 +411,11 @@ export async function addQuote(input: {
 export async function deleteQuote(quoteId: string) {
   const quote = await db.quotes.get(quoteId);
   if (!quote) return;
+  const purchaseCase = await db.purchaseCases.get(quote.caseId);
+  if (purchaseCase?.purchaseOutcome?.quoteId === quoteId) {
+    throw new Error("این استعلام به خرید ثبت‌شده وصل است؛ ابتدا ثبت خرید را پاک کن.");
+  }
+
   await db.transaction(
     "rw",
     db.quotes,
@@ -381,7 +426,11 @@ export async function deleteQuote(quoteId: string) {
       await db.attachments.where("quoteId").equals(quoteId).delete();
       await db.reminders.where("quoteId").equals(quoteId).delete();
       await db.quotes.delete(quoteId);
+      const clearsSelection = purchaseCase?.selectedQuoteId === quoteId;
       await db.purchaseCases.update(quote.caseId, {
+        ...(clearsSelection
+          ? { selectedQuoteId: undefined, status: "active" as const }
+          : {}),
         updatedAt: new Date().toISOString(),
       });
     }

@@ -6,6 +6,7 @@ export interface NotificationSettings {
   expiring: boolean;
   stale: boolean;
   ready: boolean;
+  delivery: boolean;
   appBadge: boolean;
 }
 
@@ -17,6 +18,7 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   expiring: true,
   stale: false,
   ready: false,
+  delivery: true,
   appBadge: true,
 };
 
@@ -25,6 +27,7 @@ const SETTING_KEY_BY_KIND: Record<DashboardTaskKind, keyof NotificationSettings>
   expiring: "expiring",
   stale: "stale",
   ready: "ready",
+  delivery: "delivery",
 };
 
 export function normalizeNotificationSettings(
@@ -38,6 +41,7 @@ export function normalizeNotificationSettings(
     expiring: value.expiring !== false,
     stale: value.stale === true,
     ready: value.ready === true,
+    delivery: value.delivery !== false,
     appBadge: value.appBadge !== false,
   };
 }

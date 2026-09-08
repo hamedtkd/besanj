@@ -75,3 +75,28 @@ test("dashboard queue keeps the declared calendar day across ISO offsets", () =>
   );
   assert.equal(tasks.some((item) => item.kind === "expiring"), true);
 });
+
+test("dashboard queue surfaces overdue delivery for an ordered purchase", () => {
+  const orderedCase: PurchaseCase = {
+    ...purchaseCase,
+    status: "decided",
+    selectedQuoteId: "q1",
+    purchaseOutcome: {
+      quoteId: "q1",
+      status: "ordered",
+      purchasedAt: "2026-09-06T23:59:59.999Z",
+      actualPaidToman: 100_000,
+      expectedDeliveryAt: "2026-09-07T23:59:59.999Z",
+      updatedAt: "2026-09-06T10:00:00.000Z",
+    },
+  };
+  const tasks = buildDashboardTasks(
+    [orderedCase],
+    [quote("q1")],
+    [],
+    new Date("2026-09-08T10:00:00Z")
+  );
+  const delivery = tasks.find((item) => item.kind === "delivery");
+  assert.ok(delivery);
+  assert.equal(delivery.priority, "urgent");
+});

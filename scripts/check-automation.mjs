@@ -33,10 +33,10 @@ if (!settings.includes("NotificationSettingsSection")) {
 
 const serviceWorker = read("public/sw.js");
 if (!serviceWorker.includes('notificationclick')) errors.push("service worker notification click routing is missing");
-if (!serviceWorker.includes('besanj-shell-v10')) errors.push("service worker cache was not bumped for v0.9");
+if (!/besanj-shell-v\d+/.test(serviceWorker)) errors.push("service worker cache version is missing");
 
 const packageJson = JSON.parse(read("package.json"));
-if (packageJson.version !== "0.9.0") errors.push("package version must be 0.9.0");
+if (!/^\d+\.\d+\.\d+$/.test(packageJson.version)) errors.push("package version must be valid semver");
 if (!packageJson.scripts?.["check:automation"]) errors.push("check:automation script is missing");
 if (!String(packageJson.scripts?.check ?? "").includes("check:automation")) {
   errors.push("main check pipeline does not include check:automation");

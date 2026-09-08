@@ -56,3 +56,8 @@ UI فونت variable Mikhak را از همان منبع عمومی GitHub/jsDeli
 - Badging API (feature-detected, optional)
 
 No third-party notification or push SDK was added.
+
+
+## v1.0 purchase completion
+
+برای ثبت نتیجه خرید و پیگیری تحویل هیچ SDK یا کتابخانه third-party جدیدی اضافه نشده است. این فاز از primitiveهای موجود پروژه، Dexie و همان Web Notification/Badging APIهای قبلی استفاده می‌کند.

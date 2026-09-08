@@ -84,3 +84,24 @@ test("snooze uses tomorrow from now instead of the old overdue date", () => {
   assert.equal(snoozeReminderDueAt(1, now).slice(0, 10), "2026-09-09");
   assert.equal(snoozeReminderDueAt(7, now).slice(0, 10), "2026-09-15");
 });
+
+test("delivery notifications are enabled by default", () => {
+  const settings = normalizeNotificationSettings(undefined);
+  assert.equal(settings.delivery, true);
+  const deliveryTask: DashboardTask = {
+    id: "delivery:case-1:q1",
+    caseId: "case-1",
+    kind: "delivery",
+    priority: "urgent",
+    title: "موعد تحویل این خرید امروز است",
+    detail: "لپ‌تاپ",
+    dueAt: "2026-09-08T23:59:59.999Z",
+  };
+  const selected = selectUnnotifiedTasks(
+    [deliveryTask],
+    { ...DEFAULT_NOTIFICATION_SETTINGS, enabled: true },
+    {},
+    new Date(2026, 8, 8, 10)
+  );
+  assert.equal(selected.length, 1);
+});
