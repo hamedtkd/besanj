@@ -31,7 +31,7 @@ if (!localSpeech.includes("available") || !localSpeech.includes("install")) {
   failures.push("on-device language-pack availability/install flow is missing");
 }
 if (/processLocally\s*=\s*false/.test(localSpeech)) {
-  failures.push("cloud speech fallback is forbidden in the local-first quick capture flow");
+  failures.push("the browser local speech path must never silently switch to cloud processing");
 }
 if (!quoteCapture.includes("subjectTitle") || !quoteCapture.includes("availability")) {
   failures.push("natural quote parser does not expose subject/availability suggestions");
@@ -52,4 +52,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Quick capture guard passed: one-tap case/quote entry, smart amounts, local voice, drafts and progressive details are wired.");
+console.log("Quick capture guard passed: one-tap case/quote entry, smart amounts, review-first voice, drafts and progressive details are wired.");

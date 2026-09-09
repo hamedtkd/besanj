@@ -6,6 +6,7 @@ import { ToastProvider } from "@/components/toast";
 import { PwaRegister } from "@/components/pwa-register";
 import { PwaInstallProvider } from "@/components/pwa-install-provider";
 import { NotificationProvider } from "@/components/notification-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { ThemeMode } from "@/lib/theme";
 
 export function Providers({
@@ -20,10 +21,12 @@ export function Providers({
       <AppPreferencesProvider>
         <PwaInstallProvider>
           <NotificationProvider>
-            <ToastProvider>
-              <PwaRegister />
-              {children}
-            </ToastProvider>
+            <TooltipProvider delay={300}>
+              <ToastProvider>
+                <PwaRegister />
+                {children}
+              </ToastProvider>
+            </TooltipProvider>
           </NotificationProvider>
         </PwaInstallProvider>
       </AppPreferencesProvider>

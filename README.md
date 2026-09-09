@@ -1,8 +1,38 @@
 # بسنج | Besanj
 
-بسنج یک وب اپ فارسی، local-first و بدون Backend برای مدیریت تصمیم خرید است. کاربر برای یک کالا یا خدمت پرونده می سازد، از چند فروشنده استعلام می گیرد، قیمت و شرایط را نگه می دارد، گزینه ها را مقایسه می کند، پیگیری انجام می دهد، خرید واقعی و تحویل را ثبت می کند و بعد از داده خریدهای قبلی برای تصمیم های بعدی استفاده می کند.
+بسنج یک وب اپ فارسی و local-first برای مدیریت تصمیم خرید است. داده های اصلی خرید، فروشنده، استعلام، بودجه و تاریخچه همچنان روی دستگاه کاربر می مانند. تنها قابلیت اختیاری «گفتار با هوش مصنوعی» یک route سروری کوچک دارد که فقط صدای همان ضبط را برای تبدیل به متن به Groq می فرستد.
 
-نسخه فعلی: **1.5.0**
+نسخه فعلی: **1.5.1**
+
+## نسخه 1.5.1: گفتار دقیق تر با هوش مصنوعی و حالت محلی
+
+به دلیل دقت پایین Whisper Tiny روی بعضی دستگاه ها و واژه های فارسی مثل نام برند و مدل کالا، مسیر اصلی Voice در ثبت سریع به Groq Whisper Large V3 منتقل شده است. حالت محلی حذف نشده و برای کاربری که نمی خواهد صدا از دستگاه خارج شود همچنان در دسترس است.
+
+- دکمه اصلی Voice: «با هوش مصنوعی بگو».
+- سرویس گفتار: Groq Speech-to-Text با مدل پیش فرض `whisper-large-v3`.
+- زبان ورودی به صورت صریح `fa` ارسال می شود.
+- یک prompt کوتاه مخصوص استعلام خرید به مدل داده می شود تا نام برند و مدل، قیمت، گارانتی، موجودی، تحویل و شماره تلفن دقیق تر رونویسی شوند.
+- API key فقط در متغیر سروری `GROQ_API_KEY` خوانده می شود و هیچ `NEXT_PUBLIC` برای کلید وجود ندارد.
+- Browser صدا را فقط به route داخلی `/api/transcribe` می فرستد و route سرور درخواست را به Groq منتقل می کند.
+- پاسخ route با `no-store` برمی گردد و خود بسنج فایل صوتی را در دیتابیس یا Backup ذخیره نمی کند.
+- متن برگشتی همچنان وارد parser محلی ثبت سریع می شود و قبل از ذخیره به کاربر نشان داده می شود.
+- حالت «تشخیص محلی» همچنان `SpeechRecognition.processLocally = true` و در صورت نیاز Whisper Tiny داخل مرورگر را دارد.
+- dependency npm جدید برای Groq یا Transformers اضافه نشده است و `fetch` سمت سرور استفاده می شود.
+- Guard جدید: `check:cloud-voice`.
+- Guard محلی `check:voice-fallback` نیز باقی مانده است.
+- Service Worker cache version همچنان `besanj-shell-v18`.
+- Dexie و Backup بدون تغییر.
+
+### تنظیم کلید Groq
+
+فایل `.env.local` را در ریشه پروژه بساز و مقدار زیر را قرار بده:
+
+```env
+GROQ_API_KEY=کلید_خودت
+GROQ_TRANSCRIBE_MODEL=whisper-large-v3
+```
+
+کلید را داخل Git commit نکن. نمونه امن تنظیمات در `.env.example` وجود دارد. بعد از ساخت یا تغییر `.env.local`، dev server را یک بار متوقف و دوباره اجرا کن.
 
 ## فاز 1.5: ثبت سریع و ورود طبیعی اطلاعات
 
@@ -312,10 +342,12 @@ check:report
 check:automation
 check:capture
 check:quick-capture
+check:voice-fallback
 check:purchase
 check:insights
 check:categories-budget
 check:sellers
+check:tooltips
 typecheck
 lint
 test
@@ -329,7 +361,22 @@ build
 Service Worker در production ثبت می شود. cache فعلی:
 
 ```text
-besanj-shell-v16
+besanj-shell-v18
+```
+
+## فایل های مهم نسخه 1.5.1
+
+```text
+components/local-voice-capture.tsx
+components/ui/tooltip.tsx
+components/help-hint.tsx
+scripts/check-tooltips.mjs
+lib/local-whisper.ts
+lib/local-speech.ts
+scripts/check-voice-fallback.mjs
+tests/local-whisper.test.ts
+docs/RELEASE_1.5.1.md
+next.config.ts
 ```
 
 ## فایل های مهم فاز 1.5
@@ -394,12 +441,17 @@ docs/RELEASE_1.2.0.md
 
 قبل از ساخت کنترل عمومی جدید، PersianLabs UI و wrapperهای فعلی پروژه بررسی می شوند. Date Picker پروژه از Doran برای تقویم فارسی استفاده می کند. تغییر component پایه باید بدون regression در همه مصرف کننده ها انجام شود.
 
-## توسعه نسخه 1.5
 
-Branch پیشنهادی و فعلی این Release:
+### راهنمای سراسری UI
+
+از v1.5.1 fix5، متن های توضیحی غیرحیاتی با `HelpHint` و Tooltip رسمی PersianLabs/ui نمایش داده می شوند. `ResponsiveSheet.description` و `FormField.hint` این رفتار را به صورت مرکزی اعمال می کنند. خطاها، هشدارهای destructive و پیام های وضعیت مهم همچنان مستقیم روی صفحه می مانند.
+
+## توسعه نسخه 1.5.1
+
+Branch پیشنهادی این Patch:
 
 ```text
-feat/quick-capture-v1.5
+fix/local-whisper-v1.5.1
 ```
 
 بعد از جایگزینی سورس:
@@ -413,7 +465,7 @@ npm run check
 
 ```bash
 git add .
-git commit -m "feat: add Besanj quick capture and local voice v1.5.0"
+git commit -m "fix: add cached local Whisper fallback v1.5.1"
 ```
 
 Merge و Tag فقط بعد از سبزشدن کامل روی سیستم مقصد انجام شود.
@@ -422,4 +474,4 @@ Merge و Tag فقط بعد از سبزشدن کامل روی سیستم مقصد
 
 - `THIRD_PARTY.md`: کتابخانه ها و مجوزها.
 - `QA.md`: وضعیت QA نسخه ها.
-- `docs/RELEASE_1.5.0.md`: Release Note نسخه فعلی.
+- `docs/RELEASE_1.5.1.md`: Release Note نسخه فعلی.

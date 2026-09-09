@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { CopyPlus, ListChecks, Store, WalletCards } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { useToast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -121,12 +122,11 @@ export function DuplicateCaseSheet({
           />
         </div>
 
-        <div className="rounded-2xl border border-border bg-muted/35 p-3.5">
+        <div className="flex items-center gap-1.5 rounded-2xl border border-border bg-muted/35 p-3.5">
           <div className="type-label">چه چیزهایی کپی نمی‌شوند؟</div>
-          <p className="type-caption mt-1 text-muted-foreground">
-            استعلام‌ها، قیمت‌های قبلی، انتخاب نهایی، پیگیری‌ها و پیوست‌ها عمداً
-            وارد پرونده جدید نمی‌شوند تا خرید تازه تاریخچه مستقل داشته باشد.
-          </p>
+          <HelpHint label="راهنمای خرید مشابه">
+            استعلام‌ها، قیمت‌های قبلی، انتخاب نهایی، پیگیری‌ها و پیوست‌ها عمداً وارد پرونده جدید نمی‌شوند تا خرید تازه تاریخچه مستقل داشته باشد.
+          </HelpHint>
         </div>
 
         <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-4">

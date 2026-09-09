@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { ListChecks, Package, Shapes, Stethoscope, Tags, WalletCards } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { createPurchaseCase } from "@/lib/db";
 import { mergeRequirements } from "@/lib/planning";
 import { BUILTIN_CATEGORIES, CUSTOM_CATEGORY_VALUE, parseTagsText, resolveCategory } from "@/lib/categories";
@@ -203,9 +204,10 @@ export function CreateCaseDialog({
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
               <WalletCards className="size-4" />
             </span>
-            <p className="type-caption text-muted-foreground">
+            <span className="type-label">بودجه هدف</span>
+            <HelpHint label="راهنمای بودجه هدف">
               بودجه فقط معیار تصمیم است؛ قیمت بالاتر حذف نمی‌شود و همچنان در مقایسه می‌ماند.
-            </p>
+            </HelpHint>
           </div>
         </div>
 

@@ -10,6 +10,7 @@ import {
   ReceiptText,
   Store,
 } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -65,15 +66,13 @@ export function CaseTimeline({
     <div className="space-y-3">
       <Card className="p-3 sm:p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <ReceiptText className="size-4.5 text-primary" />
-              <h2 className="type-section-title">خط زمانی پرونده</h2>
-              <Badge variant="secondary">{timeline.length.toLocaleString("fa-IR-u-nu-arabext")}</Badge>
-            </div>
-            <p className="type-caption mt-1 text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <ReceiptText className="size-4.5 text-primary" />
+            <h2 className="type-section-title">خط زمانی پرونده</h2>
+            <HelpHint label="راهنمای خط زمانی">
               استعلام، پیگیری، فایل، تصمیم و نتیجه خرید را به ترتیب زمان کنار هم می‌بینی.
-            </p>
+            </HelpHint>
+            <Badge variant="secondary">{timeline.length.toLocaleString("fa-IR-u-nu-arabext")}</Badge>
           </div>
 
           <div className="flex flex-wrap gap-1.5">

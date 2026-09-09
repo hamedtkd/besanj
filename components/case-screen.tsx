@@ -27,6 +27,7 @@ import { CaseFollowUpSheet } from "@/components/case-follow-up-sheet";
 import { CaseTimeline } from "@/components/case-timeline";
 import { DecisionAssistant } from "@/components/decision-assistant";
 import { EmptyState } from "@/components/empty-state";
+import { HelpHint } from "@/components/help-hint";
 import { PriceHistoryChart } from "@/components/price-history-chart";
 import { PurchaseOutcomeCard } from "@/components/purchase-outcome-card";
 import { PurchaseOutcomeSheet } from "@/components/purchase-outcome-sheet";
@@ -288,11 +289,11 @@ export function CaseScreen({ caseId }: { caseId: string }) {
               <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
                 <ShoppingBag className="size-5" />
               </span>
-              <div>
+              <div className="flex items-center gap-1.5">
                 <h2 className="type-card-title">تصمیم ثبت شده؛ نتیجه واقعی خرید را هم نگه دار</h2>
-                <p className="type-caption mt-1 text-muted-foreground">
+                <HelpHint label="راهنمای نتیجه خرید">
                   مبلغ پرداخت‌شده، شماره سفارش و وضعیت تحویل را ثبت کن تا این پرونده واقعاً کامل شود.
-                </p>
+                </HelpHint>
               </div>
             </div>
             <Button type="button" onClick={() => setPurchaseOutcomeOpen(true)}>
@@ -322,7 +323,9 @@ export function CaseScreen({ caseId }: { caseId: string }) {
               ) : null}
 
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <p className="type-caption text-muted-foreground">آخرین قیمت هر فروشنده نمایش داده می‌شود؛ قیمت‌های قبلی در تاریخچه و نمودار می‌مانند.</p>
+                <HelpHint label="راهنمای مقایسه قیمت‌ها" side="bottom">
+                  آخرین قیمت هر فروشنده نمایش داده می‌شود؛ قیمت‌های قبلی در تاریخچه و نمودار می‌مانند.
+                </HelpHint>
                 {metrics.latestQuotes.some((quote) => new Date().getTime() - new Date(quote.quotedAt).getTime() > 3 * 86_400_000) ? (
                   <span className="inline-flex items-center gap-1 text-xs text-amber-700 dark:text-amber-300"><RefreshCw className="size-3.5" />بعضی قیمت‌ها قدیمی شده‌اند</span>
                 ) : null}

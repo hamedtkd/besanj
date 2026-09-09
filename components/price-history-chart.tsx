@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import { BarChart3, CircleDot, Eye, EyeOff } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { HelpHint } from "@/components/help-hint";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCompactPersianDate, formatToman } from "@/lib/format";
@@ -98,11 +99,11 @@ export function PriceHistoryChart({
     <Card className="overflow-hidden">
       <div className="border-b border-border p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
+          <div className="flex items-center gap-1.5">
             <h2 className="type-section-title">نمودار قیمت‌ها</h2>
-            <p className="type-caption mt-1 max-w-2xl text-muted-foreground">
+            <HelpHint label="راهنمای نمودار قیمت‌ها">
               برای مقایسه سریع، نمودار میله‌ای آخرین قیمت‌ها را ببین؛ برای دیدن همه استعلام‌ها در طول زمان، حالت نقطه‌ای را باز کن.
-            </p>
+            </HelpHint>
           </div>
 
           <div className="inline-flex w-fit rounded-xl border border-border bg-muted/35 p-1">

@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { Save } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { useToast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ResponsiveSheet } from "@/components/ui/responsive-sheet";
 import { Textarea } from "@/components/ui/textarea";
@@ -100,14 +101,18 @@ export function SellerProfileEditSheet({
             />
           </Field>
           <Field>
-            <FieldLabel>شماره‌های دیگر</FieldLabel>
+            <div className="flex items-center gap-1.5">
+              <FieldLabel>شماره‌های دیگر</FieldLabel>
+              <HelpHint label="راهنمای شماره‌های دیگر">
+                حداکثر ۸ شماره، با ویرگول از هم جدا شوند.
+              </HelpHint>
+            </div>
             <Input
               dir="ltr"
               value={otherPhones}
               onChange={(event) => setOtherPhones(event.target.value)}
               placeholder="با ویرگول جدا کن"
             />
-            <FieldDescription>حداکثر ۸ شماره، با ویرگول از هم جدا شوند.</FieldDescription>
           </Field>
         </div>
 

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Plus, Trash2, WalletCards } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { useToast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
@@ -145,21 +146,22 @@ function BudgetSettingsForm({
       </FormField>
 
       <div className="rounded-2xl border border-primary/15 bg-primary/[0.055] p-3.5">
-        <div className="flex items-start gap-2.5">
-          <WalletCards className="mt-0.5 size-4.5 shrink-0 text-primary" />
-          <p className="type-caption text-muted-foreground">
+        <div className="flex items-center gap-2.5">
+          <WalletCards className="size-4.5 shrink-0 text-primary" />
+          <span className="type-label">بودجه ماهانه</span>
+          <HelpHint label="راهنمای بودجه ماهانه">
             این بودجه هر ماه دوباره از صفر سنجیده می‌شود. اطلاعات ماه‌های قبلی پاک نمی‌شوند و فقط میزان مصرف ماه جاری جدا محاسبه می‌شود.
-          </p>
+          </HelpHint>
         </div>
       </div>
 
       <section>
         <div className="mb-2 flex items-center justify-between gap-2">
-          <div>
+          <div className="flex items-center gap-1.5">
             <h3 className="type-card-title">سقف دسته‌ها</h3>
-            <p className="type-caption mt-0.5 text-muted-foreground">
+            <HelpHint label="راهنمای سقف دسته‌ها">
               برای دسته‌هایی که خرجشان مهم‌تر است سقف جدا بگذار.
-            </p>
+            </HelpHint>
           </div>
         </div>
 

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { CheckCircle2, PackageCheck, ReceiptText, Trash2, Truck } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { useToast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -239,11 +240,12 @@ export function PurchaseOutcomeSheet({
               />
             </FormField>
           ) : (
-            <div className="flex items-start gap-2.5 rounded-2xl border border-border bg-muted/35 p-3.5">
-              <Truck className="mt-0.5 size-4.5 shrink-0 text-muted-foreground" />
-              <p className="type-caption text-muted-foreground">
+            <div className="flex items-center gap-2.5 rounded-2xl border border-border bg-muted/35 p-3.5">
+              <Truck className="size-4.5 shrink-0 text-muted-foreground" />
+              <span className="type-label">پیگیری تحویل</span>
+              <HelpHint label="راهنمای پیگیری تحویل">
                 بعد از رسیدن سفارش، همین بخش را باز کن و وضعیت را «دریافت شده» بگذار.
-              </p>
+              </HelpHint>
             </div>
           )}
         </div>
@@ -259,15 +261,16 @@ export function PurchaseOutcomeSheet({
 
         {outcome ? (
           <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.07] p-3.5">
-            <div className="flex items-start gap-2.5">
+            <div className="flex items-center gap-2.5">
               {outcome.status === "received" ? (
-                <PackageCheck className="mt-0.5 size-4.5 shrink-0 text-emerald-700 dark:text-emerald-300" />
+                <PackageCheck className="size-4.5 shrink-0 text-emerald-700 dark:text-emerald-300" />
               ) : (
-                <CheckCircle2 className="mt-0.5 size-4.5 shrink-0 text-emerald-700 dark:text-emerald-300" />
+                <CheckCircle2 className="size-4.5 shrink-0 text-emerald-700 dark:text-emerald-300" />
               )}
-              <p className="type-caption text-muted-foreground">
+              <span className="type-label">نتیجه خرید قفل‌شده</span>
+              <HelpHint label="راهنمای نتیجه خرید">
                 ثبت خرید به استعلام انتخاب‌شده قفل است تا نتیجه واقعی با تصمیم اشتباه جابه‌جا نشود.
-              </p>
+              </HelpHint>
             </div>
           </div>
         ) : null}

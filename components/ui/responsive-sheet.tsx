@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -185,12 +186,14 @@ export function ResponsiveSheet({
 
                 <header className="flex items-start justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
                   <div className="min-w-0">
-                    <h2 className="type-section-title">{title}</h2>
-                    {description ? (
-                      <p className="type-caption mt-1 text-muted-foreground">
-                        {description}
-                      </p>
-                    ) : null}
+                    <div className="flex items-center gap-1.5">
+                      <h2 className="type-section-title">{title}</h2>
+                      {description ? (
+                        <HelpHint label={`راهنمای ${title}`} side="bottom">
+                          {description}
+                        </HelpHint>
+                      ) : null}
+                    </div>
                   </div>
                   <Button
                     type="button"

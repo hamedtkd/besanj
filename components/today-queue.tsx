@@ -12,6 +12,7 @@ import {
   Sparkles,
   Truck,
 } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { useToast } from "@/components/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,13 +62,13 @@ export function TodayQueue({ tasks }: { tasks: DashboardTask[] }) {
               <BellRing className="size-4" />
             </span>
             <h2 className="type-section-title">کارهای امروز</h2>
+            <HelpHint label="راهنمای کارهای امروز">
+              پیگیری‌های سررسیدشده، قیمت‌های رو به انقضا و پرونده‌های آماده تصمیم اینجا جمع می‌شوند.
+            </HelpHint>
             <Badge variant={tasks.some((item) => item.priority === "urgent") ? "warning" : "secondary"}>
               {tasks.length.toLocaleString("fa-IR-u-nu-arabext")}
             </Badge>
           </div>
-          <p className="type-caption mt-1 text-muted-foreground">
-            پیگیری‌های سررسیدشده، قیمت‌های رو به انقضا و پرونده‌های آماده تصمیم اینجا جمع می‌شوند.
-          </p>
         </div>
       </div>
 

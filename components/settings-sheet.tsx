@@ -8,6 +8,7 @@ import {
   type AppPalette,
 } from "@/components/app-preferences";
 import { CustomThemeColorSheet } from "@/components/custom-theme-color-sheet";
+import { HelpHint } from "@/components/help-hint";
 import { DataBackupSection } from "@/components/data-backup-section";
 import { PwaInstallSection } from "@/components/pwa-install-section";
 import { NotificationSettingsSection } from "@/components/notification-settings-section";
@@ -73,11 +74,11 @@ export function SettingsSheet({
           <section>
             <div className="mb-3 flex items-center gap-2">
               <Settings2 className="size-4 text-primary" />
-              <div>
+              <div className="flex items-center gap-1.5">
                 <h3 className="type-card-title">حالت نمایش</h3>
-                <p className="type-caption text-muted-foreground">
+                <HelpHint label="راهنمای حالت نمایش">
                   روشن، تاریک یا هماهنگ با دستگاه
-                </p>
+                </HelpHint>
               </div>
             </div>
 
@@ -122,11 +123,11 @@ export function SettingsSheet({
           <section className="border-t border-border pt-5">
             <div className="mb-3 flex items-center gap-2">
               <Palette className="size-4 text-primary" />
-              <div>
+              <div className="flex items-center gap-1.5">
                 <h3 className="type-card-title">رنگ اصلی</h3>
-                <p className="type-caption text-muted-foreground">
+                <HelpHint label="راهنمای رنگ اصلی">
                   رنگ اکشن‌ها، نمودارها و تأکیدهای اصلی
-                </p>
+                </HelpHint>
               </div>
             </div>
 
@@ -189,12 +190,11 @@ export function SettingsSheet({
 
           <div className="rounded-2xl border border-border bg-muted/45 p-3.5">
             <div className="flex items-center justify-between gap-3">
-              <div>
+              <div className="flex items-center gap-1.5">
                 <div className="type-label">ذخیره روی همین دستگاه</div>
-                <p className="type-caption mt-0.5 text-muted-foreground">
-                  اطلاعات بسنج روی همین مرورگر می‌ماند؛ برای انتقال دستگاه یا
-                  اطمینان از حفظ پیوست‌ها، از بخش پشتیبان فایل خروجی بگیر.
-                </p>
+                <HelpHint label="راهنمای ذخیره محلی">
+                  اطلاعات بسنج روی همین مرورگر می‌ماند؛ برای انتقال دستگاه یا اطمینان از حفظ پیوست‌ها، از بخش پشتیبان فایل خروجی بگیر.
+                </HelpHint>
               </div>
               <Badge variant="secondary">محلی</Badge>
             </div>

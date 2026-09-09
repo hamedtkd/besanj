@@ -27,6 +27,7 @@ import {
   YAxis,
 } from "recharts";
 import { BudgetOverview } from "@/components/budget-overview";
+import { HelpHint } from "@/components/help-hint";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -77,10 +78,12 @@ export function InsightsPage() {
                 <ChartNoAxesCombined className="size-3.5" />
                 بینش‌های خرید
               </div>
-              <h1 className="type-page-title">از خریدهای قبلی یاد بگیر.</h1>
-              <p className="type-body mt-2 max-w-2xl text-muted-foreground">
-                هزینه واقعی، صرفه‌جویی، سرعت تصمیم و سابقه فروشنده‌ها را یک‌جا ببین تا خرید بعدی را با حافظه بهتر شروع کنی.
-              </p>
+              <div className="flex items-center gap-1.5">
+                <h1 className="type-page-title">از خریدهای قبلی یاد بگیر.</h1>
+                <HelpHint label="راهنمای بینش‌های خرید" side="bottom">
+                  هزینه واقعی، صرفه‌جویی، سرعت تصمیم و سابقه فروشنده‌ها را یک‌جا ببین تا خرید بعدی را با حافظه بهتر شروع کنی.
+                </HelpHint>
+              </div>
             </div>
             <Button
               nativeButton={false}
@@ -286,11 +289,11 @@ function SpendChart({
 }) {
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-border/80 p-4 sm:p-5">
+      <div className="flex items-center gap-1.5 border-b border-border/80 p-4 sm:p-5">
         <h2 className="type-section-title">روند هزینه خرید</h2>
-        <p className="type-caption mt-1 text-muted-foreground">
+        <HelpHint label="راهنمای روند هزینه خرید">
           جمع مبلغ واقعی خریدهای ثبت‌شده در هر ماه؛ حداکثر ۱۲ ماه اخیر.
-        </p>
+        </HelpHint>
       </div>
       {data.length ? (
         <div className="h-80 w-full p-3 sm:p-4" dir="ltr">
@@ -341,11 +344,11 @@ function CategorySpendChart({
 }) {
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-border/80 p-4 sm:p-5">
+      <div className="flex items-center gap-1.5 border-b border-border/80 p-4 sm:p-5">
         <h2 className="type-section-title">هزینه بر اساس دسته</h2>
-        <p className="type-caption mt-1 text-muted-foreground">
+        <HelpHint label="راهنمای هزینه دسته‌ها">
           مبلغ واقعی خریدها را بر اساس دسته‌بندی پرونده‌ها کنار هم ببین.
-        </p>
+        </HelpHint>
       </div>
       {data.length ? (
         <div className="h-80 w-full p-3 sm:p-4" dir="ltr">
@@ -402,11 +405,11 @@ function DecisionSnapshot({
 }) {
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-border/80 p-4 sm:p-5">
+      <div className="flex items-center gap-1.5 border-b border-border/80 p-4 sm:p-5">
         <h2 className="type-section-title">رفتار خرید تو</h2>
-        <p className="type-caption mt-1 text-muted-foreground">
+        <HelpHint label="راهنمای رفتار خرید">
           چند شاخص ساده برای بهترکردن تصمیم‌های بعدی.
-        </p>
+        </HelpHint>
       </div>
       <div className="divide-y divide-border/70">
         <SnapshotRow
@@ -521,11 +524,11 @@ function SellerMemory({
   if (!sellers.length) return null;
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-border/80 p-4 sm:p-5">
+      <div className="flex items-center gap-1.5 border-b border-border/80 p-4 sm:p-5">
         <h2 className="type-section-title">حافظه فروشنده‌ها</h2>
-        <p className="type-caption mt-1 text-muted-foreground">
+        <HelpHint label="راهنمای حافظه فروشنده‌ها">
           پروفایل سراسری فروشنده‌ها، سابقه خرید و امتیاز را بین پرونده‌های مختلف یک‌جا نگه می‌دارد.
-        </p>
+        </HelpHint>
       </div>
       <div className="divide-y divide-border/70">
         {sellers.map((seller, index) => {

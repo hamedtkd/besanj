@@ -12,6 +12,7 @@ import {
   Stethoscope,
   Zap,
 } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { LocalVoiceCapture } from "@/components/local-voice-capture";
 import { useToast } from "@/components/toast";
 import { Badge } from "@/components/ui/badge";
@@ -316,9 +317,11 @@ export function QuickCaptureSheet({
             <Button type="button" size="lg" onClick={saveCaseOnly} disabled={saving || text.trim().length < 2}>
               <CheckCircle2 />{saving ? "در حال ثبت..." : "ساخت پرونده"}
             </Button>
-            <p className="type-caption text-center text-muted-foreground">
-              دسته، بودجه، برچسب و شرط‌ها بعداً و فقط در صورت نیاز تکمیل می‌شوند.
-            </p>
+            <div className="flex justify-center">
+              <HelpHint label="راهنمای ساخت پرونده سریع">
+                دسته، بودجه، برچسب و شرط‌ها بعداً و فقط در صورت نیاز تکمیل می‌شوند.
+              </HelpHint>
+            </div>
           </>
         ) : (
           <>
@@ -424,6 +427,9 @@ export function QuickCaptureSheet({
               <div className="flex items-center gap-2">
                 <Sparkles className="size-4 text-primary" />
                 <span className="type-label">پیشنهاد بسنج، قبل از ثبت بررسی کن</span>
+                <HelpHint label="راهنمای پیشنهاد بسنج">
+                  هیچ مقدار استخراج‌شده‌ای بدون تأیید نهایی تو ذخیره نمی‌شود.
+                </HelpHint>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {(selectedCase?.title || effectiveTitle) ? <Badge variant="secondary">{selectedCase?.title || effectiveTitle}</Badge> : null}
@@ -456,9 +462,6 @@ export function QuickCaptureSheet({
             <Button type="button" size="lg" onClick={saveQuote} disabled={saving}>
               <CheckCircle2 />{saving ? "در حال ثبت..." : "ثبت سریع"}
             </Button>
-            <p className="type-caption text-center text-muted-foreground">
-              هیچ مقدار استخراج‌شده‌ای بدون همین تأیید نهایی ذخیره نمی‌شود.
-            </p>
           </>
         )}
       </div>

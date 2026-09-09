@@ -11,8 +11,23 @@
 | گزینه بله/خیر | `Checkbox` |
 | انتخاب تک‌گزینه‌ای نمایشی | `RadioGroup` |
 | ساختار فیلد/خطا | `Field` از طریق `FormField` محصول |
+| راهنمای کوتاه رابط | `Tooltip` رسمی PersianLabs/ui از طریق `HelpHint` سراسری |
 | تب‌ها | `Tabs` |
 | کارت/Badge/Button/Input/Textarea | کامپوننت‌های Registry PersianLabs با تم بسنج |
+
+
+## Tooltip و متن راهنما
+
+برای متن های توضیحی غیرحیاتی، الگوی استاندارد بسنج `HelpHint` است. این wrapper از Tooltip رسمی PersianLabs/ui استفاده می کند و یک آیکن سوال کوچک کنار عنوان یا label نشان می دهد. Tooltip با hover و focus قابل دسترسی است و direction پرتال در RTL از پیاده سازی PersianLabs حفظ شده است.
+
+مواردی که نباید داخل Tooltip پنهان شوند:
+
+- خطاهای اعتبارسنجی و خطاهای عملیاتی
+- هشدارهای destructive مانند جایگزینی Backup
+- هشدارهایی که می گویند انتخاب یا داده فعلی ناسازگار/قدیمی است
+- دستورالعملی که بدون دیدن آن کاربر نمی تواند همان لحظه عمل را کامل کند
+
+`ResponsiveSheet` توضیح header را خودکار به `HelpHint` تبدیل می کند و `FormField` نیز `hint` را به Tooltip می برد. بنابراین مصرف کننده ها نباید متن راهنمای تکراری زیر این دو کامپوننت بسازند.
 
 ## نکته مهم Select
 
@@ -43,7 +58,7 @@
 
 ## Guardrail
 
-`npm run check:ui` سورس محصول را اسکن می‌کند و برای موارد زیر fail می‌شود:
+`npm run check:ui` سورس محصول را اسکن می‌کند و برای موارد زیر fail می‌شود. `npm run check:tooltips` نیز الگوی Tooltip سراسری، RTL و باقی ماندن هشدارهای حیاتی را کنترل می کند:
 
 - `<select>` native
 - ``input type="date"`

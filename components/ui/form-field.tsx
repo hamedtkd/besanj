@@ -1,7 +1,7 @@
 import type * as React from "react";
+import { HelpHint } from "@/components/help-hint";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldLabel,
 } from "@/components/ui/field";
@@ -25,12 +25,15 @@ export function FormField({
 }) {
   return (
     <Field data-invalid={Boolean(error) || undefined} className={cn("gap-2", className)}>
-      <FieldLabel>
-        {label}
-        {required ? <span className="text-destructive">*</span> : null}
-      </FieldLabel>
+      <div className="flex items-center gap-1.5">
+        <FieldLabel>
+          {label}
+          {required ? <span className="text-destructive">*</span> : null}
+        </FieldLabel>
+        {hint ? <HelpHint label={`راهنمای ${label}`}>{hint}</HelpHint> : null}
+      </div>
       {children}
-      {error ? <FieldError match={true}>{error}</FieldError> : hint ? <FieldDescription>{hint}</FieldDescription> : null}
+      {error ? <FieldError match={true}>{error}</FieldError> : null}
     </Field>
   );
 }
