@@ -107,6 +107,9 @@ export function QuoteFormDialog({
   const [requirementChecks, setRequirementChecks] = React.useState<Record<string, boolean>>(() => ({ ...(preset?.quote.requirementChecks ?? {}) }));
   const [pendingFiles, setPendingFiles] = React.useState<File[]>([]);
   const [providerChoice, setProviderChoice] = React.useState("__new__");
+  const [selectedSellerProfileId, setSelectedSellerProfileId] = React.useState<string | undefined>(
+    preset?.provider.sellerProfileId
+  );
 
   const form = useForm<QuoteFormValues>({
     resolver: zodResolver(quoteFormSchema),
@@ -151,6 +154,7 @@ export function QuoteFormDialog({
     if (next === "__new__") {
       form.setValue("providerName", "", { shouldValidate: true });
       form.setValue("phone", "");
+      setSelectedSellerProfileId(undefined);
       return;
     }
 
@@ -158,12 +162,16 @@ export function QuoteFormDialog({
     if (!suggestion) return;
     form.setValue("providerName", suggestion.provider.name, { shouldValidate: true });
     form.setValue("phone", suggestion.provider.phone ?? "");
+    setSelectedSellerProfileId(suggestion.provider.sellerProfileId);
   }
 
   function applyCapturedQuote(draft: QuoteCaptureDraft, sourceText: string) {
+    if (draft.providerName || draft.phone) {
+      setProviderChoice("__new__");
+      setSelectedSellerProfileId(undefined);
+    }
     if (draft.providerName) {
       form.setValue("providerName", draft.providerName, { shouldValidate: true });
-      setProviderChoice("__new__");
     }
     if (draft.phone) form.setValue("phone", draft.phone, { shouldValidate: true });
     if (draft.priceToman) {
@@ -203,6 +211,7 @@ export function QuoteFormDialog({
       setPendingFiles([]);
       setRequirementChecks({});
       setProviderChoice("__new__");
+      setSelectedSellerProfileId(undefined);
     }
     onOpenChange(next);
   }
@@ -233,6 +242,7 @@ export function QuoteFormDialog({
         caseId,
         providerName: values.providerName,
         phone: values.phone,
+        sellerProfileId: selectedSellerProfileId,
         priceToman: values.priceToman,
         extraCostToman: values.extraCostToman,
         quotedAt: dateToIso(values.quotedAt),
@@ -259,6 +269,8 @@ export function QuoteFormDialog({
         form.reset(blankValues());
         setPendingFiles([]);
         setRequirementChecks({});
+        setProviderChoice("__new__");
+        setSelectedSellerProfileId(undefined);
       } else {
         handleOpenChange(false);
       }
@@ -268,6 +280,14 @@ export function QuoteFormDialog({
         "error"
       );
     }
+  }
+
+  const providerNameRegistration = form.register("providerName");
+
+  function resetExplicitSellerChoice() {
+    if (preset || !selectedSellerProfileId) return;
+    setProviderChoice("__new__");
+    setSelectedSellerProfileId(undefined);
   }
 
   return (
@@ -321,7 +341,11 @@ export function QuoteFormDialog({
             <Input
               placeholder="مثلاً فروشگاه مرکزی"
               readOnly={Boolean(preset)}
-              {...form.register("providerName")}
+              {...providerNameRegistration}
+              onChange={(event) => {
+                providerNameRegistration.onChange(event);
+                resetExplicitSellerChoice();
+              }}
             />
           </FormField>
 
@@ -332,7 +356,10 @@ export function QuoteFormDialog({
               render={({ field }) => (
                 <MobileNumberInput
                   value={field.value ?? ""}
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    resetExplicitSellerChoice();
+                  }}
                   readOnly={Boolean(preset)}
                   aria-invalid={Boolean(form.formState.errors.phone)}
                 />

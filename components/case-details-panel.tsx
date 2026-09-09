@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   Archive,
   BellRing,
@@ -333,7 +334,15 @@ export function CaseDetailsPanel({
               {providers.map((provider) => (
                 <div key={provider.id} className="flex items-center gap-3 rounded-xl border border-border bg-background/55 p-3">
                   <div className="min-w-0 flex-1">
-                    <div className="type-label truncate">{provider.name}</div>
+                    <div className="type-label truncate">
+                      {provider.sellerProfileId ? (
+                        <Link href={`/sellers/${provider.sellerProfileId}`} className="hover:text-primary">
+                          {provider.name}
+                        </Link>
+                      ) : (
+                        provider.name
+                      )}
+                    </div>
                     <div className="type-caption mt-0.5 truncate text-muted-foreground">
                       {provider.rating
                         ? `امتیاز ${provider.rating.toLocaleString("fa-IR")} از ۵${provider.ratingNote ? ` · ${provider.ratingNote}` : ""}`

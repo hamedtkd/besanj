@@ -56,13 +56,31 @@ export interface PurchaseCase {
   updatedAt: string;
 }
 
+export interface SellerProfile {
+  id: string;
+  name: string;
+  phone?: string;
+  otherPhones?: string[];
+  website?: string;
+  instagram?: string;
+  telegram?: string;
+  whatsapp?: string;
+  note?: string;
+  favorite?: boolean;
+  avoid?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Provider {
   id: string;
   caseId: string;
+  sellerProfileId?: string;
   name: string;
   phone?: string;
   rating?: number;
   ratingNote?: string;
+  ratingUpdatedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -505,6 +505,7 @@ function SellerMemory({
 }: {
   sellers: Array<{
     key: string;
+    sellerProfileId?: string;
     name: string;
     phone?: string;
     caseCount: number;
@@ -523,7 +524,7 @@ function SellerMemory({
       <div className="border-b border-border/80 p-4 sm:p-5">
         <h2 className="type-section-title">حافظه فروشنده‌ها</h2>
         <p className="type-caption mt-1 text-muted-foreground">
-          فروشنده‌های هم‌نام/هم‌شماره در پرونده‌های مختلف کنار هم جمع می‌شوند تا سابقه واقعی‌شان گم نشود.
+          پروفایل سراسری فروشنده‌ها، سابقه خرید و امتیاز را بین پرونده‌های مختلف یک‌جا نگه می‌دارد.
         </p>
       </div>
       <div className="divide-y divide-border/70">
@@ -539,7 +540,15 @@ function SellerMemory({
                 </span>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <strong className="type-label truncate">{seller.name}</strong>
+                    <strong className="type-label truncate">
+                      {seller.sellerProfileId ? (
+                        <Link href={`/sellers/${seller.sellerProfileId}`} className="hover:text-primary">
+                          {seller.name}
+                        </Link>
+                      ) : (
+                        seller.name
+                      )}
+                    </strong>
                     {seller.averageRating !== null ? (
                       <Badge variant="secondary">
                         {seller.averageRating.toLocaleString("fa-IR", { maximumFractionDigits: 1 })} از ۵

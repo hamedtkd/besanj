@@ -1,3 +1,57 @@
+# QA | Besanj 1.3.0
+
+## فاز پروفایل سراسری فروشنده
+
+- Seller Profile سراسری با شناسه پایدار
+- مسیر `/sellers` و `/sellers/[id]`
+- همه استعلام ها، خریدها و امتیازهای فروشنده در یک پروفایل
+- شماره ها، وب سایت، اینستاگرام، تلگرام، واتساپ و یادداشت سراسری
+- Favorite و علامت «پیشنهاد نمی شود»
+- ویرایش سراسری نام و شماره اصلی
+- Merge فروشنده های تکراری با حفظ Quote، Reminder و Purchase Outcome
+- استفاده دوباره از فروشنده بر اساس `sellerProfileId`
+- لینک Seller Memory در Insights به پروفایل سراسری
+- Backup/Restore سازگار با Backupهای قدیمی
+- Dexie schema v6 با store جدید `sellerProfiles`
+- Service Worker `besanj-shell-v14`
+- Guard جدید `check:sellers`
+- Next.js و eslint-config-next روی `16.3.4` برای رفع گزارش امنیتی بحرانی مقصد
+
+## بررسی های اجراشده در محیط ساخت
+
+- `npm test`: **102/102 PASS**
+- `TZ=Asia/Tehran npm test`: **102/102 PASS**
+- `check:ui`: **PASS**
+- `check:theme`: **PASS**
+- `check:pwa`: **PASS**
+- `check:workflow`: **PASS**
+- `check:data`: **PASS**
+- `check:report`: **PASS**
+- `check:automation`: **PASS**
+- `check:capture`: **PASS**
+- `check:purchase`: **PASS**
+- `check:insights`: **PASS**
+- `check:categories-budget`: **PASS**
+- `check:sellers`: **PASS**
+- TS/TSX syntax/transpile: **137 فایل، 0 خطا**
+- TypeScript strict check روی ماژول های pure جدید و مرتبط: **PASS**
+- Local import resolution: **566 import، 0 مسیر شکسته**
+- JavaScript syntax برای Service Worker و scriptهای `.mjs`: **PASS**
+- LF normalization: **190 فایل متنی بررسی شد، 0 فایل CRLF**
+
+## محدودیت محیط ساخت
+
+`npm install` در sandbox به Registry دسترسی نداشت و dependencyهای پروژه داخل artifact مبنا نبودند. بنابراین اجرای معتبر `doctor`، typecheck کامل پروژه، ESLint و Next production build در این محیط ممکن نبود. TypeScript ماژول های pure مربوط به Seller Profile به صورت مستقل و strict بررسی شده است، اما گیت نهایی Release باید روی سیستم مقصد با dependencyهای نصب شده و `npm run check` تأیید شود.
+
+## گیت مرجع روی سیستم مقصد
+
+```bash
+npm install
+npm run check
+```
+
+---
+
 # QA | Besanj 1.2.0
 
 ## فاز دسته بندی، برچسب و بودجه ماهانه

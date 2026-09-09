@@ -5,6 +5,7 @@ import type {
   PurchaseCase,
   Quote,
   QuoteAttachment,
+  SellerProfile,
 } from "./types";
 import type { ThemeMode } from "./theme";
 
@@ -26,6 +27,7 @@ export interface BackupSnapshot {
   reminders: CaseReminder[];
   attachments: QuoteAttachment[];
   budgetPlans?: BudgetPlan[];
+  sellerProfiles?: SellerProfile[];
 }
 
 export interface PortableAttachment extends Omit<QuoteAttachment, "blob"> {
@@ -46,6 +48,7 @@ export interface BesanjBackupFile {
     attachments: number;
     attachmentBytes: number;
     budgetPlans?: number;
+    sellerProfiles?: number;
   };
   data: {
     purchaseCases: PurchaseCase[];
@@ -54,6 +57,7 @@ export interface BesanjBackupFile {
     reminders: CaseReminder[];
     attachments: PortableAttachment[];
     budgetPlans?: BudgetPlan[];
+    sellerProfiles?: SellerProfile[];
   };
 }
 
@@ -184,6 +188,7 @@ export async function buildBesanjBackupFile(
       attachments: portableAttachments.length,
       attachmentBytes,
       budgetPlans: snapshot.budgetPlans?.length ?? 0,
+      sellerProfiles: snapshot.sellerProfiles?.length ?? 0,
     },
     data: {
       purchaseCases: snapshot.purchaseCases,
@@ -192,6 +197,7 @@ export async function buildBesanjBackupFile(
       reminders: snapshot.reminders,
       attachments: portableAttachments,
       budgetPlans: snapshot.budgetPlans ?? [],
+      sellerProfiles: snapshot.sellerProfiles ?? [],
     },
   };
 }
@@ -227,6 +233,9 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
   const budgetPlans = data.budgetPlans === undefined
     ? []
     : requireArray(data.budgetPlans, "بودجه‌ها");
+  const sellerProfiles = data.sellerProfiles === undefined
+    ? []
+    : requireArray(data.sellerProfiles, "پروفایل فروشنده‌ها");
 
   const caseIds = new Set<string>();
   const selectedQuotes: Array<{ caseId: string; quoteId: string }> = [];
@@ -290,6 +299,38 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
     }
   }
 
+  const sellerProfileIds = new Set<string>();
+  for (const raw of sellerProfiles) {
+    const row = requireRow(raw, "پروفایل فروشنده‌ها");
+    const id = requireStringField(row, "id", "پروفایل فروشنده‌ها");
+    requireStringField(row, "name", "پروفایل فروشنده‌ها");
+    requireStringField(row, "createdAt", "پروفایل فروشنده‌ها");
+    requireStringField(row, "updatedAt", "پروفایل فروشنده‌ها");
+    for (const key of ["phone", "website", "instagram", "telegram", "whatsapp", "note"] as const) {
+      if (row[key] !== undefined && typeof row[key] !== "string") {
+        throw new Error("اطلاعات تماس یکی از پروفایل‌های فروشنده معتبر نیست.");
+      }
+    }
+    if (row.otherPhones !== undefined) {
+      if (
+        !Array.isArray(row.otherPhones) ||
+        row.otherPhones.some((phone) => typeof phone !== "string")
+      ) {
+        throw new Error("شماره‌های یکی از پروفایل‌های فروشنده معتبر نیست.");
+      }
+    }
+    if (row.favorite !== undefined && typeof row.favorite !== "boolean") {
+      throw new Error("وضعیت علاقه‌مندی یکی از فروشنده‌ها معتبر نیست.");
+    }
+    if (row.avoid !== undefined && typeof row.avoid !== "boolean") {
+      throw new Error("وضعیت پیشنهادنشدن یکی از فروشنده‌ها معتبر نیست.");
+    }
+    if (sellerProfileIds.has(id)) {
+      throw new Error("شناسه تکراری در پروفایل فروشنده‌های پشتیبان وجود دارد.");
+    }
+    sellerProfileIds.add(id);
+  }
+
   const providerIds = new Set<string>();
   const providerCase = new Map<string, string>();
   for (const raw of providers) {
@@ -299,6 +340,12 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
     requireStringField(row, "name", "فروشنده‌ها");
     if (!caseIds.has(caseId)) {
       throw new Error("یکی از فروشنده‌ها به پرونده‌ای اشاره می‌کند که در پشتیبان نیست.");
+    }
+    if (
+      row.sellerProfileId !== undefined &&
+      (typeof row.sellerProfileId !== "string" || !sellerProfileIds.has(row.sellerProfileId))
+    ) {
+      throw new Error("ارتباط یکی از فروشنده‌ها با پروفایل سراسری معتبر نیست.");
     }
     if (providerIds.has(id)) throw new Error("شناسه تکراری در فروشنده‌های پشتیبان وجود دارد.");
     providerIds.add(id);
@@ -441,6 +488,7 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
       attachments: attachments.length,
       attachmentBytes,
       budgetPlans: budgetPlans.length,
+      sellerProfiles: sellerProfiles.length,
     },
     data: {
       purchaseCases: purchaseCases as PurchaseCase[],
@@ -449,6 +497,7 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
       reminders: reminders as CaseReminder[],
       attachments: attachments as PortableAttachment[],
       budgetPlans: budgetPlans as BudgetPlan[],
+      sellerProfiles: sellerProfiles as SellerProfile[],
     },
   };
 }
