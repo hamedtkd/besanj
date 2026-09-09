@@ -7,6 +7,7 @@ import {
   Archive,
   BarChart3,
   BellRing,
+  BookmarkPlus,
   FileDown,
   ListChecks,
   WalletCards,
@@ -35,6 +36,7 @@ import { QuoteComparison } from "@/components/quote-comparison";
 import { QuoteFilters } from "@/components/quote-filters";
 import { QuoteFormDialog, type RequotePreset } from "@/components/quote-form-dialog";
 import { QuoteHistory } from "@/components/quote-history";
+import { SaveTemplateSheet } from "@/components/save-template-sheet";
 import { SideBySideComparison } from "@/components/side-by-side-comparison";
 import { useToast } from "@/components/toast";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +57,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
   const [quoteOpen, setQuoteOpen] = React.useState(false);
   const [followUpOpen, setFollowUpOpen] = React.useState(false);
   const [purchaseOutcomeOpen, setPurchaseOutcomeOpen] = React.useState(false);
+  const [saveTemplateOpen, setSaveTemplateOpen] = React.useState(false);
   const [followUpProviderId, setFollowUpProviderId] = React.useState<string | undefined>(undefined);
   const [preset, setPreset] = React.useState<RequotePreset | null>(null);
   const [activeTab, setActiveTab] = React.useState("compare");
@@ -210,6 +213,14 @@ export function CaseScreen({ caseId }: { caseId: string }) {
               variant="outline"
             >
               <FileDown />گزارش
+            </Button>
+            <Button
+              type="button"
+              size="lg"
+              variant="outline"
+              onClick={() => setSaveTemplateOpen(true)}
+            >
+              <BookmarkPlus />ذخیره قالب
             </Button>
             {selectedQuote && selectedProvider ? (
               <Button
@@ -490,6 +501,12 @@ export function CaseScreen({ caseId }: { caseId: string }) {
           }}
         />
       ) : null}
+
+      <SaveTemplateSheet
+        purchaseCase={purchaseCase}
+        open={saveTemplateOpen}
+        onOpenChange={setSaveTemplateOpen}
+      />
 
       <SideBySideComparison
         open={sideBySideOpen}

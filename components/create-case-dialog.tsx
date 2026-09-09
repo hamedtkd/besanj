@@ -1,13 +1,14 @@
 "use client";
 
+import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { ListChecks, Package, Shapes, Stethoscope, Tags, WalletCards } from "lucide-react";
 import { HelpHint } from "@/components/help-hint";
-import { createPurchaseCase } from "@/lib/db";
+import { createPurchaseCase, markCaseTemplateUsed } from "@/lib/db";
 import { mergeRequirements } from "@/lib/planning";
-import { BUILTIN_CATEGORIES, CUSTOM_CATEGORY_VALUE, parseTagsText, resolveCategory } from "@/lib/categories";
+import { BUILTIN_CATEGORIES, CUSTOM_CATEGORY_VALUE, parseTagsText, resolveCategory, tagsToText, isBuiltInCategoryKey } from "@/lib/categories";
 import { purchaseCaseSchema, type PurchaseCaseFormValues } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
@@ -25,13 +26,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { TomanIcon } from "@/components/ui/toman-icon";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
+import type { CaseTemplate } from "@/lib/types";
 
 export function CreateCaseDialog({
   open,
   onOpenChange,
+  initialTemplate,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialTemplate?: CaseTemplate;
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -65,7 +69,8 @@ export function CreateCaseDialog({
         tags: parseTagsText(values.tagsText),
         requirements: mergeRequirements(undefined, values.requirementsText ?? ""),
       });
-      toast("پرونده ساخته شد.");
+      if (initialTemplate) await markCaseTemplateUsed(initialTemplate.id);
+      toast(initialTemplate ? "پرونده از قالب ساخته شد." : "پرونده ساخته شد.");
       onOpenChange(false);
       form.reset();
       router.push(`/cases/${row.id}`);
@@ -73,6 +78,43 @@ export function CreateCaseDialog({
       toast("ساخت پرونده انجام نشد. دوباره تلاش کن.", "error");
     }
   }
+
+  React.useEffect(() => {
+    if (!open) return;
+    if (!initialTemplate) {
+      form.reset({
+        title: "",
+        kind: "product",
+        description: "",
+        targetBudgetToman: null,
+        categoryKey: "other",
+        customCategory: "",
+        tagsText: "",
+        requirementsText: "",
+      });
+      return;
+    }
+
+    let templateCategoryKey: PurchaseCaseFormValues["categoryKey"] = "other";
+    let templateCustomCategory = "";
+    if (isBuiltInCategoryKey(initialTemplate.categoryKey)) {
+      templateCategoryKey = initialTemplate.categoryKey;
+    } else if (initialTemplate.categoryKey) {
+      templateCategoryKey = CUSTOM_CATEGORY_VALUE;
+      templateCustomCategory = initialTemplate.categoryLabel ?? "";
+    }
+
+    form.reset({
+      title: initialTemplate.name,
+      kind: initialTemplate.kind,
+      description: initialTemplate.description ?? "",
+      targetBudgetToman: initialTemplate.targetBudgetToman ?? null,
+      categoryKey: templateCategoryKey,
+      customCategory: templateCustomCategory,
+      tagsText: tagsToText(initialTemplate.tags),
+      requirementsText: initialTemplate.requirementLabels?.join("\n") ?? "",
+    });
+  }, [form, initialTemplate, open]);
 
   const selectedCategory = useWatch({
     control: form.control,
@@ -88,6 +130,18 @@ export function CreateCaseDialog({
       className="sm:max-w-2xl"
     >
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-5 p-4 pb-6 sm:p-5">
+        {initialTemplate ? (
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/[0.06] px-3.5 py-3">
+            <div className="min-w-0">
+              <div className="type-label">قالب «{initialTemplate.name}» اعمال شد</div>
+              <p className="type-caption mt-0.5 text-muted-foreground">همه چیز قابل ویرایش است؛ فقط عنوان را عوض کن یا مستقیم پرونده را بساز.</p>
+            </div>
+            <HelpHint label="راهنمای قالب پرونده">
+              قالب هیچ فروشنده یا قیمتی را وارد نمی‌کند و فقط اطلاعات پایه برای شروع سریع را آماده کرده است.
+            </HelpHint>
+          </div>
+        ) : null}
+
         <FormField label="عنوان" required error={form.formState.errors.title?.message}>
           <Input autoFocus placeholder="مثلاً یخچال ساید یا ایمپلنت دندان" {...form.register("title")} />
         </FormField>

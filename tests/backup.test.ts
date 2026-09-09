@@ -356,3 +356,54 @@ test("backup rejects a dangling seller profile link", async () => {
     /پروفایل سراسری/
   );
 });
+
+test("backup preserves personal case templates", async () => {
+  const backup = await buildBesanjBackupFile(
+    {
+      purchaseCases: [],
+      providers: [],
+      quotes: [],
+      reminders: [],
+      attachments: [],
+      caseTemplates: [
+        {
+          id: "template-1",
+          name: "خرید کاری",
+          kind: "product",
+          categoryKey: "digital",
+          categoryLabel: "دیجیتال",
+          tags: ["کاری"],
+          requirementLabels: ["گارانتی", "تحویل"],
+          favorite: true,
+          useCount: 2,
+          createdAt: "2026-09-09T00:00:00.000Z",
+          updatedAt: "2026-09-09T00:00:00.000Z",
+        },
+      ],
+    },
+    { appVersion: "1.6.0" }
+  );
+
+  const parsed = parseBesanjBackupText(JSON.stringify(backup));
+  assert.equal(parsed.stats.caseTemplates, 1);
+  assert.equal(parsed.data.caseTemplates?.[0]?.name, "خرید کاری");
+  assert.deepEqual(parsed.data.caseTemplates?.[0]?.requirementLabels, ["گارانتی", "تحویل"]);
+});
+
+test("backup parser accepts older files without case templates", async () => {
+  const backup = await buildBesanjBackupFile(
+    {
+      purchaseCases: [],
+      providers: [],
+      quotes: [],
+      reminders: [],
+      attachments: [],
+    },
+    { appVersion: "1.5.1" }
+  );
+  const oldShape = JSON.parse(JSON.stringify(backup));
+  delete oldShape.data.caseTemplates;
+  delete oldShape.stats.caseTemplates;
+  const parsed = parseBesanjBackupText(JSON.stringify(oldShape));
+  assert.deepEqual(parsed.data.caseTemplates, []);
+});

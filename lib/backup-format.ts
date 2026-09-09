@@ -1,5 +1,6 @@
 import type {
   BudgetPlan,
+  CaseTemplate,
   CaseReminder,
   Provider,
   PurchaseCase,
@@ -28,6 +29,7 @@ export interface BackupSnapshot {
   attachments: QuoteAttachment[];
   budgetPlans?: BudgetPlan[];
   sellerProfiles?: SellerProfile[];
+  caseTemplates?: CaseTemplate[];
 }
 
 export interface PortableAttachment extends Omit<QuoteAttachment, "blob"> {
@@ -49,6 +51,7 @@ export interface BesanjBackupFile {
     attachmentBytes: number;
     budgetPlans?: number;
     sellerProfiles?: number;
+    caseTemplates?: number;
   };
   data: {
     purchaseCases: PurchaseCase[];
@@ -58,6 +61,7 @@ export interface BesanjBackupFile {
     attachments: PortableAttachment[];
     budgetPlans?: BudgetPlan[];
     sellerProfiles?: SellerProfile[];
+    caseTemplates?: CaseTemplate[];
   };
 }
 
@@ -189,6 +193,7 @@ export async function buildBesanjBackupFile(
       attachmentBytes,
       budgetPlans: snapshot.budgetPlans?.length ?? 0,
       sellerProfiles: snapshot.sellerProfiles?.length ?? 0,
+      caseTemplates: snapshot.caseTemplates?.length ?? 0,
     },
     data: {
       purchaseCases: snapshot.purchaseCases,
@@ -198,6 +203,7 @@ export async function buildBesanjBackupFile(
       attachments: portableAttachments,
       budgetPlans: snapshot.budgetPlans ?? [],
       sellerProfiles: snapshot.sellerProfiles ?? [],
+      caseTemplates: snapshot.caseTemplates ?? [],
     },
   };
 }
@@ -236,6 +242,9 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
   const sellerProfiles = data.sellerProfiles === undefined
     ? []
     : requireArray(data.sellerProfiles, "پروفایل فروشنده‌ها");
+  const caseTemplates = data.caseTemplates === undefined
+    ? []
+    : requireArray(data.caseTemplates, "قالب‌های پرونده");
 
   const caseIds = new Set<string>();
   const selectedQuotes: Array<{ caseId: string; quoteId: string }> = [];
@@ -442,6 +451,50 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
     attachmentBytes += row.size;
   }
 
+
+  const templateIds = new Set<string>();
+  for (const raw of caseTemplates) {
+    const row = requireRow(raw, "قالب‌های پرونده");
+    const id = requireStringField(row, "id", "قالب‌های پرونده");
+    requireStringField(row, "name", "قالب‌های پرونده");
+    requireStringField(row, "createdAt", "قالب‌های پرونده");
+    requireStringField(row, "updatedAt", "قالب‌های پرونده");
+    if (row.kind !== "product" && row.kind !== "service") {
+      throw new Error("نوع یکی از قالب‌های پرونده معتبر نیست.");
+    }
+    if (row.description !== undefined && typeof row.description !== "string") {
+      throw new Error("توضیح یکی از قالب‌های پرونده معتبر نیست.");
+    }
+    if (row.targetBudgetToman !== undefined &&
+      (typeof row.targetBudgetToman !== "number" || !Number.isFinite(row.targetBudgetToman) || row.targetBudgetToman <= 0)) {
+      throw new Error("بودجه یکی از قالب‌های پرونده معتبر نیست.");
+    }
+    if (row.categoryKey !== undefined && typeof row.categoryKey !== "string") {
+      throw new Error("دسته یکی از قالب‌های پرونده معتبر نیست.");
+    }
+    if (row.categoryLabel !== undefined && typeof row.categoryLabel !== "string") {
+      throw new Error("نام دسته یکی از قالب‌های پرونده معتبر نیست.");
+    }
+    for (const key of ["tags", "requirementLabels"] as const) {
+      if (row[key] !== undefined &&
+        (!Array.isArray(row[key]) || row[key].some((item) => typeof item !== "string"))) {
+        throw new Error("فهرست‌های یکی از قالب‌های پرونده معتبر نیست.");
+      }
+    }
+    if (row.favorite !== undefined && typeof row.favorite !== "boolean") {
+      throw new Error("وضعیت علاقه‌مندی یکی از قالب‌ها معتبر نیست.");
+    }
+    if (row.useCount !== undefined &&
+      (typeof row.useCount !== "number" || !Number.isFinite(row.useCount) || row.useCount < 0)) {
+      throw new Error("تعداد استفاده یکی از قالب‌ها معتبر نیست.");
+    }
+    if (row.lastUsedAt !== undefined && typeof row.lastUsedAt !== "string") {
+      throw new Error("تاریخ آخرین استفاده یکی از قالب‌ها معتبر نیست.");
+    }
+    if (templateIds.has(id)) throw new Error("شناسه تکراری در قالب‌های پرونده وجود دارد.");
+    templateIds.add(id);
+  }
+
   const budgetPlanIds = new Set<string>();
   for (const raw of budgetPlans) {
     const row = requireRow(raw, "بودجه‌ها");
@@ -489,6 +542,7 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
       attachmentBytes,
       budgetPlans: budgetPlans.length,
       sellerProfiles: sellerProfiles.length,
+      caseTemplates: caseTemplates.length,
     },
     data: {
       purchaseCases: purchaseCases as PurchaseCase[],
@@ -498,6 +552,7 @@ export function parseBesanjBackupText(text: string): BesanjBackupFile {
       attachments: attachments as PortableAttachment[],
       budgetPlans: budgetPlans as BudgetPlan[],
       sellerProfiles: sellerProfiles as SellerProfile[],
+      caseTemplates: caseTemplates as CaseTemplate[],
     },
   };
 }

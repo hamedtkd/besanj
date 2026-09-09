@@ -113,7 +113,8 @@ export function DataBackupSection() {
       (stats?.reminders ?? 0) +
       (stats?.attachments ?? 0) +
       (stats?.budgetPlans ?? 0) +
-      (stats?.sellerProfiles ?? 0) >
+      (stats?.sellerProfiles ?? 0) +
+      (stats?.caseTemplates ?? 0) >
       0);
 
   return (
@@ -139,6 +140,7 @@ export function DataBackupSection() {
                 {stats.reminders.toLocaleString("fa-IR-u-nu-arabext")} پیگیری ·{" "}
                 {stats.attachments.toLocaleString("fa-IR-u-nu-arabext")} پیوست
                 {stats.sellerProfiles ? ` · ${stats.sellerProfiles.toLocaleString("fa-IR-u-nu-arabext")} پروفایل فروشنده` : ""}
+                {stats.caseTemplates ? ` · ${stats.caseTemplates.toLocaleString("fa-IR-u-nu-arabext")} قالب شخصی` : ""}
                 {stats.budgetPlans ? " · بودجه ماهانه تنظیم شده" : ""}
                 {stats.attachmentBytes
                   ? ` · ${formatFileSize(stats.attachmentBytes)} فایل`
@@ -200,6 +202,7 @@ export function DataBackupSection() {
               </span>
               <span>
                 {(pendingBackup.stats.sellerProfiles ?? 0).toLocaleString("fa-IR-u-nu-arabext")} پروفایل فروشنده ·{" "}
+                {(pendingBackup.stats.caseTemplates ?? 0).toLocaleString("fa-IR-u-nu-arabext")} قالب شخصی ·{" "}
                 {pendingBackup.stats.attachments.toLocaleString("fa-IR-u-nu-arabext")} پیوست
               </span>
               <span>{formatFileSize(pendingBackup.stats.attachmentBytes)} فایل پیوست</span>
