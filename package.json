@@ -1,6 +1,6 @@
 {
   "name": "besanj",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "lint": "eslint . --max-warnings=0",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "check:ui": "node scripts/cleanup-stale-ui.mjs && node scripts/check-ui-components.mjs",
-    "check": "npm run doctor && npm run check:ui && npm run check:tooltips && npm run check:theme && npm run check:pwa && npm run check:workflow && npm run check:data && npm run check:report && npm run check:automation && npm run check:capture && npm run check:quick-capture && npm run check:cloud-voice && npm run check:voice-fallback && npm run check:purchase && npm run check:insights && npm run check:categories-budget && npm run check:sellers && npm run check:persian-ui && npm run typecheck && npm run lint && npm test && npm run build",
+    "check": "npm run doctor && npm run check:ui && npm run check:tooltips && npm run check:templates && npm run check:theme && npm run check:pwa && npm run check:workflow && npm run check:data && npm run check:report && npm run check:automation && npm run check:capture && npm run check:quick-capture && npm run check:cloud-voice && npm run check:voice-fallback && npm run check:purchase && npm run check:insights && npm run check:categories-budget && npm run check:sellers && npm run check:persian-ui && npm run typecheck && npm run lint && npm test && npm run build",
     "predev": "node scripts/cleanup-stale-ui.mjs && node scripts/doctor.mjs",
     "postinstall": "node scripts/cleanup-stale-ui.mjs",
     "doctor": "node scripts/doctor.mjs",
@@ -30,7 +30,8 @@
     "check:quick-capture": "node scripts/check-quick-capture.mjs",
     "check:cloud-voice": "node scripts/check-cloud-voice.mjs",
     "check:voice-fallback": "node scripts/check-voice-fallback.mjs",
-    "check:tooltips": "node scripts/check-tooltips.mjs"
+    "check:tooltips": "node scripts/check-tooltips.mjs",
+    "check:templates": "node scripts/check-templates.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

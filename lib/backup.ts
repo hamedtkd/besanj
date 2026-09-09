@@ -15,7 +15,7 @@ import {
 } from "./theme";
 import { normalizeHexColor, normalizeSavedThemeColors } from "./theme-color";
 
-export const BESANJ_APP_VERSION = "1.3.0";
+export const BESANJ_APP_VERSION = "1.6.0";
 
 const PALETTE_STORAGE_KEY = "estelamkoo:palette";
 const CUSTOM_COLOR_STORAGE_KEY = "estelamkoo:custom-color";
@@ -97,6 +97,7 @@ export async function createFullBackup() {
     attachments,
     budgetPlans,
     sellerProfiles,
+    caseTemplates,
   ] = await Promise.all([
       db.purchaseCases.toArray(),
       db.providers.toArray(),
@@ -105,6 +106,7 @@ export async function createFullBackup() {
       db.attachments.toArray(),
       db.budgetPlans.toArray(),
       db.sellerProfiles.toArray(),
+      db.caseTemplates.toArray(),
     ]);
 
   return buildBesanjBackupFile(
@@ -116,6 +118,7 @@ export async function createFullBackup() {
       attachments,
       budgetPlans,
       sellerProfiles,
+      caseTemplates,
     },
     {
       appVersion: BESANJ_APP_VERSION,
@@ -141,9 +144,11 @@ export async function replaceWithBackup(backup: BesanjBackupFile) {
       db.attachments,
       db.budgetPlans,
       db.sellerProfiles,
+      db.caseTemplates,
     ],
     async () => {
       await db.attachments.clear();
+      await db.caseTemplates.clear();
       await db.sellerProfiles.clear();
       await db.budgetPlans.clear();
       await db.reminders.clear();
@@ -172,6 +177,9 @@ export async function replaceWithBackup(backup: BesanjBackupFile) {
       if (backup.data.budgetPlans?.length) {
         await db.budgetPlans.bulkAdd(backup.data.budgetPlans);
       }
+      if (backup.data.caseTemplates?.length) {
+        await db.caseTemplates.bulkAdd(backup.data.caseTemplates);
+      }
     }
   );
 
@@ -179,7 +187,7 @@ export async function replaceWithBackup(backup: BesanjBackupFile) {
 }
 
 export async function readBackupStats() {
-  const [cases, providers, quotes, reminders, attachments, budgetPlans, sellerProfiles] = await Promise.all([
+  const [cases, providers, quotes, reminders, attachments, budgetPlans, sellerProfiles, caseTemplates] = await Promise.all([
     db.purchaseCases.count(),
     db.providers.count(),
     db.quotes.count(),
@@ -187,6 +195,7 @@ export async function readBackupStats() {
     db.attachments.toArray(),
     db.budgetPlans.count(),
     db.sellerProfiles.count(),
+    db.caseTemplates.count(),
   ]);
 
   return {
@@ -197,6 +206,7 @@ export async function readBackupStats() {
     attachments: attachments.length,
     budgetPlans,
     sellerProfiles,
+    caseTemplates,
     attachmentBytes: attachments.reduce(
       (sum, attachment) => sum + attachment.size,
       0

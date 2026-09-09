@@ -7,6 +7,7 @@ import {
   ChartNoAxesCombined,
   CirclePlus,
   Filter,
+  LayoutTemplate,
   RefreshCw,
   RotateCcw,
   Search,
@@ -17,6 +18,7 @@ import { HelpHint } from "@/components/help-hint";
 import { CaseCard } from "@/components/case-card";
 import { CreateCaseDialog } from "@/components/create-case-dialog";
 import { QuickCaptureSheet } from "@/components/quick-capture-sheet";
+import { TemplatePickerSheet } from "@/components/template-picker-sheet";
 import { EmptyState } from "@/components/empty-state";
 import { TodayQueue } from "@/components/today-queue";
 import { MonthlyBudgetSummary } from "@/components/monthly-budget-summary";
@@ -44,6 +46,7 @@ import { collectCategoryOptions, collectTagOptions } from "@/lib/categories";
 import { buildDashboardTasks } from "@/lib/follow-up";
 import type { PurchaseStatus } from "@/lib/types";
 import { QUICK_CAPTURE_DRAFT_KEY, parseQuickCaptureDraft, type QuickCaptureDraftState } from "@/lib/quick-capture";
+import type { CaseTemplateOption } from "@/lib/case-templates";
 
 const statusTabs: Array<{ value: PurchaseStatus; label: string }> = [
   { value: "active", label: "فعال" },
@@ -74,6 +77,8 @@ const SORT_ITEMS: Array<{ value: HomeCaseSort; label: string }> = [
 export function HomeScreen() {
   const [createOpen, setCreateOpen] = React.useState(false);
   const [quickOpen, setQuickOpen] = React.useState(false);
+  const [templatesOpen, setTemplatesOpen] = React.useState(false);
+  const [selectedTemplate, setSelectedTemplate] = React.useState<CaseTemplateOption | undefined>(undefined);
   const [quickSession, setQuickSession] = React.useState(0);
   const [quickInitialDraft, setQuickInitialDraft] = React.useState<QuickCaptureDraftState | undefined>(undefined);
   const [status, setStatus] = React.useState<PurchaseStatus>("active");
@@ -150,6 +155,17 @@ export function HomeScreen() {
     setQuickOpen(true);
   }
 
+  function openCreateCase() {
+    setSelectedTemplate(undefined);
+    setCreateOpen(true);
+  }
+
+  function chooseTemplate(template: CaseTemplateOption) {
+    setSelectedTemplate(template);
+    setTemplatesOpen(false);
+    setCreateOpen(true);
+  }
+
   return (
     <>
       <section className="mb-6 overflow-hidden rounded-3xl border border-border/90 bg-card/72 shadow-[0_18px_60px_color-mix(in_oklab,var(--foreground)_5%,transparent)] sm:mb-7">
@@ -188,7 +204,16 @@ export function HomeScreen() {
                 type="button"
                 size="lg"
                 variant="outline"
-                onClick={() => setCreateOpen(true)}
+                onClick={() => setTemplatesOpen(true)}
+              >
+                <LayoutTemplate />
+                قالب‌ها
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                onClick={openCreateCase}
               >
                 <CirclePlus />
                 پرونده جدید
@@ -406,7 +431,7 @@ export function HomeScreen() {
                 description={emptyDescription(tab.value)}
                 action={
                   tab.value === "active" ? (
-                    <Button type="button" onClick={() => setCreateOpen(true)}>
+                    <Button type="button" onClick={openCreateCase}>
                       <CirclePlus />
                       ساخت اولین پرونده
                     </Button>
@@ -418,17 +443,42 @@ export function HomeScreen() {
         ))}
       </Tabs>
 
-      <Button
-        type="button"
-        size="lg"
-        className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] end-4 z-30 rounded-2xl shadow-xl sm:hidden"
-        onClick={openQuickCapture}
-      >
-        <Zap />
-        ثبت سریع
-      </Button>
+      <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] end-4 z-30 flex items-center gap-2 sm:hidden">
+        <Button
+          type="button"
+          size="lg"
+          variant="outline"
+          className="rounded-2xl bg-popover/95 shadow-lg backdrop-blur"
+          onClick={() => setTemplatesOpen(true)}
+        >
+          <LayoutTemplate />
+          قالب‌ها
+        </Button>
+        <Button
+          type="button"
+          size="lg"
+          className="rounded-2xl shadow-xl"
+          onClick={openQuickCapture}
+        >
+          <Zap />
+          ثبت سریع
+        </Button>
+      </div>
 
-      <CreateCaseDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <CreateCaseDialog
+        key={selectedTemplate?.id ?? "blank"}
+        open={createOpen}
+        onOpenChange={(next) => {
+          setCreateOpen(next);
+          if (!next) setSelectedTemplate(undefined);
+        }}
+        initialTemplate={selectedTemplate}
+      />
+      <TemplatePickerSheet
+        open={templatesOpen}
+        onOpenChange={setTemplatesOpen}
+        onChoose={chooseTemplate}
+      />
       <QuickCaptureSheet
         key={quickSession}
         open={quickOpen}

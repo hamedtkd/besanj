@@ -56,6 +56,23 @@ export interface PurchaseCase {
   updatedAt: string;
 }
 
+export interface CaseTemplate {
+  id: string;
+  name: string;
+  kind: PurchaseKind;
+  description?: string;
+  targetBudgetToman?: number;
+  categoryKey?: string;
+  categoryLabel?: string;
+  tags?: string[];
+  requirementLabels?: string[];
+  favorite?: boolean;
+  useCount?: number;
+  lastUsedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SellerProfile {
   id: string;
   name: string;

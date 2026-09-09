@@ -4,6 +4,7 @@ import Dexie, { type EntityTable } from "dexie";
 import { sanitizeRequirementChecks } from "@/lib/planning";
 import { normalizeTags, resolveCategory } from "@/lib/categories";
 import { normalizeBudgetPlan } from "@/lib/budget";
+import { normalizeCaseTemplate, templateFromPurchaseCase, templateToCaseInput } from "@/lib/case-templates";
 import { snoozeReminderDueAt } from "@/lib/follow-up";
 import { cloneRequirementsForNewCase, makeRepeatedCaseTitle } from "@/lib/duplicate-case";
 import { normalizePurchaseOutcome, type PurchaseOutcomeInput } from "@/lib/purchase-outcome";
@@ -16,6 +17,7 @@ import {
 } from "@/lib/seller-profiles";
 import type {
   BudgetPlan,
+  CaseTemplate,
   CaseReminder,
   CaseRequirement,
   Provider,
@@ -37,6 +39,7 @@ class BesanjDB extends Dexie {
   attachments!: EntityTable<QuoteAttachment, "id">;
   budgetPlans!: EntityTable<BudgetPlan, "id">;
   sellerProfiles!: EntityTable<SellerProfile, "id">;
+  caseTemplates!: EntityTable<CaseTemplate, "id">;
 
   constructor() {
     super("estelamkoo-local");
@@ -178,6 +181,20 @@ class BesanjDB extends Dexie {
         }
       });
 
+    this.version(7).stores({
+      purchaseCases: "&id, status, kind, createdAt, updatedAt",
+      providers:
+        "&id, caseId, sellerProfileId, name, rating, updatedAt, [sellerProfileId+caseId]",
+      quotes:
+        "&id, caseId, providerId, channel, quotedAt, validUntil, [caseId+providerId], [caseId+quotedAt], createdAt, updatedAt",
+      reminders:
+        "&id, caseId, providerId, quoteId, status, dueAt, [caseId+status], createdAt, updatedAt",
+      attachments: "&id, caseId, quoteId, createdAt",
+      budgetPlans: "&id, updatedAt",
+      sellerProfiles: "&id, name, phone, updatedAt",
+      caseTemplates: "&id, name, kind, categoryKey, updatedAt, lastUsedAt",
+    });
+
   }
 }
 
@@ -253,6 +270,92 @@ export async function createPurchaseCase(input: {
     updatedAt: now,
   };
   await db.purchaseCases.add(row);
+  return row;
+}
+
+export async function createCaseTemplate(input: {
+  name: string;
+  kind: PurchaseKind;
+  description?: string;
+  targetBudgetToman?: number | null;
+  categoryKey?: string | null;
+  categoryLabel?: string | null;
+  tags?: string[];
+  requirementLabels?: string[];
+  favorite?: boolean;
+}) {
+  const row = normalizeCaseTemplate({
+    ...input,
+    targetBudgetToman: input.targetBudgetToman ?? undefined,
+    categoryKey: input.categoryKey ?? undefined,
+    categoryLabel: input.categoryLabel ?? undefined,
+  });
+  await db.caseTemplates.add(row);
+  return row;
+}
+
+export async function saveCaseAsTemplate(
+  caseId: string,
+  options?: { name?: string; includeBudget?: boolean }
+) {
+  const purchaseCase = await db.purchaseCases.get(caseId);
+  if (!purchaseCase) throw new Error("پرونده پیدا نشد.");
+  const row = templateFromPurchaseCase(purchaseCase, options);
+  await db.caseTemplates.add(row);
+  return row;
+}
+
+export async function updateCaseTemplate(
+  id: string,
+  patch: Partial<
+    Pick<
+      CaseTemplate,
+      | "name"
+      | "kind"
+      | "description"
+      | "targetBudgetToman"
+      | "categoryKey"
+      | "categoryLabel"
+      | "tags"
+      | "requirementLabels"
+      | "favorite"
+    >
+  >
+) {
+  const current = await db.caseTemplates.get(id);
+  if (!current) throw new Error("قالب پیدا نشد.");
+  const row = normalizeCaseTemplate({ ...current, ...patch, id: current.id, createdAt: current.createdAt }, {
+    id: current.id,
+  });
+  await db.caseTemplates.put(row);
+  return row;
+}
+
+export async function deleteCaseTemplate(id: string) {
+  await db.caseTemplates.delete(id);
+}
+
+export async function markCaseTemplateUsed(id: string) {
+  if (id.startsWith("builtin:")) return;
+  const current = await db.caseTemplates.get(id);
+  if (!current) return;
+  const now = new Date().toISOString();
+  await db.caseTemplates.update(id, {
+    useCount: (current.useCount ?? 0) + 1,
+    lastUsedAt: now,
+    updatedAt: now,
+  });
+}
+
+export async function createPurchaseCaseFromTemplate(
+  template: CaseTemplate,
+  title?: string,
+  options?: { trackUsage?: boolean }
+) {
+  const row = await createPurchaseCase(templateToCaseInput(template, title));
+  if (options?.trackUsage !== false) {
+    await markCaseTemplateUsed(template.id);
+  }
   return row;
 }
 

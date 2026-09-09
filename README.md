@@ -2,7 +2,27 @@
 
 بسنج یک وب اپ فارسی و local-first برای مدیریت تصمیم خرید است. داده های اصلی خرید، فروشنده، استعلام، بودجه و تاریخچه همچنان روی دستگاه کاربر می مانند. تنها قابلیت اختیاری «گفتار با هوش مصنوعی» یک route سروری کوچک دارد که فقط صدای همان ضبط را برای تبدیل به متن به Groq می فرستد.
 
-نسخه فعلی: **1.5.1**
+نسخه فعلی: **1.6.0**
+
+## نسخه 1.6.0: قالب های سریع برای خریدهای تکراری
+
+این نسخه سرعت شروع پرونده را بالا می برد. کاربر می تواند به جای پر کردن دوباره دسته، برچسب، شرط ها و توضیح پایه، از یک قالب آماده استفاده کند یا هر پرونده قبلی را به قالب شخصی تبدیل کند.
+
+- ۸ قالب آماده برای لپ تاپ، موبایل، تلویزیون، لوازم خانگی، خودرو، درمان، خدمات خانه و سفر.
+- دکمه «قالب ها» در داشبورد دسکتاپ و موبایل.
+- جست وجوی قالب بر اساس نام، دسته، برچسب و شرط پیشنهادی.
+- انتخاب قالب فقط فرم پرونده را از قبل پر می کند و همه اطلاعات قبل از ساخت قابل ویرایش هستند.
+- قالب ها هیچ فروشنده، استعلام، قیمت، فایل یا شناسه خرید را ذخیره نمی کنند.
+- دکمه «ذخیره قالب» داخل هر پرونده برای ساخت قالب شخصی از ساختار همان پرونده.
+- بودجه به صورت پیش فرض داخل قالب شخصی ذخیره نمی شود تا رقم قدیمی ناخواسته به خرید بعدی منتقل نشود؛ کاربر می تواند آن را صریحاً فعال کند.
+- علاقه مندی، تعداد استفاده و مرتب سازی قالب های شخصی.
+- حذف قالب شخصی با تأیید دو مرحله ای.
+- Dexie از v6 به v7 ارتقا یافته و جدول `caseTemplates` اضافه شده است.
+- Backup format همچنان نسخه 1 و backward-compatible است؛ فیلد `caseTemplates` اختیاری به پشتیبان اضافه شده است.
+- Backup های قدیمی بدون قالب همچنان پذیرفته می شوند.
+- Guard جدید `check:templates` به `npm run check` اضافه شده است.
+- Service Worker cache version: `besanj-shell-v19`.
+- dependency جدید npm اضافه نشده است.
 
 ## نسخه 1.5.1: گفتار دقیق تر با هوش مصنوعی و حالت محلی
 
@@ -334,6 +354,8 @@ npm run check
 ```text
 doctor
 check:ui
+check:tooltips
+check:templates
 check:theme
 check:pwa
 check:workflow
@@ -342,12 +364,13 @@ check:report
 check:automation
 check:capture
 check:quick-capture
+check:cloud-voice
 check:voice-fallback
 check:purchase
 check:insights
 check:categories-budget
 check:sellers
-check:tooltips
+check:persian-ui
 typecheck
 lint
 test
@@ -361,7 +384,24 @@ build
 Service Worker در production ثبت می شود. cache فعلی:
 
 ```text
-besanj-shell-v18
+besanj-shell-v19
+```
+
+## فایل های مهم نسخه 1.6.0
+
+```text
+lib/case-templates.ts
+lib/db.ts
+lib/backup.ts
+lib/backup-format.ts
+components/template-picker-sheet.tsx
+components/save-template-sheet.tsx
+components/create-case-dialog.tsx
+components/home-screen.tsx
+components/case-screen.tsx
+scripts/check-templates.mjs
+tests/case-templates.test.ts
+docs/RELEASE_1.6.0.md
 ```
 
 ## فایل های مهم نسخه 1.5.1
@@ -446,12 +486,12 @@ docs/RELEASE_1.2.0.md
 
 از v1.5.1 fix5، متن های توضیحی غیرحیاتی با `HelpHint` و Tooltip رسمی PersianLabs/ui نمایش داده می شوند. `ResponsiveSheet.description` و `FormField.hint` این رفتار را به صورت مرکزی اعمال می کنند. خطاها، هشدارهای destructive و پیام های وضعیت مهم همچنان مستقیم روی صفحه می مانند.
 
-## توسعه نسخه 1.5.1
+## توسعه نسخه 1.6.0
 
-Branch پیشنهادی این Patch:
+Branch پیشنهادی این فاز:
 
 ```text
-fix/local-whisper-v1.5.1
+feat/case-templates-v1.6
 ```
 
 بعد از جایگزینی سورس:
@@ -465,7 +505,7 @@ npm run check
 
 ```bash
 git add .
-git commit -m "fix: add cached local Whisper fallback v1.5.1"
+git commit -m "feat: add reusable purchase templates v1.6.0"
 ```
 
 Merge و Tag فقط بعد از سبزشدن کامل روی سیستم مقصد انجام شود.
@@ -474,4 +514,4 @@ Merge و Tag فقط بعد از سبزشدن کامل روی سیستم مقصد
 
 - `THIRD_PARTY.md`: کتابخانه ها و مجوزها.
 - `QA.md`: وضعیت QA نسخه ها.
-- `docs/RELEASE_1.5.1.md`: Release Note نسخه فعلی.
+- `docs/RELEASE_1.6.0.md`: Release Note نسخه فعلی.
