@@ -12,6 +12,7 @@ import {
   Store,
 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { HelpHint } from "@/components/help-hint";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -63,10 +64,12 @@ export function SellerDirectoryPage() {
             <Store className="size-5" />
             <span className="type-label">حافظه فروشنده‌ها</span>
           </div>
-          <h1 className="type-page-title mt-2">فروشنده‌ها</h1>
-          <p className="type-body mt-2 max-w-2xl text-muted-foreground">
-            سابقه قیمت، خرید، امتیاز و تحویل هر فروشنده در همه پرونده‌ها اینجا کنار هم می‌ماند.
-          </p>
+          <div className="mt-2 flex items-center gap-1.5">
+            <h1 className="type-page-title">فروشنده‌ها</h1>
+            <HelpHint label="راهنمای فروشنده‌ها" side="bottom">
+              سابقه قیمت، خرید، امتیاز و تحویل هر فروشنده در همه پرونده‌ها اینجا کنار هم می‌ماند.
+            </HelpHint>
+          </div>
         </div>
       </section>
 

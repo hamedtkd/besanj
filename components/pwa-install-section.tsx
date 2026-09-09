@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, Download, Share2, Smartphone } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/use-pwa-install";
@@ -15,11 +16,11 @@ export function PwaInstallSection() {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="type-card-title">نصب روی دستگاه</h3>
+            <HelpHint label="راهنمای نصب روی دستگاه">
+              بسنج را مثل یک اپ مستقل روی موبایل یا دسکتاپ باز کن.
+            </HelpHint>
             <Badge variant="secondary">قابل نصب</Badge>
           </div>
-          <p className="type-caption text-muted-foreground">
-            بسنج را مثل یک اپ مستقل روی موبایل یا دسکتاپ باز کن.
-          </p>
         </div>
       </div>
 

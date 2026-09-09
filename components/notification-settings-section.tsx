@@ -1,6 +1,7 @@
 "use client";
 
 import { BellOff, BellRing, CircleAlert, FlaskConical, Smartphone } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { useNotifications } from "@/components/notification-provider";
 import { useToast } from "@/components/toast";
 import { Badge } from "@/components/ui/badge";
@@ -63,11 +64,11 @@ export function NotificationSettingsSection() {
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <BellRing className="size-4 shrink-0 text-primary" />
-          <div>
+          <div className="flex items-center gap-1.5">
             <h3 className="type-card-title">اعلان و پیگیری هوشمند</h3>
-            <p className="type-caption text-muted-foreground">
+            <HelpHint label="راهنمای اعلان‌ها">
               کارهای مهم را هنگام باز بودن یا برگشتن به بسنج یادآوری کن.
-            </p>
+            </HelpHint>
           </div>
         </div>
         <Badge variant={active ? "success" : "secondary"}>
@@ -81,13 +82,13 @@ export function NotificationSettingsSection() {
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
               {active ? <BellRing className="size-4" /> : <BellOff className="size-4" />}
             </span>
-            <div>
+            <div className="flex items-center gap-1.5">
               <div className="type-label">اعلان سیستم‌عامل</div>
-              <p className="type-caption mt-0.5 max-w-md text-muted-foreground">
+              <HelpHint label="راهنمای اعلان سیستم‌عامل">
                 {active
                   ? "بسنج موارد جدید را یک‌بار در هر روز اعلان می‌کند و شمار کارها را روی آیکن اپ نگه می‌دارد."
                   : "برای دریافت هشدار باید یک‌بار اجازه اعلان را به بسنج بدهی."}
-              </p>
+              </HelpHint>
             </div>
           </div>
 
@@ -122,9 +123,11 @@ export function NotificationSettingsSection() {
                   checked={notifications.settings[item.key]}
                   onCheckedChange={(checked) => notifications.setKindEnabled(item.key, checked === true)}
                 />
-                <span className="min-w-0">
-                  <span className="type-label block">{item.label}</span>
-                  <span className="type-caption mt-0.5 block text-muted-foreground">{item.description}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-1">
+                    <span className="type-label block">{item.label}</span>
+                    <HelpHint label={`راهنمای ${item.label}`}>{item.description}</HelpHint>
+                  </span>
                 </span>
               </label>
             ))}
@@ -134,13 +137,13 @@ export function NotificationSettingsSection() {
                 checked={notifications.settings.appBadge}
                 onCheckedChange={(checked) => notifications.setKindEnabled("appBadge", checked === true)}
               />
-              <span className="min-w-0">
+              <span className="min-w-0 flex-1">
                 <span className="type-label flex items-center gap-1.5">
                   <Smartphone className="size-3.5 text-primary" />
                   نشان تعداد کارها روی آیکن اپ
-                </span>
-                <span className="type-caption mt-0.5 block text-muted-foreground">
-                  در مرورگرها و سیستم‌عامل‌هایی که App Badge را پشتیبانی می‌کنند.
+                  <HelpHint label="راهنمای نشان آیکن اپ">
+                    در مرورگرها و سیستم‌عامل‌هایی که App Badge را پشتیبانی می‌کنند.
+                  </HelpHint>
                 </span>
               </span>
             </label>

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { CircleAlert, Clipboard, Sparkles } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { LocalVoiceCapture } from "@/components/local-voice-capture";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,10 +29,12 @@ export function QuoteCapturePanel({
           <Clipboard className="size-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="type-label">ثبت سریع از متن</div>
-          <p className="type-caption mt-0.5 text-muted-foreground">
-            متن پیام، پیش‌فاکتور یا یادداشت فروشنده را بچسبان. بسنج فقط فیلدهای قابل تشخیص را پیشنهاد می‌دهد و چیزی خودکار ثبت نمی‌شود.
-          </p>
+          <div className="flex items-center gap-1.5">
+            <div className="type-label">ثبت سریع از متن</div>
+            <HelpHint label="راهنمای ثبت سریع از متن">
+              متن پیام، پیش‌فاکتور یا یادداشت فروشنده را بچسبان. بسنج فقط فیلدهای قابل تشخیص را پیشنهاد می‌دهد و چیزی خودکار ثبت نمی‌شود.
+            </HelpHint>
+          </div>
         </div>
       </div>
 
@@ -50,10 +53,10 @@ export function QuoteCapturePanel({
           }
         />
 
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="type-caption text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <HelpHint label="راهنمای پر کردن فرم">
             قیمت و اطلاعات پیشنهادی را بعد از پرشدن فرم بررسی کن.
-          </span>
+          </HelpHint>
           <Button
             type="button"
             size="sm"

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ArrowDown, ArrowUp, Minus, RefreshCw, Store } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
@@ -59,14 +60,12 @@ export function QuoteHistory({
     <div>
       <Card className="mb-4 p-4 sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <Store className="size-4 text-primary" />
-              <h2 className="type-card-title">تاریخچه فروشنده</h2>
-            </div>
-            <p className="type-caption mt-1 text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Store className="size-4 text-primary" />
+            <h2 className="type-card-title">تاریخچه فروشنده</h2>
+            <HelpHint label="راهنمای تاریخچه فروشنده">
               همه استعلام‌ها را ببین یا یک فروشنده را انتخاب کن تا روند قیمت همان فروشگاه جدا شود.
-            </p>
+            </HelpHint>
           </div>
           <div className="w-full sm:w-72">
             <Select<string>

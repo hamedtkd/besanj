@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { BellRing } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { useToast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -94,11 +95,12 @@ export function CaseFollowUpSheet({
       description="بسنج این مورد را در کارهای امروز و پرونده نگه می‌دارد."
     >
       <div className="grid gap-5 p-4 pb-6 sm:p-5">
-        <div className="flex items-start gap-3 rounded-2xl border border-primary/15 bg-primary/[0.055] p-3.5">
-          <BellRing className="mt-0.5 size-4.5 shrink-0 text-primary" />
-          <p className="type-caption text-muted-foreground">
+        <div className="flex items-center gap-2 rounded-2xl border border-primary/15 bg-primary/[0.055] p-3.5">
+          <BellRing className="size-4.5 shrink-0 text-primary" />
+          <span className="type-label">پیگیری در کارهای امروز</span>
+          <HelpHint label="راهنمای پیگیری">
             این پیگیری در «کارهای امروز» می‌ماند. اگر اعلان‌های بسنج را در تنظیمات فعال کرده باشی، هنگام اجرای اپ یا برگشتن به آن هشدار سیستم‌عامل هم می‌گیری.
-          </p>
+          </HelpHint>
         </div>
 
         <FormField label="عنوان پیگیری" required>

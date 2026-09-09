@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ListChecks, Shapes, Tags, WalletCards } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { useToast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
@@ -172,11 +173,12 @@ export function CasePlanningSheet({
         </FormField>
 
         <div className="rounded-2xl border border-primary/15 bg-primary/[0.055] p-3.5">
-          <div className="flex items-start gap-2.5">
-            <WalletCards className="mt-0.5 size-4.5 shrink-0 text-primary" />
-            <p className="type-caption text-muted-foreground">
+          <div className="flex items-center gap-2.5">
+            <WalletCards className="size-4.5 shrink-0 text-primary" />
+            <span className="type-label">بودجه هدف پرونده</span>
+            <HelpHint label="راهنمای بودجه هدف پرونده">
               بودجه هدف این پرونده با بودجه ماهانه فرق دارد. این عدد برای انتخاب همین خرید است و بودجه ماهانه برای کنترل مجموع خریدها استفاده می‌شود.
-            </p>
+            </HelpHint>
           </div>
         </div>
 

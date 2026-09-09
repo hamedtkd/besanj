@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Upload,
 } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { useToast } from "@/components/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -119,12 +120,11 @@ export function DataBackupSection() {
     <section className="border-t border-border pt-5">
       <div className="mb-3 flex items-start gap-2">
         <Database className="mt-0.5 size-4 text-primary" />
-        <div>
+        <div className="flex items-center gap-1.5">
           <h3 className="type-card-title">پشتیبان و انتقال داده</h3>
-          <p className="type-caption mt-0.5 text-muted-foreground">
-            پرونده‌ها، فروشنده‌ها، دسته‌ها، برچسب‌ها، بودجه‌ها، استعلام‌ها، پیگیری‌ها، پیوست‌ها و تنظیمات ظاهری را در یک
-            فایل نگه دار یا روی دستگاه دیگری بازیابی کن.
-          </p>
+          <HelpHint label="راهنمای پشتیبان و انتقال داده">
+            پرونده‌ها، فروشنده‌ها، دسته‌ها، برچسب‌ها، بودجه‌ها، استعلام‌ها، پیگیری‌ها، پیوست‌ها و تنظیمات ظاهری را در یک فایل نگه دار یا روی دستگاه دیگری بازیابی کن.
+          </HelpHint>
         </div>
       </div>
 
@@ -171,11 +171,10 @@ export function DataBackupSection() {
         <div className="flex items-center gap-2">
           <Upload className="size-4 text-primary" />
           <div className="type-label">بازیابی از فایل</div>
+          <HelpHint label="راهنمای بازیابی از فایل">
+            ابتدا فایل را انتخاب کن. تا وقتی تأیید نهایی نکنی، هیچ داده‌ای تغییر نمی‌کند.
+          </HelpHint>
         </div>
-        <p className="type-caption mt-1 text-muted-foreground">
-          ابتدا فایل را انتخاب کن. تا وقتی تأیید نهایی نکنی، هیچ داده‌ای تغییر
-          نمی‌کند.
-        </p>
 
         <Input
           type="file"

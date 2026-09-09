@@ -20,6 +20,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import { CaseFollowUpSheet } from "@/components/case-follow-up-sheet";
+import { HelpHint } from "@/components/help-hint";
 import { DuplicateCaseSheet } from "@/components/duplicate-case-sheet";
 import { CasePlanningSheet } from "@/components/case-planning-sheet";
 import { ProviderRatingSheet } from "@/components/provider-rating-sheet";
@@ -227,14 +228,12 @@ export function CaseDetailsPanel({
 
         <Card className="p-4 sm:p-5 lg:col-span-2">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <WalletCards className="size-5 text-primary" />
-                <h3 className="type-section-title">برنامه خرید</h3>
-              </div>
-              <p className="type-caption mt-1 text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <WalletCards className="size-5 text-primary" />
+              <h3 className="type-section-title">برنامه خرید</h3>
+              <HelpHint label="راهنمای برنامه خرید">
                 دسته، برچسب، بودجه و شرط‌هایی که باید موقع تصمیم نهایی جلوی چشم بمانند.
-              </p>
+              </HelpHint>
             </div>
             <Button type="button" size="sm" variant="outline" onClick={() => setPlanningOpen(true)}>
               <Pencil />ویرایش
@@ -319,14 +318,12 @@ export function CaseDetailsPanel({
         </Card>
 
         <Card className="p-4 sm:p-5">
-          <div>
-            <div className="flex items-center gap-2">
-              <Star className="size-5 text-primary" />
-              <h3 className="type-section-title">اعتماد به فروشنده‌ها</h3>
-            </div>
-            <p className="type-caption mt-1 text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Star className="size-5 text-primary" />
+            <h3 className="type-section-title">اعتماد به فروشنده‌ها</h3>
+            <HelpHint label="راهنمای امتیاز فروشنده">
               تجربه خودت را ثبت کن؛ امتیاز اعتماد در تصمیم‌یار اثر ملایم دارد.
-            </p>
+            </HelpHint>
           </div>
 
           {providers.length ? (
@@ -370,11 +367,11 @@ export function CaseDetailsPanel({
           <div className="flex items-center gap-2">
             <FileText className="size-5 text-primary" />
             <h3 className="type-section-title">پیوست‌های استعلام</h3>
+            <HelpHint label="راهنمای پیوست‌ها">
+              فایل‌ها فقط روی همین مرورگر و داخل دیتابیس محلی بسنج ذخیره می‌شوند.
+            </HelpHint>
             {attachments.length ? <Badge variant="secondary">{attachments.length.toLocaleString("fa-IR-u-nu-arabext")}</Badge> : null}
           </div>
-          <p className="type-caption mt-1 text-muted-foreground">
-            فایل‌ها فقط روی همین مرورگر و داخل دیتابیس محلی بسنج ذخیره می‌شوند.
-          </p>
 
           {attachments.length ? (
             <div className="mt-4 grid gap-2 sm:grid-cols-2">

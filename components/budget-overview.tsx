@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AlertTriangle, PiggyBank, Settings2, WalletCards } from "lucide-react";
 import { BudgetSettingsSheet } from "@/components/budget-settings-sheet";
+import { HelpHint } from "@/components/help-hint";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -34,11 +35,11 @@ export function BudgetOverview({
             <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
               <PiggyBank className="size-5" />
             </span>
-            <div>
+            <div className="flex items-center gap-1.5">
               <h2 className="type-section-title">بودجه {snapshot.monthLabel}</h2>
-              <p className="type-caption mt-1 text-muted-foreground">
+              <HelpHint label="راهنمای بودجه ماهانه">
                 میزان مصرف از مبلغ واقعی خریدهای ثبت‌شده همین ماه محاسبه می‌شود.
-              </p>
+              </HelpHint>
             </div>
           </div>
           <Button type="button" variant="outline" onClick={() => setSettingsOpen(true)}>

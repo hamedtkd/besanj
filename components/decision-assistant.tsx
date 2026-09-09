@@ -9,6 +9,7 @@ import {
   Sparkles,
   Trophy,
 } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -101,11 +102,11 @@ export function DecisionAssistant({
         <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex items-start gap-3">
             <StepBadge step="۱" />
-            <div>
+            <div className="flex items-center gap-1.5">
               <h2 className="type-section-title">گزینه‌های تصمیم را انتخاب کن</h2>
-              <p className="type-caption mt-1 text-muted-foreground">
+              <HelpHint label="راهنمای گزینه‌های تصمیم">
                 از همین‌جا دو تا چهار فروشنده را اضافه یا حذف کن؛ انتخاب‌ها با تب مقایسه همگام می‌مانند.
-              </p>
+              </HelpHint>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -177,11 +178,11 @@ export function DecisionAssistant({
           <Card className="h-fit p-4 sm:p-5">
             <div className="flex items-start gap-3">
               <StepBadge step="۲" />
-              <div>
+              <div className="flex items-center gap-1.5">
                 <h2 className="type-section-title">اولویت‌ها و محدودیت‌ها</h2>
-                <p className="type-caption mt-1 text-muted-foreground">
+                <HelpHint label="راهنمای امتیاز تصمیم‌یار">
                   امتیاز فقط اطلاعات ثبت‌شده خودت را مرتب می‌کند و درباره کیفیت واقعی فروشنده قضاوت نمی‌کند.
-                </p>
+                </HelpHint>
               </div>
             </div>
 
@@ -253,10 +254,12 @@ export function DecisionAssistant({
                   onCheckedChange={(checked) => patch("requireFresh", checked === true)}
                   className="mt-0.5"
                 />
-                <span>
-                  <span className="type-label block">فقط قیمت تازه</span>
-                  <span className="type-caption mt-0.5 block text-muted-foreground">
-                    قیمت‌های قدیمی یا منقضی از پیشنهاد اصلی کنار گذاشته شوند.
+                <span className="min-w-0 flex-1">
+                  <span className="type-label flex items-center gap-1">
+                    فقط قیمت تازه
+                    <HelpHint label="راهنمای قیمت تازه">
+                      قیمت‌های قدیمی یا منقضی از پیشنهاد اصلی کنار گذاشته شوند.
+                    </HelpHint>
                   </span>
                 </span>
               </label>
@@ -266,9 +269,11 @@ export function DecisionAssistant({
           <div className="space-y-3">
             <div className="mb-1 flex items-center gap-3 px-1">
               <StepBadge step="۳" />
-              <div>
+              <div className="flex items-center gap-1.5">
                 <h2 className="type-section-title">نتیجه تصمیم‌یار</h2>
-                <p className="type-caption text-muted-foreground">رتبه‌بندی بر اساس اولویت‌ها و محدودیت‌های فعلی</p>
+                <HelpHint label="راهنمای نتیجه تصمیم‌یار">
+                  رتبه‌بندی بر اساس اولویت‌ها و محدودیت‌های فعلی انجام می‌شود.
+                </HelpHint>
               </div>
             </div>
 

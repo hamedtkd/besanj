@@ -13,6 +13,7 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
+import { HelpHint } from "@/components/help-hint";
 import { CaseCard } from "@/components/case-card";
 import { CreateCaseDialog } from "@/components/create-case-dialog";
 import { QuickCaptureSheet } from "@/components/quick-capture-sheet";
@@ -163,12 +164,14 @@ export function HomeScreen() {
                 <Sparkles className="size-3.5" />
                 دفتر شخصی استعلام قیمت
               </div>
-              <h1 className="type-page-title max-w-2xl">
-                از اولین استعلام تا نتیجه واقعی خرید، همه‌چیز یک‌جا.
-              </h1>
-              <p className="type-body mt-2 max-w-2xl text-muted-foreground">
-                قیمت بگیر، مقایسه کن، پیگیری‌ها را انجام بده و بعد مبلغ واقعی و تحویل خرید را هم کنار همان پرونده نگه دار.
-              </p>
+              <div className="flex items-start gap-1.5">
+                <h1 className="type-page-title max-w-2xl">
+                  از اولین استعلام تا نتیجه واقعی خرید، همه‌چیز یک‌جا.
+                </h1>
+                <HelpHint label="راهنمای صفحه اصلی" side="bottom">
+                  قیمت بگیر، مقایسه کن، پیگیری‌ها را انجام بده و بعد مبلغ واقعی و تحویل خرید را هم کنار همان پرونده نگه دار.
+                </HelpHint>
+              </div>
             </div>
 
             <div className="hidden shrink-0 items-center gap-2 sm:flex">

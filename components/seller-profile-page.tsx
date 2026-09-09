@@ -22,6 +22,7 @@ import {
   Store,
 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { HelpHint } from "@/components/help-hint";
 import { SellerMergeSheet } from "@/components/seller-merge-sheet";
 import { SellerProfileEditSheet } from "@/components/seller-profile-edit-sheet";
 import { useToast } from "@/components/toast";
@@ -339,11 +340,11 @@ function SellerPurchases({
 }) {
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-border p-4 sm:p-5">
+      <div className="flex items-center gap-1.5 border-b border-border p-4 sm:p-5">
         <h2 className="type-section-title">خریدهای ثبت‌شده</h2>
-        <p className="type-caption mt-1 text-muted-foreground">
+        <HelpHint label="راهنمای خریدهای فروشنده">
           همه خریدهایی که انتخاب نهایی‌شان به این فروشنده رسیده است.
-        </p>
+        </HelpHint>
       </div>
       {rows.length ? (
         <div className="divide-y divide-border/70">
@@ -382,11 +383,11 @@ function SellerQuoteHistory({
 }) {
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-border p-4 sm:p-5">
+      <div className="flex items-center gap-1.5 border-b border-border p-4 sm:p-5">
         <h2 className="type-section-title">همه استعلام‌ها</h2>
-        <p className="type-caption mt-1 text-muted-foreground">
+        <HelpHint label="راهنمای استعلام‌های فروشنده">
           قیمت‌های این فروشنده در تمام پرونده‌ها، از جدیدترین به قدیمی‌ترین.
-        </p>
+        </HelpHint>
       </div>
       {rows.length ? (
         <div className="divide-y divide-border/70">
@@ -428,11 +429,11 @@ function SellerRatingHistory({
 }) {
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-border p-4 sm:p-5">
+      <div className="flex items-center gap-1.5 border-b border-border p-4 sm:p-5">
         <h2 className="type-section-title">سابقه امتیاز</h2>
-        <p className="type-caption mt-1 text-muted-foreground">
+        <HelpHint label="راهنمای سابقه امتیاز">
           امتیازهایی که در پرونده‌های مختلف برای این فروشنده ثبت شده‌اند.
-        </p>
+        </HelpHint>
       </div>
       {rows.length ? (
         <div className="divide-y divide-border/70">

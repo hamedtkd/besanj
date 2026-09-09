@@ -1,3 +1,46 @@
+# QA | Besanj 1.5.1
+
+## Patch گفتار دقیق تر با هوش مصنوعی
+
+- مسیر اصلی Voice: Groq Speech-to-Text
+- مدل پیش فرض: `whisper-large-v3`
+- زبان اجباری: `fa`
+- prompt مخصوص متن استعلام خرید
+- API key فقط در `GROQ_API_KEY` سمت سرور
+- route داخلی `/api/transcribe`
+- حداکثر فایل ابری: 10 MB
+- پاسخ route با `no-store`
+- بدون SDK جدید npm
+- حالت «تشخیص محلی» همچنان فعال
+- Whisper Tiny محلی و SpeechRecognition محلی حذف نشده اند
+- Review-first و parser ثبت سریع بدون تغییر
+- Dexie v6 و Backup بدون تغییر
+- Guard جدید `check:cloud-voice`
+- Guard `check:voice-fallback` باقی مانده است
+- Service Worker `besanj-shell-v18`
+
+## بررسی های محیط ساخت
+
+- کل تست ها: **124/124 PASS**
+- `tests/cloud-transcription.test.ts`: **5/5 PASS**
+- `tests/local-whisper.test.ts`: **4/4 PASS**
+- `check:cloud-voice`: **PASS**
+- `check:voice-fallback`: **PASS**
+- `check:quick-capture`: **PASS**
+- dependency npm جدید: **ندارد**
+
+## گیت نهایی روی سیستم مقصد
+
+```bash
+npm install
+npm audit
+npm run check
+```
+
+بعد از سبز شدن Check، تست واقعی میکروفن با کلید Groq انجام شود.
+
+---
+
 # QA | Besanj 1.5.0
 
 ## فاز ثبت سریع
@@ -428,3 +471,29 @@ npm run check
 6. روی دستگاهی که Web Share دارد، «اشتراک» را تست کن؛ روی مرورگر بدون Web Share باید متن کپی شود.
 7. «چاپ / ذخیره PDF» را بزن و Preview را در Light و Dark Mode بررسی کن؛ خروجی چاپ باید پس‌زمینه سفید و A4 باشد.
 8. اگر انتخاب نهایی quote قدیمی است و همان فروشنده quote جدید دارد، بخش «انتخاب نهایی» باید همچنان quote انتخاب‌شده قبلی را نشان دهد.
+
+## v1.5.1 fix2: audit و TypeScript
+
+- `canUseLocalWhisperRecorder` باید `getUserMedia` را با `typeof ... === "function"` بررسی کند تا TS2774 برنگردد.
+- `@huggingface/transformers` نباید dependency npm پروژه باشد؛ browser runtime نسخه 4.2.0 از loader ثابت بارگذاری می شود.
+- بعد از جایگزینی fix2 روی branch قبلی، `npm install` باید dependencyهای Node-only نسخه اولیه را حذف کند و سپس `npm audit` دوباره بررسی شود.
+
+## v1.5.1 fix5: Tooltip سراسری
+
+- Tooltip رسمی PersianLabs/ui باید از Base UI primitive و DirectionProvider استفاده کند.
+- Tooltip باید بالاتر از ResponsiveSheet دیده شود و در RTL جهت درست داشته باشد.
+- `ResponsiveSheet.description` و `FormField.hint` باید به HelpHint منتقل شوند.
+- راهنماهای غیرحیاتی در صفحات اصلی، ثبت سریع، Voice، بودجه، Backup، فروشنده ها، Insights، Timeline، نمودار و Decision Assistant باید از HelpHint استفاده کنند.
+- خطاها و هشدارهای حیاتی نباید داخل Tooltip پنهان شوند.
+- `check:tooltips` باید PASS شود.
+- regression الزامی: `npm audit` و `npm run check`.
+
+
+### نتیجه ساخت fix5 در این محیط
+
+- مبنای fix4 روی سیستم مقصد: `124/124` تست PASS، TypeScript PASS، ESLint PASS و Next production build PASS.
+- تمام Guardهای مستقل از dependency در fix5: PASS.
+- `check:tooltips`: PASS، استفاده در ۱۸ سطح کلیدی رابط.
+- TS/TSX syntax scan: ۱۵۲ فایل، ۰ خطا.
+- Local import resolution: ۶۳۷ import، ۰ مسیر شکسته.
+- نصب dependency در محیط ساخت در زمان مجاز کامل نشد؛ بنابراین full `typecheck/lint/test/build` این fix باید یک بار روی سیستم مقصد با `npm run check` اجرا شود.
