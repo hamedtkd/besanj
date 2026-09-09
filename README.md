@@ -2,7 +2,29 @@
 
 بسنج یک وب اپ فارسی، local-first و بدون Backend برای مدیریت تصمیم خرید است. کاربر برای یک کالا یا خدمت پرونده می سازد، از چند فروشنده استعلام می گیرد، قیمت و شرایط را نگه می دارد، گزینه ها را مقایسه می کند، پیگیری انجام می دهد، خرید واقعی و تحویل را ثبت می کند و بعد از داده خریدهای قبلی برای تصمیم های بعدی استفاده می کند.
 
-نسخه فعلی: **1.2.0**
+نسخه فعلی: **1.3.0**
+
+## فاز 1.3: پروفایل سراسری فروشنده
+
+این نسخه حافظه فروشنده را از یک تجمیع آماری به یک موجودیت واقعی و قابل مدیریت تبدیل می کند. همه چیز همچنان local-first است و هیچ داده ای به Backend یا سرویس خارجی ارسال نمی شود.
+
+- مسیر `/sellers` برای فهرست سراسری فروشنده ها.
+- مسیر `/sellers/[id]` برای پروفایل اختصاصی هر فروشنده.
+- شناسه پایدار فروشنده در همه پرونده ها با `sellerProfileId`.
+- سابقه همه استعلام ها، خریدها و امتیازها در یک صفحه.
+- آمار تعداد پرونده، استعلام، خرید، نرخ انتخاب، میانگین قیمت و مجموع خرید.
+- سابقه تحویل به موقع و میانگین امتیاز فروشنده.
+- شماره اصلی، شماره های دیگر، وب سایت، اینستاگرام، تلگرام و واتساپ.
+- یادداشت سراسری فروشنده.
+- علامت «محبوب» و «پیشنهاد نمی شود» با نمایش در فهرست و مقایسه استعلام ها.
+- ویرایش نام و شماره اصلی به صورت سراسری روی تمام Providerهای مرتبط.
+- ادغام دو پروفایل تکراری بدون حذف استعلام، خرید یا پیگیری.
+- استفاده دوباره از فروشنده قبلی بر اساس شناسه پایدار، نه فقط شباهت متن.
+- لینک مستقیم Seller Memory در Insights به پروفایل سراسری.
+- Backup/Restore کامل Seller Profile و سازگاری با Backupهای قدیمی.
+- Migration خودکار Dexie از v5 به v6.
+- Guard جدید `check:sellers`.
+- Service Worker cache version: `besanj-shell-v14`.
 
 ## فاز 1.2: دسته بندی، برچسب و بودجه ماهانه
 
@@ -102,7 +124,7 @@
 estelamkoo-local
 ```
 
-Schema فعلی Dexie: **v5**
+Schema فعلی Dexie: **v6**
 
 جدول ها:
 
@@ -113,7 +135,27 @@ quotes
 reminders
 attachments
 budgetPlans
+sellerProfiles
 ```
+
+### Migration v6
+
+در v1.3 یک store سراسری به نام `sellerProfiles` اضافه شده است. ردیف `Provider` همچنان رابطه فروشنده با یک پرونده را نگه می دارد، اما با `sellerProfileId` به هویت سراسری فروشنده وصل می شود. این ساختار باعث می شود Quote، Reminder، Rating و سابقه پرونده های قبلی بدون بازنویسی مخرب باقی بمانند.
+
+Migration از v5 به v6 backward-compatible است:
+
+- store جدید `sellerProfiles` ساخته می شود.
+- Providerهای موجود با نرمال سازی شماره تلفن و در نبود شماره با نام نرمال شده، به پروفایل سراسری وصل می شوند.
+- شناسه Quoteها، Providerها، Reminderها، خریدها و Attachmentها تغییر نمی کند.
+- امتیازهای قبلی حفظ می شوند و زمان آخرین امتیاز از داده موجود مقدار اولیه می گیرد.
+- نام دیتابیس همچنان `estelamkoo-local` است.
+- هیچ فروشنده یا استعلام قبلی حذف نمی شود.
+
+### مدل فروشنده
+
+`SellerProfile` هویت سراسری فروشنده را نگه می دارد و `Provider` رابطه همان فروشنده با یک پرونده مشخص است. ویرایش نام یا شماره اصلی Seller Profile روی Providerهای مرتبط همگام می شود، ولی Quoteها و امتیازهای تاریخی در جای خود باقی می مانند.
+
+در زمان ادغام، پروفایل مقصد باقی می ماند. اگر هر دو پروفایل در یک پرونده Provider جدا داشته باشند، Quoteها و Reminderها به یک Provider واحد منتقل می شوند و سپس Provider تکراری حذف می شود.
 
 ### Migration v5
 
@@ -171,12 +213,13 @@ quotes
 reminders
 attachments
 budgetPlans
+sellerProfiles
 theme / palette preferences
 ```
 
-دسته و برچسب داخل رکوردهای `purchaseCases` ذخیره می شوند. تنظیم بودجه داخل `budgetPlans` قرار دارد.
+دسته و برچسب داخل رکوردهای `purchaseCases` ذخیره می شوند. تنظیم بودجه داخل `budgetPlans` قرار دارد. هویت سراسری فروشنده داخل `sellerProfiles` ذخیره می شود و `providers.sellerProfileId` ارتباط آن با پرونده ها را نگه می دارد.
 
-فرمت فایل Backup همچنان نسخه 1 باقی مانده است، چون فیلد جدید optional است و parser نسخه 1.2 فایل های قدیمی فاقد `budgetPlans` را هم می پذیرد.
+فرمت فایل Backup همچنان نسخه 1 باقی مانده است، چون داده های جدید افزایشی هستند. Parser نسخه 1.3 فایل های قدیمی فاقد `budgetPlans` یا `sellerProfiles` را هم می پذیرد. هنگام Restore یک Backup قدیمی، Seller Profileها از Providerهای موجود ساخته می شوند.
 
 Restore به صورت جایگزینی کامل انجام می شود و پیش از تغییر دیتابیس، ساختار داده اعتبارسنجی می شود.
 
@@ -230,20 +273,42 @@ check:capture
 check:purchase
 check:insights
 check:categories-budget
+check:sellers
 typecheck
 lint
 test
 build
 ```
 
-`check:categories-budget` فقط وجود فایل را بررسی نمی کند. این Guard سیم کشی واقعی مدل داده، migration v5، فرم ایجاد و ویرایش پرونده، فیلترها، محاسبه بودجه، Insights و Backup/Restore را کنترل می کند.
+`check:categories-budget` سیم کشی دسته، بودجه و گزارش را کنترل می کند. `check:sellers` نیز فقط وجود فایل را بررسی نمی کند و migration v6، هویت پایدار فروشنده، مسیرهای Seller، ادغام، ویرایش سراسری، استفاده دوباره در Quote، Insights و Backup/Restore را بررسی می کند.
 
 ## PWA
 
 Service Worker در production ثبت می شود. cache فعلی:
 
 ```text
-besanj-shell-v13
+besanj-shell-v14
+```
+
+## فایل های مهم فاز 1.3
+
+```text
+lib/seller-profiles.ts
+lib/db.ts
+lib/provider-history.ts
+lib/insights.ts
+lib/backup-format.ts
+components/seller-directory-page.tsx
+components/seller-profile-page.tsx
+components/seller-profile-edit-sheet.tsx
+components/seller-merge-sheet.tsx
+components/quote-form-dialog.tsx
+components/quote-comparison.tsx
+app/sellers/page.tsx
+app/sellers/[id]/page.tsx
+scripts/check-seller-profiles.mjs
+tests/seller-profiles.test.ts
+docs/RELEASE_1.3.0.md
 ```
 
 ## فایل های مهم فاز 1.2
@@ -270,12 +335,12 @@ docs/RELEASE_1.2.0.md
 
 قبل از ساخت کنترل عمومی جدید، PersianLabs UI و wrapperهای فعلی پروژه بررسی می شوند. Date Picker پروژه از Doran برای تقویم فارسی استفاده می کند. تغییر component پایه باید بدون regression در همه مصرف کننده ها انجام شود.
 
-## توسعه نسخه 1.2
+## توسعه نسخه 1.3
 
 Branch پیشنهادی و فعلی این Release:
 
 ```text
-feat/categories-budget-v1.2
+feat/seller-profiles-v1.3
 ```
 
 بعد از جایگزینی سورس:
@@ -289,7 +354,7 @@ npm run check
 
 ```bash
 git add .
-git commit -m "feat: add Besanj categories tags and monthly budgets v1.2.0"
+git commit -m "feat: add Besanj seller profiles v1.3.0"
 ```
 
 Merge و Tag فقط بعد از سبزشدن کامل روی سیستم مقصد انجام شود.
@@ -298,4 +363,4 @@ Merge و Tag فقط بعد از سبزشدن کامل روی سیستم مقصد
 
 - `THIRD_PARTY.md`: کتابخانه ها و مجوزها.
 - `QA.md`: وضعیت QA نسخه ها.
-- `docs/RELEASE_1.2.0.md`: Release Note نسخه فعلی.
+- `docs/RELEASE_1.3.0.md`: Release Note نسخه فعلی.

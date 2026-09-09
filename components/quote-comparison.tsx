@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "motion/react";
 import {
   BellRing,
@@ -32,7 +33,7 @@ import {
 import { buildFollowUpMessage } from "@/lib/contact";
 import { freshnessLabel, getQuoteFreshness, quoteTotal } from "@/lib/quote";
 import { getBudgetState, requirementMatchSummary } from "@/lib/planning";
-import type { CaseRequirement, Provider, Quote } from "@/lib/types";
+import type { CaseRequirement, Provider, Quote, SellerProfile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function QuoteComparison({
@@ -49,6 +50,7 @@ export function QuoteComparison({
   requirements = [],
   attachmentCounts = {},
   caseTitle,
+  sellerProfiles = [],
 }: {
   quotes: Quote[];
   providers: Provider[];
@@ -63,9 +65,13 @@ export function QuoteComparison({
   requirements?: CaseRequirement[];
   attachmentCounts?: Record<string, number>;
   caseTitle: string;
+  sellerProfiles?: SellerProfile[];
 }) {
   const providerById = new Map(
     providers.map((provider) => [provider.id, provider])
+  );
+  const sellerProfileById = new Map(
+    sellerProfiles.map((profile) => [profile.id, profile])
   );
   const min = quotes.length ? Math.min(...quotes.map(quoteTotal)) : null;
   const newestTime = quotes.length
@@ -77,6 +83,9 @@ export function QuoteComparison({
       {quotes.map((quote, index) => {
         const provider = providerById.get(quote.providerId);
         if (!provider) return null;
+        const sellerProfile = provider.sellerProfileId
+          ? sellerProfileById.get(provider.sellerProfileId)
+          : undefined;
 
         const total = quoteTotal(quote);
         const compared = comparedQuoteIds.includes(quote.id);
@@ -107,7 +116,9 @@ export function QuoteComparison({
                 "relative flex h-full min-h-[24rem] flex-col overflow-hidden transition-[border-color,box-shadow,background-color,transform] hover:-translate-y-0.5 hover:shadow-[0_18px_55px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
                 compared && "border-primary/55 ring-1 ring-primary/15",
                 selected &&
-                  "border-primary/65 bg-primary/[0.045] ring-2 ring-primary/15"
+                  "border-primary/65 bg-primary/[0.045] ring-2 ring-primary/15",
+                sellerProfile?.avoid &&
+                  "border-destructive/35 bg-destructive/[0.025]"
               )}
             >
               <div
@@ -132,7 +143,17 @@ export function QuoteComparison({
                     <div className="min-w-0">
                       <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                         <h3 className="type-card-title truncate">
-                          {provider.name}
+                          {provider.sellerProfileId ? (
+                            <Link
+                              href={`/sellers/${provider.sellerProfileId}`}
+                              className="hover:text-primary"
+                              title="باز کردن پروفایل فروشنده"
+                            >
+                              {provider.name}
+                            </Link>
+                          ) : (
+                            provider.name
+                          )}
                         </h3>
                         {selected ? (
                           <Badge variant="success">انتخاب نهایی</Badge>
@@ -142,6 +163,12 @@ export function QuoteComparison({
                             <Star className="fill-current text-amber-500" />
                             {provider.rating.toLocaleString("fa-IR")}/۵
                           </Badge>
+                        ) : null}
+                        {sellerProfile?.favorite ? (
+                          <Badge variant="success">محبوب</Badge>
+                        ) : null}
+                        {sellerProfile?.avoid ? (
+                          <Badge variant="destructive">پیشنهاد نمی‌شود</Badge>
                         ) : null}
                       </div>
                       <p className="type-caption mt-1 truncate text-muted-foreground">

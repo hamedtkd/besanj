@@ -7,6 +7,7 @@ import {
   type PortablePreferences,
 } from "./backup-format";
 import { db } from "./db";
+import { buildSellerGraph } from "./seller-profiles";
 import {
   normalizeThemeMode,
   THEME_COOKIE_NAME,
@@ -14,7 +15,7 @@ import {
 } from "./theme";
 import { normalizeHexColor, normalizeSavedThemeColors } from "./theme-color";
 
-export const BESANJ_APP_VERSION = "1.2.0";
+export const BESANJ_APP_VERSION = "1.3.0";
 
 const PALETTE_STORAGE_KEY = "estelamkoo:palette";
 const CUSTOM_COLOR_STORAGE_KEY = "estelamkoo:custom-color";
@@ -88,18 +89,34 @@ function writePreferences(preferences?: PortablePreferences) {
 }
 
 export async function createFullBackup() {
-  const [purchaseCases, providers, quotes, reminders, attachments, budgetPlans] =
-    await Promise.all([
+  const [
+    purchaseCases,
+    providers,
+    quotes,
+    reminders,
+    attachments,
+    budgetPlans,
+    sellerProfiles,
+  ] = await Promise.all([
       db.purchaseCases.toArray(),
       db.providers.toArray(),
       db.quotes.toArray(),
       db.reminders.toArray(),
       db.attachments.toArray(),
       db.budgetPlans.toArray(),
+      db.sellerProfiles.toArray(),
     ]);
 
   return buildBesanjBackupFile(
-    { purchaseCases, providers, quotes, reminders, attachments, budgetPlans },
+    {
+      purchaseCases,
+      providers,
+      quotes,
+      reminders,
+      attachments,
+      budgetPlans,
+      sellerProfiles,
+    },
     {
       appVersion: BESANJ_APP_VERSION,
       preferences: readPreferences(),
@@ -109,6 +126,10 @@ export async function createFullBackup() {
 
 export async function replaceWithBackup(backup: BesanjBackupFile) {
   const attachments = decodeBackupAttachments(backup.data.attachments);
+  const sellerGraph = buildSellerGraph(
+    backup.data.providers,
+    backup.data.sellerProfiles ?? []
+  );
 
   await db.transaction(
     "rw",
@@ -119,9 +140,11 @@ export async function replaceWithBackup(backup: BesanjBackupFile) {
       db.reminders,
       db.attachments,
       db.budgetPlans,
+      db.sellerProfiles,
     ],
     async () => {
       await db.attachments.clear();
+      await db.sellerProfiles.clear();
       await db.budgetPlans.clear();
       await db.reminders.clear();
       await db.quotes.clear();
@@ -131,8 +154,11 @@ export async function replaceWithBackup(backup: BesanjBackupFile) {
       if (backup.data.purchaseCases.length) {
         await db.purchaseCases.bulkAdd(backup.data.purchaseCases);
       }
-      if (backup.data.providers.length) {
-        await db.providers.bulkAdd(backup.data.providers);
+      if (sellerGraph.sellerProfiles.length) {
+        await db.sellerProfiles.bulkAdd(sellerGraph.sellerProfiles);
+      }
+      if (sellerGraph.providers.length) {
+        await db.providers.bulkAdd(sellerGraph.providers);
       }
       if (backup.data.quotes.length) {
         await db.quotes.bulkAdd(backup.data.quotes);
@@ -153,13 +179,14 @@ export async function replaceWithBackup(backup: BesanjBackupFile) {
 }
 
 export async function readBackupStats() {
-  const [cases, providers, quotes, reminders, attachments, budgetPlans] = await Promise.all([
+  const [cases, providers, quotes, reminders, attachments, budgetPlans, sellerProfiles] = await Promise.all([
     db.purchaseCases.count(),
     db.providers.count(),
     db.quotes.count(),
     db.reminders.count(),
     db.attachments.toArray(),
     db.budgetPlans.count(),
+    db.sellerProfiles.count(),
   ]);
 
   return {
@@ -169,6 +196,7 @@ export async function readBackupStats() {
     reminders,
     attachments: attachments.length,
     budgetPlans,
+    sellerProfiles,
     attachmentBytes: attachments.reduce(
       (sum, attachment) => sum + attachment.size,
       0

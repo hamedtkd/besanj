@@ -231,3 +231,128 @@ test("backup parser accepts older files without budget settings", async () => {
   const parsed = parseBesanjBackupText(JSON.stringify(oldShape));
   assert.deepEqual(parsed.data.budgetPlans, []);
 });
+
+test("backup preserves global seller profiles and provider links", async () => {
+  const backup = await buildBesanjBackupFile(
+    {
+      purchaseCases: [
+        {
+          id: "case-seller",
+          title: "مانیتور",
+          kind: "product",
+          status: "active",
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+      sellerProfiles: [
+        {
+          id: "seller-1",
+          name: "فروشگاه آریا",
+          phone: "09121111111",
+          otherPhones: ["02188776655"],
+          instagram: "aria_shop",
+          favorite: true,
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+      providers: [
+        {
+          id: "provider-seller",
+          caseId: "case-seller",
+          sellerProfileId: "seller-1",
+          name: "فروشگاه آریا",
+          phone: "09121111111",
+          rating: 5,
+          ratingUpdatedAt: "2026-09-08T00:00:00.000Z",
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+      quotes: [],
+      reminders: [],
+      attachments: [],
+    },
+    { appVersion: "1.3.0" }
+  );
+
+  const parsed = parseBesanjBackupText(JSON.stringify(backup));
+  assert.equal(parsed.stats.sellerProfiles, 1);
+  assert.equal(parsed.data.sellerProfiles?.[0]?.instagram, "aria_shop");
+  assert.equal(parsed.data.providers[0]?.sellerProfileId, "seller-1");
+});
+
+test("backup parser accepts v1.2 files without seller profiles", async () => {
+  const backup = await buildBesanjBackupFile(
+    {
+      purchaseCases: [
+        {
+          id: "case-old-seller",
+          title: "خرید قدیمی",
+          kind: "product",
+          status: "active",
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+      providers: [
+        {
+          id: "provider-old",
+          caseId: "case-old-seller",
+          name: "فروشنده قدیمی",
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+      quotes: [],
+      reminders: [],
+      attachments: [],
+    },
+    { appVersion: "1.2.0" }
+  );
+  const oldShape = JSON.parse(JSON.stringify(backup));
+  delete oldShape.data.sellerProfiles;
+  delete oldShape.stats.sellerProfiles;
+
+  const parsed = parseBesanjBackupText(JSON.stringify(oldShape));
+  assert.deepEqual(parsed.data.sellerProfiles, []);
+  assert.equal(parsed.data.providers[0]?.sellerProfileId, undefined);
+});
+
+test("backup rejects a dangling seller profile link", async () => {
+  const backup = await buildBesanjBackupFile(
+    {
+      purchaseCases: [
+        {
+          id: "case-broken-seller",
+          title: "خرید",
+          kind: "product",
+          status: "active",
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+      sellerProfiles: [],
+      providers: [
+        {
+          id: "provider-broken",
+          caseId: "case-broken-seller",
+          sellerProfileId: "missing",
+          name: "فروشنده",
+          createdAt: "2026-09-08T00:00:00.000Z",
+          updatedAt: "2026-09-08T00:00:00.000Z",
+        },
+      ],
+      quotes: [],
+      reminders: [],
+      attachments: [],
+    },
+    { appVersion: "1.3.0" }
+  );
+
+  assert.throws(
+    () => parseBesanjBackupText(JSON.stringify(backup)),
+    /پروفایل سراسری/
+  );
+});

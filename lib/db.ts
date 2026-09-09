@@ -7,6 +7,13 @@ import { normalizeBudgetPlan } from "@/lib/budget";
 import { snoozeReminderDueAt } from "@/lib/follow-up";
 import { cloneRequirementsForNewCase, makeRepeatedCaseTitle } from "@/lib/duplicate-case";
 import { normalizePurchaseOutcome, type PurchaseOutcomeInput } from "@/lib/purchase-outcome";
+import {
+  buildSellerGraph,
+  mergeSellerProfileRecords,
+  normalizeSellerPhone,
+  normalizeSellerProfileInput,
+  pickLatestRatedProvider,
+} from "@/lib/seller-profiles";
 import type {
   BudgetPlan,
   CaseReminder,
@@ -18,6 +25,7 @@ import type {
   Quote,
   QuoteAttachment,
   QuoteChannel,
+  SellerProfile,
 } from "@/lib/types";
 import { normalizeOptionalText } from "@/lib/validation-rules";
 
@@ -28,6 +36,7 @@ class BesanjDB extends Dexie {
   reminders!: EntityTable<CaseReminder, "id">;
   attachments!: EntityTable<QuoteAttachment, "id">;
   budgetPlans!: EntityTable<BudgetPlan, "id">;
+  sellerProfiles!: EntityTable<SellerProfile, "id">;
 
   constructor() {
     super("estelamkoo-local");
@@ -131,6 +140,44 @@ class BesanjDB extends Dexie {
         });
       });
 
+    this.version(6)
+      .stores({
+        purchaseCases: "&id, status, kind, createdAt, updatedAt",
+        providers:
+          "&id, caseId, sellerProfileId, name, rating, updatedAt, [sellerProfileId+caseId]",
+        quotes:
+          "&id, caseId, providerId, channel, quotedAt, validUntil, [caseId+providerId], [caseId+quotedAt], createdAt, updatedAt",
+        reminders:
+          "&id, caseId, providerId, quoteId, status, dueAt, [caseId+status], createdAt, updatedAt",
+        attachments: "&id, caseId, quoteId, createdAt",
+        budgetPlans: "&id, updatedAt",
+        sellerProfiles: "&id, name, phone, updatedAt",
+      })
+      .upgrade(async (tx) => {
+        const providers = tx.table<Provider, string>("providers");
+        const sellerProfiles = tx.table<SellerProfile, string>("sellerProfiles");
+        const providerRows = await providers.toArray();
+        const graph = buildSellerGraph(providerRows, [], {
+          makeId,
+          now: new Date().toISOString(),
+        });
+
+        if (graph.sellerProfiles.length) {
+          await sellerProfiles.bulkAdd(graph.sellerProfiles);
+        }
+        if (graph.providers.length) {
+          await providers.bulkPut(
+            graph.providers.map((provider) => ({
+              ...provider,
+              ratingUpdatedAt:
+                provider.rating !== undefined
+                  ? provider.ratingUpdatedAt ?? provider.updatedAt
+                  : undefined,
+            }))
+          );
+        }
+      });
+
   }
 }
 
@@ -146,10 +193,6 @@ function normalizedComparable(value?: string) {
     .toLocaleLowerCase("fa-IR")
     .replace(/[\u200c\u200f\u202a-\u202e]/g, "")
     .replace(/\s+/g, " ");
-}
-
-function normalizedPhone(value?: string) {
-  return (value ?? "").replace(/\D/g, "");
 }
 
 function clampRating(value: number) {
@@ -309,37 +352,98 @@ export async function clearPurchaseOutcome(caseId: string) {
   });
 }
 
+async function resolveSellerProfile(input: {
+  sellerProfileId?: string;
+  name: string;
+  phone?: string;
+}) {
+  if (input.sellerProfileId) {
+    const explicit = await db.sellerProfiles.get(input.sellerProfileId);
+    if (explicit) return explicit;
+  }
+
+  const profiles = await db.sellerProfiles.toArray();
+  const wantedPhone = normalizeSellerPhone(input.phone);
+  const wantedName = normalizedComparable(input.name);
+  const matched = wantedPhone
+    ? profiles.find((profile) => {
+        if (normalizeSellerPhone(profile.phone) === wantedPhone) return true;
+        return (profile.otherPhones ?? []).some(
+          (phone) => normalizeSellerPhone(phone) === wantedPhone
+        );
+      })
+    : profiles.find(
+        (profile) =>
+          !normalizeSellerPhone(profile.phone) &&
+          normalizedComparable(profile.name) === wantedName
+      );
+  if (matched) return matched;
+
+  const now = new Date().toISOString();
+  const normalized = normalizeSellerProfileInput(
+    { name: input.name, phone: input.phone },
+    now
+  );
+  const profile: SellerProfile = {
+    id: makeId(),
+    ...normalized,
+    createdAt: now,
+  };
+  await db.sellerProfiles.add(profile);
+  return profile;
+}
+
 export async function findOrCreateProvider(input: {
   caseId: string;
   name: string;
   phone?: string;
+  sellerProfileId?: string;
 }) {
   const providers = await db.providers.where("caseId").equals(input.caseId).toArray();
   const wantedName = normalizedComparable(input.name);
-  const wantedPhone = normalizedPhone(input.phone);
+  const wantedPhone = normalizeSellerPhone(input.phone);
 
-  const existing = providers.find((provider) => {
-    if (normalizedComparable(provider.name) !== wantedName) return false;
-    const existingPhone = normalizedPhone(provider.phone);
-    return !wantedPhone || !existingPhone || existingPhone === wantedPhone;
-  });
+  const existing = input.sellerProfileId
+    ? providers.find(
+        (provider) => provider.sellerProfileId === input.sellerProfileId
+      )
+    : providers.find((provider) => {
+        if (normalizedComparable(provider.name) !== wantedName) return false;
+        const existingPhone = normalizeSellerPhone(provider.phone);
+        return !wantedPhone || !existingPhone || existingPhone === wantedPhone;
+      });
 
   if (existing) {
-    const phone = normalizeOptionalText(input.phone);
-    if (phone && phone !== existing.phone) {
+    let profile = existing.sellerProfileId
+      ? await db.sellerProfiles.get(existing.sellerProfileId)
+      : undefined;
+    if (!profile) {
+      profile = await resolveSellerProfile(input);
+    }
+
+    const patch: Partial<Provider> = {};
+    if (existing.sellerProfileId !== profile.id) {
+      patch.sellerProfileId = profile.id;
+    }
+    if (existing.name !== profile.name) patch.name = profile.name;
+    if (existing.phone !== profile.phone) patch.phone = profile.phone;
+
+    if (Object.keys(patch).length) {
       const updatedAt = new Date().toISOString();
-      await db.providers.update(existing.id, { phone, updatedAt });
-      return { ...existing, phone, updatedAt };
+      await db.providers.update(existing.id, { ...patch, updatedAt });
+      return { ...existing, ...patch, updatedAt };
     }
     return existing;
   }
 
+  const profile = await resolveSellerProfile(input);
   const now = new Date().toISOString();
   const row: Provider = {
     id: makeId(),
     caseId: input.caseId,
-    name: normalizeOptionalText(input.name) ?? "فروشنده بدون نام",
-    phone: normalizeOptionalText(input.phone),
+    sellerProfileId: profile.id,
+    name: profile.name,
+    phone: profile.phone,
     createdAt: now,
     updatedAt: now,
   };
@@ -352,14 +456,165 @@ export async function updateProviderRating(
   rating?: number | null,
   ratingNote?: string
 ) {
+  const now = new Date().toISOString();
+  const normalizedRating =
+    rating === null || rating === undefined || !Number.isFinite(rating)
+      ? undefined
+      : clampRating(rating);
   await db.providers.update(providerId, {
-    rating:
-      rating === null || rating === undefined || !Number.isFinite(rating)
-        ? undefined
-        : clampRating(rating),
+    rating: normalizedRating,
     ratingNote: normalizeOptionalText(ratingNote),
-    updatedAt: new Date().toISOString(),
+    ratingUpdatedAt: normalizedRating !== undefined ? now : undefined,
+    updatedAt: now,
   });
+}
+
+export async function updateSellerProfile(
+  sellerProfileId: string,
+  input: {
+    name: string;
+    phone?: string | null;
+    otherPhones?: string[];
+    website?: string;
+    instagram?: string;
+    telegram?: string;
+    whatsapp?: string;
+    note?: string;
+    favorite?: boolean;
+    avoid?: boolean;
+  }
+) {
+  const current = await db.sellerProfiles.get(sellerProfileId);
+  if (!current) throw new Error("فروشنده پیدا نشد.");
+  const now = new Date().toISOString();
+  const normalized = normalizeSellerProfileInput(input, now);
+  const next: SellerProfile = {
+    id: current.id,
+    ...normalized,
+    createdAt: current.createdAt,
+  };
+
+  await db.transaction("rw", db.sellerProfiles, db.providers, async () => {
+    await db.sellerProfiles.put(next);
+    await db.providers
+      .where("sellerProfileId")
+      .equals(sellerProfileId)
+      .modify((provider) => {
+        provider.name = next.name;
+        provider.phone = next.phone;
+        provider.updatedAt = now;
+      });
+  });
+  return next;
+}
+
+export async function setSellerFavorite(
+  sellerProfileId: string,
+  favorite: boolean
+) {
+  const current = await db.sellerProfiles.get(sellerProfileId);
+  if (!current) throw new Error("فروشنده پیدا نشد.");
+  return updateSellerProfile(sellerProfileId, {
+    ...current,
+    favorite,
+    avoid: favorite ? false : current.avoid,
+  });
+}
+
+export async function setSellerAvoid(
+  sellerProfileId: string,
+  avoid: boolean
+) {
+  const current = await db.sellerProfiles.get(sellerProfileId);
+  if (!current) throw new Error("فروشنده پیدا نشد.");
+  return updateSellerProfile(sellerProfileId, {
+    ...current,
+    avoid,
+    favorite: avoid ? false : current.favorite,
+  });
+}
+
+export async function mergeSellerProfiles(
+  sourceSellerProfileId: string,
+  targetSellerProfileId: string
+) {
+  if (sourceSellerProfileId === targetSellerProfileId) {
+    throw new Error("برای ادغام، دو فروشنده متفاوت انتخاب کن.");
+  }
+
+  const [source, target] = await Promise.all([
+    db.sellerProfiles.get(sourceSellerProfileId),
+    db.sellerProfiles.get(targetSellerProfileId),
+  ]);
+  if (!source || !target) throw new Error("یکی از فروشنده‌ها پیدا نشد.");
+
+  const relatedProviders = await db.providers
+    .where("sellerProfileId")
+    .anyOf(sourceSellerProfileId, targetSellerProfileId)
+    .toArray();
+  const byCase = new Map<string, Provider[]>();
+  for (const provider of relatedProviders) {
+    const rows = byCase.get(provider.caseId) ?? [];
+    rows.push(provider);
+    byCase.set(provider.caseId, rows);
+  }
+
+  const now = new Date().toISOString();
+  const mergedProfile = mergeSellerProfileRecords(target, source, now);
+
+  await db.transaction(
+    "rw",
+    [db.sellerProfiles, db.providers, db.quotes, db.reminders],
+    async () => {
+      await db.sellerProfiles.put(mergedProfile);
+
+      for (const rows of byCase.values()) {
+        const canonical =
+          rows.find(
+            (provider) => provider.sellerProfileId === targetSellerProfileId
+          ) ?? rows[0];
+        const latestRated = pickLatestRatedProvider(rows);
+
+        await db.providers.update(canonical.id, {
+          sellerProfileId: targetSellerProfileId,
+          name: mergedProfile.name,
+          phone: mergedProfile.phone,
+          ...(latestRated
+            ? {
+                rating: latestRated.rating,
+                ratingNote: latestRated.ratingNote,
+                ratingUpdatedAt:
+                  latestRated.ratingUpdatedAt ?? latestRated.updatedAt,
+              }
+            : {}),
+          updatedAt: now,
+        });
+
+        for (const duplicate of rows) {
+          if (duplicate.id === canonical.id) continue;
+          await db.quotes
+            .where("providerId")
+            .equals(duplicate.id)
+            .modify((quote) => {
+              quote.providerId = canonical.id;
+              quote.updatedAt = now;
+            });
+          await db.reminders
+            .where("providerId")
+            .equals(duplicate.id)
+            .modify((reminder) => {
+              reminder.providerId = canonical.id;
+              reminder.updatedAt = now;
+            });
+          await db.providers.delete(duplicate.id);
+        }
+      }
+
+      await db.sellerProfiles.delete(sourceSellerProfileId);
+    }
+  );
+
+  return mergedProfile;
 }
 
 export interface NewQuoteAttachmentInput {
@@ -373,6 +628,7 @@ export async function addQuote(input: {
   caseId: string;
   providerName: string;
   phone?: string;
+  sellerProfileId?: string;
   priceToman: number;
   extraCostToman?: number | null;
   quotedAt: string;
@@ -394,6 +650,7 @@ export async function addQuote(input: {
     caseId: input.caseId,
     name: input.providerName,
     phone: input.phone,
+    sellerProfileId: input.sellerProfileId,
   });
 
   const now = new Date().toISOString();
@@ -519,10 +776,12 @@ export async function duplicatePurchaseCase(input: {
   const providers: Provider[] = sourceProviders.map((provider) => ({
     id: makeId(),
     caseId,
+    sellerProfileId: provider.sellerProfileId,
     name: provider.name,
     phone: provider.phone,
     rating: provider.rating,
     ratingNote: provider.ratingNote,
+    ratingUpdatedAt: provider.ratingUpdatedAt,
     createdAt: now,
     updatedAt: now,
   }));

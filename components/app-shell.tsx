@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, ChartNoAxesCombined, Home, Settings } from "lucide-react";
+import { ArrowRight, ChartNoAxesCombined, Home, Settings, Store } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { SettingsSheet } from "@/components/settings-sheet";
 import { ThemeQuickActions } from "@/components/theme-quick-actions";
@@ -70,6 +70,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               title="بینش‌های خرید"
             >
               <ChartNoAxesCombined />
+            </Button>
+
+            <Button
+              nativeButton={false}
+              render={<Link href="/sellers" />}
+              variant={pathname.startsWith("/sellers") ? "secondary" : "ghost"}
+              size="icon-sm"
+              aria-label="فروشنده‌ها"
+              title="فروشنده‌ها"
+            >
+              <Store />
             </Button>
 
             <TaskQuickLink />

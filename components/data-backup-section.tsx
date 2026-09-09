@@ -111,7 +111,8 @@ export function DataBackupSection() {
       (stats?.quotes ?? 0) +
       (stats?.reminders ?? 0) +
       (stats?.attachments ?? 0) +
-      (stats?.budgetPlans ?? 0) >
+      (stats?.budgetPlans ?? 0) +
+      (stats?.sellerProfiles ?? 0) >
       0);
 
   return (
@@ -121,7 +122,7 @@ export function DataBackupSection() {
         <div>
           <h3 className="type-card-title">پشتیبان و انتقال داده</h3>
           <p className="type-caption mt-0.5 text-muted-foreground">
-            پرونده‌ها، دسته‌ها، برچسب‌ها، بودجه‌ها، استعلام‌ها، پیگیری‌ها، پیوست‌ها و تنظیمات ظاهری را در یک
+            پرونده‌ها، فروشنده‌ها، دسته‌ها، برچسب‌ها، بودجه‌ها، استعلام‌ها، پیگیری‌ها، پیوست‌ها و تنظیمات ظاهری را در یک
             فایل نگه دار یا روی دستگاه دیگری بازیابی کن.
           </p>
         </div>
@@ -137,6 +138,7 @@ export function DataBackupSection() {
                 {stats.quotes.toLocaleString("fa-IR")} استعلام ·{" "}
                 {stats.reminders.toLocaleString("fa-IR")} پیگیری ·{" "}
                 {stats.attachments.toLocaleString("fa-IR")} پیوست
+                {stats.sellerProfiles ? ` · ${stats.sellerProfiles.toLocaleString("fa-IR")} پروفایل فروشنده` : ""}
                 {stats.budgetPlans ? " · بودجه ماهانه تنظیم شده" : ""}
                 {stats.attachmentBytes
                   ? ` · ${formatFileSize(stats.attachmentBytes)} فایل`
@@ -198,9 +200,10 @@ export function DataBackupSection() {
                 {pendingBackup.stats.quotes.toLocaleString("fa-IR")} استعلام
               </span>
               <span>
-                {pendingBackup.stats.attachments.toLocaleString("fa-IR")} پیوست ·{" "}
-                {formatFileSize(pendingBackup.stats.attachmentBytes)}
+                {(pendingBackup.stats.sellerProfiles ?? 0).toLocaleString("fa-IR")} پروفایل فروشنده ·{" "}
+                {pendingBackup.stats.attachments.toLocaleString("fa-IR")} پیوست
               </span>
+              <span>{formatFileSize(pendingBackup.stats.attachmentBytes)} فایل پیوست</span>
               <span>حجم فایل: {formatFileSize(pendingFileSize)}</span>
             </div>
 

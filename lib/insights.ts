@@ -1,6 +1,6 @@
-import { normalizePersianDigits } from "./normalize-persian-digits.ts";
 import { latestQuotesByProvider, quoteTotal } from "./quote.ts";
 import { caseMatchesTag, categoryLabelForCase } from "./categories.ts";
+import { providerSellerIdentityKey } from "./seller-profiles.ts";
 import type { Provider, PurchaseCase, Quote } from "./types.ts";
 
 const DAY_MS = 86_400_000;
@@ -48,6 +48,7 @@ export interface PurchaseInsightFilters {
 
 export interface SellerInsight {
   key: string;
+  sellerProfileId?: string;
   name: string;
   phone?: string;
   caseCount: number;
@@ -87,22 +88,10 @@ export interface PurchaseInsights {
   mostUsedSeller: SellerInsight | null;
 }
 
-function normalizedName(value: string) {
-  return normalizePersianDigits(value)
-    .trim()
-    .toLocaleLowerCase("fa-IR")
-    .replace(/[\u200c\u200f\u202a-\u202e]/g, "")
-    .replace(/\s+/g, " ");
-}
-
-function normalizedPhone(value?: string) {
-  return normalizePersianDigits(value ?? "").replace(/\D/g, "");
-}
-
-export function providerIdentity(provider: Pick<Provider, "name" | "phone">) {
-  const phone = normalizedPhone(provider.phone);
-  if (phone) return `phone:${phone}`;
-  return `name:${normalizedName(provider.name)}`;
+export function providerIdentity(
+  provider: Pick<Provider, "sellerProfileId" | "name" | "phone">
+) {
+  return providerSellerIdentityKey(provider);
 }
 
 function storedCalendarDayNumber(value?: string | null) {
@@ -291,6 +280,7 @@ export function buildPurchaseInsights(
     string,
     {
       key: string;
+      sellerProfileId?: string;
       name: string;
       phone?: string;
       caseIds: Set<string>;
@@ -309,6 +299,7 @@ export function buildPurchaseInsights(
     const key = providerIdentity(provider);
     const current = sellerMap.get(key) ?? {
       key,
+      sellerProfileId: provider.sellerProfileId,
       name: provider.name,
       phone: provider.phone,
       caseIds: new Set<string>(),
@@ -322,6 +313,7 @@ export function buildPurchaseInsights(
       onTimeDeliveryCount: 0,
     };
     current.caseIds.add(provider.caseId);
+    current.sellerProfileId = current.sellerProfileId ?? provider.sellerProfileId;
     if (provider.rating !== undefined && Number.isFinite(provider.rating)) {
       current.ratingTotal += provider.rating;
       current.ratingCount += 1;
@@ -357,6 +349,7 @@ export function buildPurchaseInsights(
   const sellers: SellerInsight[] = Array.from(sellerMap.values())
     .map((seller) => ({
       key: seller.key,
+      sellerProfileId: seller.sellerProfileId,
       name: seller.name,
       phone: seller.phone,
       caseCount: seller.caseIds.size,
