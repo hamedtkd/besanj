@@ -1,6 +1,6 @@
 {
   "name": "besanj",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "lint": "eslint . --max-warnings=0",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "check:ui": "node scripts/cleanup-stale-ui.mjs && node scripts/check-ui-components.mjs",
-    "check": "npm run doctor && npm run check:ui && npm run check:theme && npm run check:pwa && npm run check:workflow && npm run check:data && npm run check:report && npm run check:automation && npm run check:capture && npm run check:purchase && npm run check:insights && npm run check:categories-budget && npm run check:sellers && npm run typecheck && npm run lint && npm test && npm run build",
+    "check": "npm run doctor && npm run check:ui && npm run check:theme && npm run check:pwa && npm run check:workflow && npm run check:data && npm run check:report && npm run check:automation && npm run check:capture && npm run check:purchase && npm run check:insights && npm run check:categories-budget && npm run check:sellers && npm run check:persian-ui && npm run typecheck && npm run lint && npm test && npm run build",
     "predev": "node scripts/cleanup-stale-ui.mjs && node scripts/doctor.mjs",
     "postinstall": "node scripts/cleanup-stale-ui.mjs",
     "doctor": "node scripts/doctor.mjs",
@@ -25,7 +25,8 @@
     "check:purchase": "node scripts/check-purchase.mjs",
     "check:insights": "node scripts/check-insights.mjs",
     "check:categories-budget": "node scripts/check-categories-budget.mjs",
-    "check:sellers": "node scripts/check-seller-profiles.mjs"
+    "check:sellers": "node scripts/check-seller-profiles.mjs",
+    "check:persian-ui": "node scripts/check-persian-ui.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

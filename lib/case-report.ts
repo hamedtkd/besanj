@@ -58,7 +58,7 @@ function validTime(value: string) {
 }
 
 function formatNumber(value: number) {
-  return new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 0 }).format(
+  return new Intl.NumberFormat("fa-IR-u-nu-arabext", { maximumFractionDigits: 0 }).format(
     Math.round(value)
   );
 }
@@ -66,7 +66,7 @@ function formatNumber(value: number) {
 function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+  return new Intl.DateTimeFormat("fa-IR-u-ca-persian-nu-arabext", {
     year: "numeric",
     month: "long",
     day: "numeric",

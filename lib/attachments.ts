@@ -10,7 +10,7 @@ export interface AttachmentLike {
 
 export function validateAttachmentSelection(files: AttachmentLike[]) {
   if (files.length > MAX_ATTACHMENTS_PER_QUOTE) {
-    return `حداکثر ${MAX_ATTACHMENTS_PER_QUOTE.toLocaleString("fa-IR")} فایل برای هر استعلام می‌توانی اضافه کنی.`;
+    return `حداکثر ${MAX_ATTACHMENTS_PER_QUOTE.toLocaleString("fa-IR-u-nu-arabext")} فایل برای هر استعلام می‌توانی اضافه کنی.`;
   }
 
   const tooLarge = files.find((file) => file.size > MAX_ATTACHMENT_BYTES);
@@ -28,11 +28,11 @@ export function validateAttachmentSelection(files: AttachmentLike[]) {
 
 export function formatFileSize(size: number) {
   if (!Number.isFinite(size) || size <= 0) return "۰ بایت";
-  if (size < 1024) return `${Math.round(size).toLocaleString("fa-IR")} بایت`;
+  if (size < 1024) return `${Math.round(size).toLocaleString("fa-IR-u-nu-arabext")} بایت`;
   if (size < 1024 * 1024) {
-    return `${Math.round(size / 1024).toLocaleString("fa-IR")} کیلوبایت`;
+    return `${Math.round(size / 1024).toLocaleString("fa-IR-u-nu-arabext")} کیلوبایت`;
   }
-  return `${(size / (1024 * 1024)).toLocaleString("fa-IR", {
+  return `${(size / (1024 * 1024)).toLocaleString("fa-IR-u-nu-arabext", {
     maximumFractionDigits: 1,
   })} مگابایت`;
 }

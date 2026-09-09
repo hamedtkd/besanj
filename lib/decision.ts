@@ -110,11 +110,11 @@ export function scoreQuotesForDecision(
         reasons.push("همه شرط‌های ثبت‌شده را پوشش می‌دهد");
       } else if (requirementSummary.total && requirementSummary.evaluated && requirementSummary.matched > 0) {
         reasons.push(
-          `${requirementSummary.matched.toLocaleString("fa-IR")} از ${requirementSummary.total.toLocaleString("fa-IR")} شرط را پوشش می‌دهد`
+          `${requirementSummary.matched.toLocaleString("fa-IR-u-nu-arabext")} از ${requirementSummary.total.toLocaleString("fa-IR-u-nu-arabext")} شرط را پوشش می‌دهد`
         );
       }
       if (providerRating && providerRating >= 4) {
-        reasons.push(`امتیاز اعتماد ${providerRating.toLocaleString("fa-IR")} از ۵`);
+        reasons.push(`امتیاز اعتماد ${providerRating.toLocaleString("fa-IR-u-nu-arabext")} از ۵`);
       }
       if (freshness === "today") reasons.push("قیمت امروز است");
       if (quote.warranty) reasons.push("اطلاعات گارانتی ثبت شده");

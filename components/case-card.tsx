@@ -84,7 +84,7 @@ export function CaseCard({
                 <p className="type-caption mt-1 text-muted-foreground">
                   {kindLabel(purchaseCase.kind)}
                   {metrics.providerCount > 0
-                    ? ` · ${metrics.providerCount.toLocaleString("fa-IR")} فروشنده`
+                    ? ` · ${metrics.providerCount.toLocaleString("fa-IR-u-nu-arabext")} فروشنده`
                     : " · هنوز استعلامی ندارد"}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -100,7 +100,7 @@ export function CaseCard({
                   ))}
                   {(purchaseCase.tags?.length ?? 0) > 2 ? (
                     <Badge variant="secondary">
-                      +{((purchaseCase.tags?.length ?? 0) - 2).toLocaleString("fa-IR")}
+                      +{((purchaseCase.tags?.length ?? 0) - 2).toLocaleString("fa-IR-u-nu-arabext")}
                     </Badge>
                   ) : null}
                 </div>
@@ -191,7 +191,7 @@ export function CaseCard({
 
           <div className="flex items-center justify-between border-t border-border/85 bg-muted/25 px-4 py-3 sm:px-5">
             <span className="type-caption text-muted-foreground">
-              {metrics.quoteCount.toLocaleString("fa-IR")} استعلام ثبت‌شده
+              {metrics.quoteCount.toLocaleString("fa-IR-u-nu-arabext")} استعلام ثبت‌شده
             </span>
             <span className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-primary transition-colors group-hover:bg-primary/10">
               باز کردن پرونده

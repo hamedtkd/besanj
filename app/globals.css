@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: "Mikhak";
-  src: url("https://cdn.jsdelivr.net/gh/aminabedi68/Mikhak@master/fonts/webfonts/variable/Mikhak%5BDSTY,KSHD,wght%5D.woff2") format("woff2");
+  src: url("https://cdn.jsdelivr.net/gh/aminabedi68/Mikhak@9dea055eb3dfc752879442224460c6e5d6ebe232/fonts/webfonts/variable/Mikhak-FD%5BDSTY%2CKSHD%2Cwght%5D.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -145,6 +145,8 @@ body {
   color: var(--foreground);
   font-family: "Mikhak", ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "ss01";
+  font-variation-settings: "KSHD" 100, "DSTY" 0;
+  font-synthesis: none;
   font-weight: var(--type-weight-body);
 }
 
@@ -222,6 +224,7 @@ a {
 
 .type-data {
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
   font-weight: var(--type-weight-data);
   letter-spacing: -.01em;
 }

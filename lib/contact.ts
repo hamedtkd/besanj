@@ -16,7 +16,7 @@ export interface ProviderContactLinks {
 }
 
 function persianNumber(value: number) {
-  return new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 0 }).format(
+  return new Intl.NumberFormat("fa-IR-u-nu-arabext", { maximumFractionDigits: 0 }).format(
     Math.round(value)
   );
 }
@@ -25,7 +25,7 @@ function displayCalendarDate(value?: string | null) {
   if (!value) return undefined;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return undefined;
-  return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+  return new Intl.DateTimeFormat("fa-IR-u-ca-persian-nu-arabext", {
     year: "numeric",
     month: "long",
     day: "numeric",

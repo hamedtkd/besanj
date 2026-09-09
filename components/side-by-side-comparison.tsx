@@ -139,7 +139,7 @@ export function SideBySideComparison({
                           ? "ثبت نشده"
                           : quote.deliveryDays === 0
                             ? "فوری"
-                            : `${quote.deliveryDays.toLocaleString("fa-IR")} روز`
+                            : `${quote.deliveryDays.toLocaleString("fa-IR-u-nu-arabext")} روز`
                       }
                       icon={<Truck />}
                       highlight={minDelivery !== null && quote.deliveryDays === minDelivery}
@@ -151,7 +151,7 @@ export function SideBySideComparison({
                       value={
                         requirementSummary.total
                           ? requirementSummary.evaluated
-                            ? `${requirementSummary.matched.toLocaleString("fa-IR")} از ${requirementSummary.total.toLocaleString("fa-IR")} مورد`
+                            ? `${requirementSummary.matched.toLocaleString("fa-IR-u-nu-arabext")} از ${requirementSummary.total.toLocaleString("fa-IR-u-nu-arabext")} مورد`
                             : "هنوز بررسی نشده"
                           : "شرطی ثبت نشده"
                       }
@@ -160,7 +160,7 @@ export function SideBySideComparison({
                     />
                     <CompareRow
                       label="اعتماد فروشنده"
-                      value={provider.rating ? `${provider.rating.toLocaleString("fa-IR")} از ۵` : "ثبت نشده"}
+                      value={provider.rating ? `${provider.rating.toLocaleString("fa-IR-u-nu-arabext")} از ۵` : "ثبت نشده"}
                       icon={<Star />}
                       highlight={Boolean(provider.rating && provider.rating >= 4)}
                     />

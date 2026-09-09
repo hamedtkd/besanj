@@ -32,7 +32,7 @@ export function MonthlyBudgetSummary({ snapshot }: { snapshot: MonthlyBudgetSnap
             <div>
               <h2 className="type-card-title">بودجه {snapshot.monthLabel}</h2>
               <p className="type-caption mt-0.5 text-muted-foreground">
-                {snapshot.purchaseCount.toLocaleString("fa-IR")} خرید در این ماه ثبت شده است.
+                {snapshot.purchaseCount.toLocaleString("fa-IR-u-nu-arabext")} خرید در این ماه ثبت شده است.
               </p>
             </div>
           </div>

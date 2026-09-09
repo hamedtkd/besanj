@@ -1,5 +1,6 @@
 /* global self, caches, fetch, Response, URL */
-const CACHE_VERSION = "besanj-shell-v14";
+const CACHE_VERSION = "besanj-shell-v15";
+const MIKHAK_FD_URL = "https://cdn.jsdelivr.net/gh/aminabedi68/Mikhak@9dea055eb3dfc752879442224460c6e5d6ebe232/fonts/webfonts/variable/Mikhak-FD%5BDSTY%2CKSHD%2Cwght%5D.woff2";
 const CORE_ASSETS = [
   "/",
   "/manifest.webmanifest",
@@ -9,6 +10,7 @@ const CORE_ASSETS = [
   "/icons/maskable-512.png",
   "/icon.svg",
   "/apple-icon.png",
+  MIKHAK_FD_URL,
 ];
 
 self.addEventListener("install", (event) => {
@@ -45,6 +47,26 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+
+  if (url.href === MIKHAK_FD_URL) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const network = fetch(request)
+          .then((response) => {
+            if (response.ok) {
+              const copy = response.clone();
+              caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+            }
+            return response;
+          })
+          .catch(() => cached || Response.error());
+
+        return cached || network;
+      })
+    );
+    return;
+  }
+
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
   if (url.searchParams.has("_rsc")) return;

@@ -201,7 +201,7 @@ export function QuoteFormDialog({
 
     toast(
       draft.detectedFields.length
-        ? `${draft.detectedFields.length.toLocaleString("fa-IR")} بخش از متن در فرم قرار گرفت.`
+        ? `${draft.detectedFields.length.toLocaleString("fa-IR-u-nu-arabext")} بخش از متن در فرم قرار گرفت.`
         : "اطلاعات مشخصی از متن پیدا نشد؛ فرم را دستی کامل کن."
     );
   }
@@ -432,7 +432,7 @@ export function QuoteFormDialog({
           <div>
             <div className="type-caption text-muted-foreground">قیمت نهایی</div>
             <div className="type-data mt-0.5 inline-flex items-center gap-1 text-lg text-primary">
-              {total.toLocaleString("fa-IR")}
+              {total.toLocaleString("fa-IR-u-nu-arabext")}
               <TomanIcon className="size-4" />
             </div>
           </div>

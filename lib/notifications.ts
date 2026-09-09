@@ -122,8 +122,8 @@ export function buildNotificationPayload(
     .join(" · ");
   const remaining = tasks.length - 2;
   return {
-    title: `${tasks.length.toLocaleString("fa-IR")} کار در بسنج نیاز به توجه دارد`,
-    body: remaining > 0 ? `${firstTitles} · و ${remaining.toLocaleString("fa-IR")} مورد دیگر` : firstTitles,
+    title: `${tasks.length.toLocaleString("fa-IR-u-nu-arabext")} کار در بسنج نیاز به توجه دارد`,
+    body: remaining > 0 ? `${firstTitles} · و ${remaining.toLocaleString("fa-IR-u-nu-arabext")} مورد دیگر` : firstTitles,
     url: "/",
     tag: `besanj-daily-${dayKey}`,
   };

@@ -90,7 +90,7 @@ export function QuoteHistory({
 
         {selectedProvider && selectedStats ? (
           <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-4 sm:grid-cols-4">
-            <HistoryMetric label="تعداد استعلام" value={selectedStats.count.toLocaleString("fa-IR")} />
+            <HistoryMetric label="تعداد استعلام" value={selectedStats.count.toLocaleString("fa-IR-u-nu-arabext")} />
             <HistoryMetric label="کمترین قیمت" value={`${formatToman(selectedStats.min)} تومان`} />
             <HistoryMetric label="بیشترین قیمت" value={`${formatToman(selectedStats.max)} تومان`} />
             <HistoryMetric
@@ -100,7 +100,7 @@ export function QuoteHistory({
                   ? "—"
                   : selectedStats.change === 0
                     ? "بدون تغییر"
-                    : `${Math.abs(selectedStats.change).toLocaleString("fa-IR", { maximumFractionDigits: 1 })}٪ ${selectedStats.change > 0 ? "افزایش" : "کاهش"}`
+                    : `${Math.abs(selectedStats.change).toLocaleString("fa-IR-u-nu-arabext", { maximumFractionDigits: 1 })}٪ ${selectedStats.change > 0 ? "افزایش" : "کاهش"}`
               }
               tone={selectedStats.change === null || selectedStats.change === 0 ? undefined : selectedStats.change > 0 ? "loss" : "profit"}
             />
@@ -175,14 +175,14 @@ export function QuoteHistory({
                     {change > 0 ? <ArrowUp className="size-3.5" /> : change < 0 ? <ArrowDown className="size-3.5" /> : <Minus className="size-3.5" />}
                     {change === 0
                       ? "بدون تغییر نسبت به قیمت قبلی"
-                      : `${Math.abs(change).toLocaleString("fa-IR", { maximumFractionDigits: 1 })}٪ ${change > 0 ? "گران‌تر" : "ارزان‌تر"} از قبل`}
+                      : `${Math.abs(change).toLocaleString("fa-IR-u-nu-arabext", { maximumFractionDigits: 1 })}٪ ${change > 0 ? "گران‌تر" : "ارزان‌تر"} از قبل`}
                   </div>
                 ) : null}
 
                 <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                   {quote.deliveryDays !== undefined ? (
                     <Detail label="تحویل">
-                      {quote.deliveryDays === 0 ? "فوری" : `${quote.deliveryDays.toLocaleString("fa-IR")} روز`}
+                      {quote.deliveryDays === 0 ? "فوری" : `${quote.deliveryDays.toLocaleString("fa-IR-u-nu-arabext")} روز`}
                     </Detail>
                   ) : null}
                   {quote.warranty ? <Detail label="گارانتی">{formatUserText(quote.warranty)}</Detail> : null}

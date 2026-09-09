@@ -146,7 +146,7 @@ export function SellerDirectoryPage() {
                         {stats.averageRating !== null ? (
                           <Badge variant="outline">
                             <Star className="fill-current text-amber-500" />
-                            {stats.averageRating.toLocaleString("fa-IR", { maximumFractionDigits: 1 })} از ۵
+                            {stats.averageRating.toLocaleString("fa-IR-u-nu-arabext", { maximumFractionDigits: 1 })} از ۵
                           </Badge>
                         ) : null}
                       </div>
@@ -169,7 +169,7 @@ export function SellerDirectoryPage() {
                           <div className="text-end">
                             <div className="type-caption text-muted-foreground">تحویل به‌موقع</div>
                             <div className="type-label mt-1">
-                              {onTimeRate === null ? "داده ندارد" : `${onTimeRate.toLocaleString("fa-IR")}٪`}
+                              {onTimeRate === null ? "داده ندارد" : `${onTimeRate.toLocaleString("fa-IR-u-nu-arabext")}٪`}
                             </div>
                           </div>
                         </div>
@@ -232,7 +232,7 @@ function SummaryCard({
         <div className="type-caption text-muted-foreground">{label}</div>
         <span className={cn("text-primary [&_svg]:size-4", warning && "text-destructive")}>{icon}</span>
       </div>
-      <div className="type-data mt-2 text-xl">{value.toLocaleString("fa-IR")}</div>
+      <div className="type-data mt-2 text-xl">{value.toLocaleString("fa-IR-u-nu-arabext")}</div>
     </Card>
   );
 }

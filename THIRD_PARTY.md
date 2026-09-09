@@ -40,9 +40,14 @@
 
 ## Mikhak
 
-UI فونت variable Mikhak را از همان منبع عمومی GitHub/jsDelivr مورد استفاده در Poolamkoo بارگذاری می‌کند:
+رابط کاربری بسنج از نسخه فارسی-رقم فونت متغیر Mikhak استفاده می کند. فایل انتخاب شده همان `Mikhak-FD[DSTY,KSHD,wght].woff2` از مخزن اصلی است و برای ثبات Release به commit `9dea055eb3dfc752879442224460c6e5d6ebe232` پین شده است.
 
 - https://github.com/aminabedi68/Mikhak
+- https://aminabedi68.github.io/Mikhak/
+- License: SIL Open Font License 1.1
+- متن مجوز داخل `docs/licenses/MIKHAK_OFL.txt` نگه داری می شود.
+
+فونت از jsDelivr با همان commit ثابت بارگذاری می شود و Service Worker آن را برای استفاده بعدی cache می کند. در این درخواست فقط فایل عمومی فونت دریافت می شود و هیچ داده پرونده، فروشنده، استعلام یا Backup به سرویس بیرونی ارسال نمی شود.
 
 ## Recharts
 

@@ -160,7 +160,7 @@ function monthKey(value: string) {
 function monthLabel(key: string) {
   const [yearText, monthText] = key.split("-");
   const date = new Date(Number(yearText), Number(monthText) - 1, 15, 12, 0, 0);
-  return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+  return new Intl.DateTimeFormat("fa-IR-u-ca-persian-nu-arabext", {
     year: "numeric",
     month: "short",
   }).format(date);

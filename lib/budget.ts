@@ -88,7 +88,7 @@ export function persianMonthKey(value: Date | string) {
 }
 
 export function persianMonthLabel(value: Date) {
-  return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+  return new Intl.DateTimeFormat("fa-IR-u-ca-persian-nu-arabext", {
     timeZone: "Asia/Tehran",
     year: "numeric",
     month: "long",
