@@ -2,7 +2,30 @@
 
 بسنج یک وب اپ فارسی، local-first و بدون Backend برای مدیریت تصمیم خرید است. کاربر برای یک کالا یا خدمت پرونده می سازد، از چند فروشنده استعلام می گیرد، قیمت و شرایط را نگه می دارد، گزینه ها را مقایسه می کند، پیگیری انجام می دهد، خرید واقعی و تحویل را ثبت می کند و بعد از داده خریدهای قبلی برای تصمیم های بعدی استفاده می کند.
 
-نسخه فعلی: **1.4.0**
+نسخه فعلی: **1.5.0**
+
+## فاز 1.5: ثبت سریع و ورود طبیعی اطلاعات
+
+این نسخه اصطکاک ثبت اطلاعات را کم می کند. کاربر می تواند با یک عنوان کوتاه پرونده بسازد، متن فروشنده را Paste کند یا در مرورگرهای سازگار با تشخیص گفتار محلی، اطلاعات را با صدا بگوید و قبل از ثبت نتیجه استخراج شده را مرور کند.
+
+- ورودی «ثبت سریع» در داشبورد روی دسکتاپ و موبایل.
+- ساخت پرونده فقط با عنوان، با دسته پیش فرض «سایر» و تکمیل جزئیات در آینده.
+- ثبت استعلام برای پرونده موجود یا ساخت پرونده و استعلام در یک مرحله.
+- parser محلی برای عنوان کالا/خدمت، قیمت، شماره فروشنده، گارانتی، موجودی، ارسال/تحویل، اعتبار و کانال تماس.
+- پشتیبانی از مبلغ های کوتاه مثل `68م`، `۶۸ میلیون` و عدد کامل.
+- فهم عددهای گفتاری فارسی مثل «شصت و هشت میلیون».
+- تشخیص «ارسال فردا»، «تحویل فوری»، «موجود» و «ناموجود».
+- انتخاب فروشنده سراسری قبلی بدون تایپ دوباره.
+- مسیر «قیمت جدید» روی کارت فروشنده، با حفظ فروشنده و تاریخچه و تمرکز روی وارد کردن مبلغ تازه.
+- Voice to Text فقط با `SpeechRecognition.processLocally = true` و بدون fallback ابری.
+- بررسی و نصب بسته گفتار فارسی روی دستگاه فقط در مرورگرهایی که API محلی را پشتیبانی می کنند.
+- Draft محلی هفت روزه برای ثبت نیمه کاره.
+- فرم عادی استعلام با «جزئیات بیشتر، اختیاری» تا فیلدهای کم استفاده مزاحم ثبت سریع نباشند.
+- همه خروجی های پیشنهادی review-first هستند و چیزی بدون تأیید کاربر ذخیره نمی شود.
+- Dexie همچنان v6 و بدون migration جدید.
+- بدون dependency جدید npm.
+- Guard جدید `check:quick-capture`.
+- Service Worker cache version: `besanj-shell-v16`.
 
 ## فاز 1.4: تجربه بومی فارسی
 
@@ -288,6 +311,7 @@ check:data
 check:report
 check:automation
 check:capture
+check:quick-capture
 check:purchase
 check:insights
 check:categories-budget
@@ -305,7 +329,24 @@ build
 Service Worker در production ثبت می شود. cache فعلی:
 
 ```text
-besanj-shell-v14
+besanj-shell-v16
+```
+
+## فایل های مهم فاز 1.5
+
+```text
+components/quick-capture-sheet.tsx
+components/local-voice-capture.tsx
+components/quote-capture-panel.tsx
+components/quote-form-dialog.tsx
+components/home-screen.tsx
+lib/quick-capture.ts
+lib/local-speech.ts
+lib/spoken-persian-number.ts
+lib/quote-capture.ts
+scripts/check-quick-capture.mjs
+tests/quick-capture.test.ts
+docs/RELEASE_1.5.0.md
 ```
 
 ## فایل های مهم فاز 1.3
@@ -353,12 +394,12 @@ docs/RELEASE_1.2.0.md
 
 قبل از ساخت کنترل عمومی جدید، PersianLabs UI و wrapperهای فعلی پروژه بررسی می شوند. Date Picker پروژه از Doran برای تقویم فارسی استفاده می کند. تغییر component پایه باید بدون regression در همه مصرف کننده ها انجام شود.
 
-## توسعه نسخه 1.3
+## توسعه نسخه 1.5
 
 Branch پیشنهادی و فعلی این Release:
 
 ```text
-feat/seller-profiles-v1.3
+feat/quick-capture-v1.5
 ```
 
 بعد از جایگزینی سورس:
@@ -372,7 +413,7 @@ npm run check
 
 ```bash
 git add .
-git commit -m "feat: add Besanj seller profiles v1.3.0"
+git commit -m "feat: add Besanj quick capture and local voice v1.5.0"
 ```
 
 Merge و Tag فقط بعد از سبزشدن کامل روی سیستم مقصد انجام شود.
@@ -381,4 +422,4 @@ Merge و Tag فقط بعد از سبزشدن کامل روی سیستم مقصد
 
 - `THIRD_PARTY.md`: کتابخانه ها و مجوزها.
 - `QA.md`: وضعیت QA نسخه ها.
-- `docs/RELEASE_1.3.0.md`: Release Note نسخه فعلی.
+- `docs/RELEASE_1.5.0.md`: Release Note نسخه فعلی.

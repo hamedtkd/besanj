@@ -1,3 +1,63 @@
+# QA | Besanj 1.5.0
+
+## فاز ثبت سریع
+
+- ثبت پرونده فقط با عنوان
+- ثبت Quote روی پرونده موجود یا ساخت Case + Quote در یک مرحله
+- Paste و متن طبیعی review-first
+- Voice to Text فقط روی دستگاه، بدون fallback ابری
+- بررسی/نصب بسته گفتار فارسی در مرورگر سازگار
+- مبلغ کوتاه `68م` و `۶۸ میلیون`
+- عددهای گفتاری فارسی، شامل قیمت گفتاری و رقم های گفتاری تلفن
+- تشخیص عنوان، فروشنده، موجودی، گارانتی، ارسال فردا و شماره
+- استفاده دوباره از Seller Profile
+- Draft محلی هفت روزه
+- Progressive Disclosure فرم کامل Quote
+- Guard جدید `check:quick-capture`
+- Dexie v6 بدون migration
+- Backup بدون تغییر
+- Service Worker `besanj-shell-v16`
+- بدون dependency جدید npm
+
+## بررسی های اجراشده در محیط ساخت
+
+- کل تست ها: **115/115 PASS**
+- کل تست ها با `TZ=Asia/Tehran`: **115/115 PASS**
+- `tests/quick-capture.test.ts`: **8/8 PASS**
+- `tests/quote-capture.test.ts`: **4/4 PASS**
+- `check:ui`: **PASS**
+- `check:theme`: **PASS**
+- `check:pwa`: **PASS**
+- `check:workflow`: **PASS**
+- `check:data`: **PASS**
+- `check:report`: **PASS**
+- `check:automation`: **PASS**
+- `check:capture`: **PASS**
+- `check:quick-capture`: **PASS**
+- `check:purchase`: **PASS**
+- `check:insights`: **PASS**
+- `check:categories-budget`: **PASS**
+- `check:sellers`: **PASS**
+- `check:persian-ui`: **PASS**
+- TS/TSX syntax parse: **146 فایل، 0 خطا**
+- Local import resolution: **598 import، 0 مسیر شکسته**
+- JavaScript syntax برای Service Worker و همه scriptهای `.mjs`: **PASS**
+- LF normalization: **198 فایل متنی، 0 فایل CRLF**
+
+## محدودیت محیط ساخت
+
+Dependencyهای npm در محیط ساخت نصب نیستند. تست های Node و همه Guardهای مستقل اجرا و پاس شده اند، اما typecheck کامل پروژه، ESLint و Next production build باید روی سیستم مقصد با `npm install` و `npm run check` تأیید شوند.
+
+## گیت مرجع روی سیستم مقصد
+
+```bash
+npm install
+npm audit
+npm run check
+```
+
+---
+
 # QA | Besanj 1.4.0
 
 ## فاز تجربه بومی فارسی
