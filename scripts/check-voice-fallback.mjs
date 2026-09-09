@@ -12,8 +12,8 @@ const failures = [];
 const loaderPath = "/vendor/transformers-loader.mjs";
 const pinnedRuntime = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.min.js";
 
-if (pkg.version !== "1.6.0") {
-  failures.push("package version must be 1.6.0");
+if (pkg.version !== "1.7.0") {
+  failures.push("package version must be 1.7.0");
 }
 if (pkg.dependencies?.["@huggingface/transformers"]) {
   failures.push("Transformers.js must not be installed through npm because its Node-only dependency tree is not needed by the browser fallback");
@@ -68,8 +68,8 @@ if (!whisper.includes('typeof navigator.mediaDevices?.getUserMedia === "function
 if (/processLocally\s*=\s*false/.test(localSpeech) || /OPENAI_API_KEY|HF_TOKEN|Authorization:\s*Bearer/i.test(localSpeech + whisper + loader)) {
   failures.push("the local voice path must remain on-device and must not contain cloud credentials");
 }
-if (!serviceWorker.includes(loaderPath) || !serviceWorker.includes("besanj-shell-v19")) {
-  failures.push("PWA shell v19 must cache the same-origin Transformers.js loader");
+if (!serviceWorker.includes(loaderPath) || !serviceWorker.includes("besanj-shell-v20")) {
+  failures.push("PWA shell v20 must cache the same-origin Transformers.js loader");
 }
 if (!tests.includes("WASM fallback") || !tests.includes("16k-compatible")) {
   failures.push("local Whisper regression tests are missing");

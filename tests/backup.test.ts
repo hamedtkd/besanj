@@ -381,7 +381,7 @@ test("backup preserves personal case templates", async () => {
         },
       ],
     },
-    { appVersion: "1.6.0" }
+    { appVersion: "1.7.0" }
   );
 
   const parsed = parseBesanjBackupText(JSON.stringify(backup));

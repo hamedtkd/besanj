@@ -46,8 +46,8 @@ if (!/\.recharts-text[\s\S]*font-family:\s*"Mikhak"/.test(css)) {
 if (!/lang="fa"/.test(layout) || !/dir="rtl"/.test(layout)) {
   violations.push("Root layout must stay Persian RTL.");
 }
-if (!serviceWorker.includes(FONT_TOKEN) || !serviceWorker.includes("besanj-shell-v19")) {
-  violations.push("PWA must cache the pinned Mikhak FD font with shell v19.");
+if (!serviceWorker.includes(FONT_TOKEN) || !serviceWorker.includes("besanj-shell-v20")) {
+  violations.push("PWA must cache the pinned Mikhak FD font with shell v20.");
 }
 if (!numberHelpers.includes('PERSIAN_NUMBER_LOCALE = "fa-IR-u-nu-arabext"')) {
   violations.push("Persian number locale must explicitly force arabext digits.");

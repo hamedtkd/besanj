@@ -25,6 +25,7 @@ import { EmptyState } from "@/components/empty-state";
 import { HelpHint } from "@/components/help-hint";
 import { SellerMergeSheet } from "@/components/seller-merge-sheet";
 import { SellerProfileEditSheet } from "@/components/seller-profile-edit-sheet";
+import { SellerPriceIntelligenceCard } from "@/components/seller-price-intelligence";
 import { useToast } from "@/components/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -195,6 +196,12 @@ export function SellerProfilePage({ sellerId }: { sellerId: string }) {
         <MoneyCard label="میانگین خرید واقعی" value={details.stats.averagePurchaseToman} />
         <MoneyCard label="جمع خرید از این فروشنده" value={details.stats.totalSpentToman || null} />
       </section>
+
+      <SellerPriceIntelligenceCard
+        profile={profile}
+        providers={data.providers}
+        quotes={data.quotes}
+      />
 
       {profile.note ? (
         <Card className="p-4 sm:p-5">

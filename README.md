@@ -2,7 +2,26 @@
 
 بسنج یک وب اپ فارسی و local-first برای مدیریت تصمیم خرید است. داده های اصلی خرید، فروشنده، استعلام، بودجه و تاریخچه همچنان روی دستگاه کاربر می مانند. تنها قابلیت اختیاری «گفتار با هوش مصنوعی» یک route سروری کوچک دارد که فقط صدای همان ضبط را برای تبدیل به متن به Groq می فرستد.
 
-نسخه فعلی: **1.6.0**
+نسخه فعلی: **1.7.0**
+
+## نسخه 1.7.0: هوش قیمت شخصی
+
+این نسخه از سابقه قیمت هایی که خود کاربر ثبت کرده استفاده می کند تا وضعیت قیمت را بدون اتصال به منبع قیمت بیرونی بهتر توضیح دهد. این قابلیت AI ابری نیست و هیچ داده جدیدی برای تحلیل قیمت از دستگاه خارج نمی کند.
+
+- کارت «هوش قیمت شخصی» داخل هر پرونده، با مقایسه بهترین قیمت فعلی با کف و میانه سابقه همان پرونده.
+- ارزیابی قیمت فقط بعد از حداقل سه روز ثبت قیمت فعال می شود تا یک نوسان تک روزه به عنوان نتیجه قطعی نمایش داده نشود.
+- قیمت قدیمی یا منقضی حتی اگر ارزان باشد به عنوان فرصت خرید نمایش داده نمی شود و کاربر به استعلام تازه هدایت می شود.
+- روند اخیر از چند snapshot روزانه بهترین قیمت ساخته می شود و به صورت کاهشی، ثابت یا افزایشی نمایش داده می شود.
+- سطح اطمینان بر اساس تعداد روزهای سابقه و تعداد فروشنده های واقعی همان پرونده مشخص می شود.
+- صفحه Insights یک بخش مستقل «هوش قیمت شخصی» دارد که قبل از خرید هم کار می کند و فرصت های فعلی، پرونده های گران تر از سابقه و میانگین فاصله از میانه شخصی را نشان می دهد.
+- جایگاه قیمتی فروشنده در صفحه Seller با مقایسه همان فروشنده با ارزان ترین گزینه هر پرونده محاسبه می شود تا کالاهای گران و ارزان مستقیم با هم قاطی نشوند.
+- حافظه قیمتی فروشنده ها تعداد پرونده قابل مقایسه، فاصله معمول از ارزان ترین و دفعات ارزان ترین بودن را نشان می دهد.
+- فیلتر دسته و برچسب در Insights روی هوش قیمت شخصی هم اعمال می شود.
+- هیچ جدول جدید Dexie و هیچ migration جدیدی اضافه نشده است.
+- Backup format تغییر ساختاری نکرده و فقط `appVersion` به 1.7.0 رسیده است.
+- Guard جدید `check:price-intelligence` به گیت کامل پروژه اضافه شده است.
+- Service Worker cache version: `besanj-shell-v20`.
+- dependency جدید npm اضافه نشده است.
 
 ## نسخه 1.6.0: قالب های سریع برای خریدهای تکراری
 
@@ -356,6 +375,7 @@ doctor
 check:ui
 check:tooltips
 check:templates
+check:price-intelligence
 check:theme
 check:pwa
 check:workflow
@@ -384,7 +404,22 @@ build
 Service Worker در production ثبت می شود. cache فعلی:
 
 ```text
-besanj-shell-v19
+besanj-shell-v20
+```
+
+## فایل های مهم نسخه 1.7.0
+
+```text
+lib/price-intelligence.ts
+components/case-price-intelligence.tsx
+components/personal-price-intelligence.tsx
+components/seller-price-intelligence.tsx
+components/case-screen.tsx
+components/insights-page.tsx
+components/seller-profile-page.tsx
+scripts/check-price-intelligence.mjs
+tests/price-intelligence.test.ts
+docs/RELEASE_1.7.0.md
 ```
 
 ## فایل های مهم نسخه 1.6.0
@@ -486,18 +521,19 @@ docs/RELEASE_1.2.0.md
 
 از v1.5.1 fix5، متن های توضیحی غیرحیاتی با `HelpHint` و Tooltip رسمی PersianLabs/ui نمایش داده می شوند. `ResponsiveSheet.description` و `FormField.hint` این رفتار را به صورت مرکزی اعمال می کنند. خطاها، هشدارهای destructive و پیام های وضعیت مهم همچنان مستقیم روی صفحه می مانند.
 
-## توسعه نسخه 1.6.0
+## توسعه نسخه 1.7.0
 
 Branch پیشنهادی این فاز:
 
 ```text
-feat/case-templates-v1.6
+feat/personal-price-intelligence-v1.7
 ```
 
 بعد از جایگزینی سورس:
 
 ```bash
 npm install
+npm audit
 npm run check
 ```
 
@@ -505,7 +541,7 @@ npm run check
 
 ```bash
 git add .
-git commit -m "feat: add reusable purchase templates v1.6.0"
+git commit -m "feat: add personal price intelligence v1.7.0"
 ```
 
 Merge و Tag فقط بعد از سبزشدن کامل روی سیستم مقصد انجام شود.
@@ -514,4 +550,4 @@ Merge و Tag فقط بعد از سبزشدن کامل روی سیستم مقصد
 
 - `THIRD_PARTY.md`: کتابخانه ها و مجوزها.
 - `QA.md`: وضعیت QA نسخه ها.
-- `docs/RELEASE_1.6.0.md`: Release Note نسخه فعلی.
+- `docs/RELEASE_1.7.0.md`: Release Note نسخه فعلی.
