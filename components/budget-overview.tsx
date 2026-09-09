@@ -117,7 +117,7 @@ function OverallBudget({ snapshot }: { snapshot: MonthlyBudgetSnapshot }) {
         <div className="mt-4">
           <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
             <span>درصد مصرف</span>
-            <span className="type-data">{Math.round((progress.ratio ?? 0) * 100).toLocaleString("fa-IR")}٪</span>
+            <span className="type-data">{Math.round((progress.ratio ?? 0) * 100).toLocaleString("fa-IR-u-nu-arabext")}٪</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-muted">
             <div
@@ -144,7 +144,7 @@ function CategoryBudgets({ snapshot }: { snapshot: MonthlyBudgetSnapshot }) {
     <div className="p-4 sm:p-5">
       <div className="mb-3">
         <p className="type-caption text-muted-foreground">بودجه دسته‌ها</p>
-        <p className="type-label mt-0.5">{rows.length.toLocaleString("fa-IR")} دسته با سقف جدا</p>
+        <p className="type-label mt-0.5">{rows.length.toLocaleString("fa-IR-u-nu-arabext")} دسته با سقف جدا</p>
       </div>
       {rows.length ? (
         <div className="grid gap-2">
@@ -154,7 +154,7 @@ function CategoryBudgets({ snapshot }: { snapshot: MonthlyBudgetSnapshot }) {
                 <div className="min-w-0">
                   <div className="type-label truncate">{row.categoryLabel}</div>
                   <p className="type-caption mt-0.5 text-muted-foreground">
-                    {row.purchaseCount.toLocaleString("fa-IR")} خرید
+                    {row.purchaseCount.toLocaleString("fa-IR-u-nu-arabext")} خرید
                   </p>
                 </div>
                 <Badge variant={row.health === "over" ? "destructive" : row.health === "near" ? "warning" : "outline"}>

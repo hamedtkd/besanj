@@ -303,7 +303,7 @@ export function CaseReportPage({ caseId }: { caseId: string }) {
                       className="report-break-inside grid gap-3 rounded-2xl border border-border p-3.5 sm:grid-cols-[2rem_1.4fr_1fr_1fr] sm:items-center"
                     >
                       <div className="type-data grid size-8 place-items-center rounded-xl bg-muted text-sm text-muted-foreground">
-                        {(index + 1).toLocaleString("fa-IR")}
+                        {(index + 1).toLocaleString("fa-IR-u-nu-arabext")}
                       </div>
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5">
@@ -312,7 +312,7 @@ export function CaseReportPage({ caseId }: { caseId: string }) {
                         </div>
                         <div className="type-caption mt-0.5 text-muted-foreground">
                           {formatPersianDate(row.quote.quotedAt)}
-                          {row.attachmentCount ? ` · ${row.attachmentCount.toLocaleString("fa-IR")} فایل` : ""}
+                          {row.attachmentCount ? ` · ${row.attachmentCount.toLocaleString("fa-IR-u-nu-arabext")} فایل` : ""}
                         </div>
                       </div>
                       <div>
@@ -329,7 +329,7 @@ export function CaseReportPage({ caseId }: { caseId: string }) {
                         <div className="mt-0.5">گارانتی: {formatUserText(row.quote.warranty)}</div>
                         {requirement.total ? (
                           <div className="mt-0.5">
-                            شروط: {requirement.matched.toLocaleString("fa-IR")}/{requirement.total.toLocaleString("fa-IR")}
+                            شروط: {requirement.matched.toLocaleString("fa-IR-u-nu-arabext")}/{requirement.total.toLocaleString("fa-IR-u-nu-arabext")}
                           </div>
                         ) : null}
                       </div>

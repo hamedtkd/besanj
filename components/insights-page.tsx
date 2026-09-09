@@ -139,7 +139,7 @@ export function InsightsPage() {
 
           <div className="type-caption flex items-center gap-1.5 text-muted-foreground lg:justify-end">
             <Tags className="size-3.5" />
-            {summary.purchaseCount.toLocaleString("fa-IR")} خرید در این نما
+            {summary.purchaseCount.toLocaleString("fa-IR-u-nu-arabext")} خرید در این نما
           </div>
         </div>
       </Card>
@@ -168,21 +168,21 @@ export function InsightsPage() {
               value={
                 summary.onTimeDeliveryRate === null
                   ? "—"
-                  : `${Math.round(summary.onTimeDeliveryRate * 100).toLocaleString("fa-IR")}٪`
+                  : `${Math.round(summary.onTimeDeliveryRate * 100).toLocaleString("fa-IR-u-nu-arabext")}٪`
               }
               detail={
                 summary.deliveryMeasuredCount
-                  ? `${summary.onTimeDeliveryCount.toLocaleString("fa-IR")} از ${summary.deliveryMeasuredCount.toLocaleString("fa-IR")} خرید قابل سنجش`
+                  ? `${summary.onTimeDeliveryCount.toLocaleString("fa-IR-u-nu-arabext")} از ${summary.deliveryMeasuredCount.toLocaleString("fa-IR-u-nu-arabext")} خرید قابل سنجش`
                   : "هنوز تحویل ثبت‌شده کافی نیست"
               }
             />
             <InsightMetric
               icon={ReceiptText}
               label="میانگین استعلام قبل از خرید"
-              value={summary.averageQuotesPerPurchase.toLocaleString("fa-IR", {
+              value={summary.averageQuotesPerPurchase.toLocaleString("fa-IR-u-nu-arabext", {
                 maximumFractionDigits: 1,
               })}
-              detail={`${summary.purchaseCount.toLocaleString("fa-IR")} خرید ثبت‌شده`}
+              detail={`${summary.purchaseCount.toLocaleString("fa-IR-u-nu-arabext")} خرید ثبت‌شده`}
             />
           </section>
 
@@ -224,7 +224,7 @@ export function InsightsPage() {
                   icon={Store}
                   title="فروشنده پرتکرار"
                   value={insights.mostUsedSeller.name}
-                  detail={`${insights.mostUsedSeller.purchaseCount.toLocaleString("fa-IR")} خرید · ${insights.mostUsedSeller.quoteCount.toLocaleString("fa-IR")} استعلام`}
+                  detail={`${insights.mostUsedSeller.purchaseCount.toLocaleString("fa-IR-u-nu-arabext")} خرید · ${insights.mostUsedSeller.quoteCount.toLocaleString("fa-IR-u-nu-arabext")} استعلام`}
                 />
               ) : null}
             </section>
@@ -316,7 +316,7 @@ function SpendChart({
                 labelFormatter={(label, payload) => {
                   const point = payload?.[0]?.payload as { purchaseCount?: number } | undefined;
                   return point?.purchaseCount
-                    ? `${String(label)} · ${point.purchaseCount.toLocaleString("fa-IR")} خرید`
+                    ? `${String(label)} · ${point.purchaseCount.toLocaleString("fa-IR-u-nu-arabext")} خرید`
                     : String(label);
                 }}
                 contentStyle={tooltipStyle}
@@ -371,7 +371,7 @@ function CategorySpendChart({
                 labelFormatter={(label, payload) => {
                   const point = payload?.[0]?.payload as { purchaseCount?: number } | undefined;
                   return point?.purchaseCount
-                    ? `${String(label)} · ${point.purchaseCount.toLocaleString("fa-IR")} خرید`
+                    ? `${String(label)} · ${point.purchaseCount.toLocaleString("fa-IR-u-nu-arabext")} خرید`
                     : String(label);
                 }}
                 contentStyle={tooltipStyle}
@@ -415,14 +415,14 @@ function DecisionSnapshot({
           value={
             averageDecisionDays === null
               ? "—"
-              : `${averageDecisionDays.toLocaleString("fa-IR", { maximumFractionDigits: 1 })} روز`
+              : `${averageDecisionDays.toLocaleString("fa-IR-u-nu-arabext", { maximumFractionDigits: 1 })} روز`
           }
         />
         <SnapshotRow
           icon={Target}
           label="خریدهای داخل بودجه"
-          value={`${withinBudgetCount.toLocaleString("fa-IR")} مورد`}
-          detail={overBudgetCount ? `${overBudgetCount.toLocaleString("fa-IR")} مورد بالاتر از بودجه` : "عبور ثبت‌شده از بودجه نداری"}
+          value={`${withinBudgetCount.toLocaleString("fa-IR-u-nu-arabext")} مورد`}
+          detail={overBudgetCount ? `${overBudgetCount.toLocaleString("fa-IR-u-nu-arabext")} مورد بالاتر از بودجه` : "عبور ثبت‌شده از بودجه نداری"}
         />
         <SnapshotRow
           icon={CircleDollarSign}
@@ -551,25 +551,25 @@ function SellerMemory({
                     </strong>
                     {seller.averageRating !== null ? (
                       <Badge variant="secondary">
-                        {seller.averageRating.toLocaleString("fa-IR", { maximumFractionDigits: 1 })} از ۵
+                        {seller.averageRating.toLocaleString("fa-IR-u-nu-arabext", { maximumFractionDigits: 1 })} از ۵
                       </Badge>
                     ) : null}
                   </div>
                   <p className="type-caption mt-1 text-muted-foreground">
                     {seller.phone ? `${formatPhone(seller.phone)} · ` : ""}
-                    {seller.caseCount.toLocaleString("fa-IR")} پرونده · {seller.quoteCount.toLocaleString("fa-IR")} استعلام
+                    {seller.caseCount.toLocaleString("fa-IR-u-nu-arabext")} پرونده · {seller.quoteCount.toLocaleString("fa-IR-u-nu-arabext")} استعلام
                   </p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 <Badge variant={seller.purchaseCount ? "default" : "outline"}>
-                  {seller.purchaseCount.toLocaleString("fa-IR")} خرید
+                  {seller.purchaseCount.toLocaleString("fa-IR-u-nu-arabext")} خرید
                 </Badge>
                 {seller.totalSpentToman ? (
                   <Badge variant="outline">{formatToman(seller.totalSpentToman)} تومان</Badge>
                 ) : null}
                 {onTimeRate !== null ? (
-                  <Badge variant="outline">تحویل به‌موقع {onTimeRate.toLocaleString("fa-IR")}٪</Badge>
+                  <Badge variant="outline">تحویل به‌موقع {onTimeRate.toLocaleString("fa-IR-u-nu-arabext")}٪</Badge>
                 ) : null}
               </div>
             </div>

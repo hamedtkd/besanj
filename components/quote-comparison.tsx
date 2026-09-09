@@ -161,7 +161,7 @@ export function QuoteComparison({
                         {provider.rating ? (
                           <Badge variant="outline">
                             <Star className="fill-current text-amber-500" />
-                            {provider.rating.toLocaleString("fa-IR")}/۵
+                            {provider.rating.toLocaleString("fa-IR-u-nu-arabext")}/۵
                           </Badge>
                         ) : null}
                         {sellerProfile?.favorite ? (
@@ -238,7 +238,7 @@ export function QuoteComparison({
                     {requirementSummary.total ? (
                       requirementSummary.evaluated ? (
                         <Badge variant={requirementSummary.matched === requirementSummary.total ? "success" : "outline"}>
-                          {requirementSummary.matched.toLocaleString("fa-IR")}/{requirementSummary.total.toLocaleString("fa-IR")} شرط
+                          {requirementSummary.matched.toLocaleString("fa-IR-u-nu-arabext")}/{requirementSummary.total.toLocaleString("fa-IR-u-nu-arabext")} شرط
                         </Badge>
                       ) : (
                         <Badge variant="outline">شرط‌ها بررسی نشده</Badge>
@@ -247,7 +247,7 @@ export function QuoteComparison({
                     {attachmentCount ? (
                       <Badge variant="outline">
                         <Paperclip />
-                        {attachmentCount.toLocaleString("fa-IR")} فایل
+                        {attachmentCount.toLocaleString("fa-IR-u-nu-arabext")} فایل
                       </Badge>
                     ) : null}
                   </div>

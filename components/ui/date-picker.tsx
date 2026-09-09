@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/popover";
 import { ResponsiveSheet } from "@/components/ui/responsive-sheet";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { toPersianDigits } from "@/lib/persian-number";
 import { cn } from "@/lib/utils";
 
 export type DatePickerPresentation = "auto" | "popover" | "drawer";
@@ -64,7 +65,7 @@ function resolveStaticDate(value: DatePickerDefaultValue | undefined) {
 
 function toPersianDateLabel(value: Date | null) {
   if (!value) return null;
-  return DoranDate.fromGregorian(value).withLocale(faIR).format("YYYY/MM/DD");
+  return toPersianDigits(DoranDate.fromGregorian(value).withLocale(faIR).format("YYYY/MM/DD"));
 }
 
 function isSameDay(left: Date, right: Date) {
@@ -426,7 +427,7 @@ function DoranCalendarSurface({
     month: calendar.month,
     day: 1,
   });
-  const monthLabel = heading.withLocale(faIR).format("MMMM YYYY");
+  const monthLabel = toPersianDigits(heading.withLocale(faIR).format("MMMM YYYY"));
   const num = (value: number) => faIR.formatNumber(String(value));
 
   return (
@@ -502,9 +503,9 @@ function DoranCalendarSurface({
                     tabIndex={isActive ? 0 : -1}
                     aria-disabled={isDisabled || undefined}
                     aria-current={cell.isToday ? "date" : undefined}
-                    aria-label={cell.date
-                      .withLocale(faIR)
-                      .format("dddd D MMMM YYYY")}
+                    aria-label={toPersianDigits(
+                      cell.date.withLocale(faIR).format("dddd D MMMM YYYY")
+                    )}
                     onClick={() => {
                       if (isDisabled) return;
                       setFocusDate(cell.date);

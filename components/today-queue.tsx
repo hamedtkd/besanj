@@ -49,7 +49,7 @@ export function TodayQueue({ tasks }: { tasks: DashboardTask[] }) {
   async function snooze(reminderId: string, days: number) {
     await snoozeReminder(reminderId, days);
     setSnoozeOpenId(null);
-    toast(days === 1 ? "پیگیری تا فردا عقب افتاد." : `پیگیری ${days.toLocaleString("fa-IR")} روز عقب افتاد.`);
+    toast(days === 1 ? "پیگیری تا فردا عقب افتاد." : `پیگیری ${days.toLocaleString("fa-IR-u-nu-arabext")} روز عقب افتاد.`);
   }
 
   return (
@@ -62,7 +62,7 @@ export function TodayQueue({ tasks }: { tasks: DashboardTask[] }) {
             </span>
             <h2 className="type-section-title">کارهای امروز</h2>
             <Badge variant={tasks.some((item) => item.priority === "urgent") ? "warning" : "secondary"}>
-              {tasks.length.toLocaleString("fa-IR")}
+              {tasks.length.toLocaleString("fa-IR-u-nu-arabext")}
             </Badge>
           </div>
           <p className="type-caption mt-1 text-muted-foreground">
@@ -163,7 +163,7 @@ export function TodayQueue({ tasks }: { tasks: DashboardTask[] }) {
       {tasks.length > visible.length ? (
         <div className="border-t border-border/75 bg-muted/20 px-4 py-2.5 text-center sm:px-5">
           <span className="type-caption text-muted-foreground">
-            {`و ${(tasks.length - visible.length).toLocaleString("fa-IR")} مورد دیگر`}
+            {`و ${(tasks.length - visible.length).toLocaleString("fa-IR-u-nu-arabext")} مورد دیگر`}
           </span>
         </div>
       ) : null}

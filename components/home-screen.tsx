@@ -208,7 +208,7 @@ export function HomeScreen() {
                 <span className="type-data opacity-65">
                   {data.cases
                     .filter((row) => row.status === tab.value)
-                    .length.toLocaleString("fa-IR")}
+                    .length.toLocaleString("fa-IR-u-nu-arabext")}
                 </span>
               </TabsTrigger>
             ))}
@@ -339,12 +339,12 @@ export function HomeScreen() {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/75 bg-muted/25 px-3 py-2.5">
             <span className="type-caption text-muted-foreground">
-              نمایش {filteredCases.length.toLocaleString("fa-IR")} از {casesInStatus.length.toLocaleString("fa-IR")} پرونده
+              نمایش {filteredCases.length.toLocaleString("fa-IR-u-nu-arabext")} از {casesInStatus.length.toLocaleString("fa-IR-u-nu-arabext")} پرونده
             </span>
             {activeFilterCount ? (
               <span className="type-caption inline-flex items-center gap-1 text-primary">
                 <Filter className="size-3.5" />
-                {activeFilterCount.toLocaleString("fa-IR")} فیلتر فعال
+                {activeFilterCount.toLocaleString("fa-IR-u-nu-arabext")} فیلتر فعال
               </span>
             ) : null}
           </div>
@@ -424,7 +424,7 @@ function SummaryMetric({
         ) : null}
       </div>
       <div className="type-data mt-1.5 text-xl sm:text-2xl">
-        {value.toLocaleString("fa-IR")}
+        {value.toLocaleString("fa-IR-u-nu-arabext")}
       </div>
     </div>
   );

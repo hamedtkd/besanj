@@ -52,8 +52,8 @@ export function ProviderRatingSheet({
                 type="button"
                 variant={value <= rating ? "secondary" : "outline"}
                 size="icon"
-                aria-label={`${value.toLocaleString("fa-IR")} از ۵`}
-                title={`${value.toLocaleString("fa-IR")} از ۵`}
+                aria-label={`${value.toLocaleString("fa-IR-u-nu-arabext")} از ۵`}
+                title={`${value.toLocaleString("fa-IR-u-nu-arabext")} از ۵`}
                 onClick={() => setRating(rating === value ? 0 : value)}
                 className={cn(value <= rating && "border-amber-500/25 text-amber-600 dark:text-amber-300")}
               >

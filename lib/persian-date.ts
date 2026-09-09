@@ -1,17 +1,18 @@
-export type CalendarType = "shamsi" | "miladi";
+import {
+  PERSIAN_DATE_LOCALE,
+  PERSIAN_GREGORIAN_DATE_LOCALE,
+  toPersianDigits,
+} from "./persian-number.ts";
 
-export function toPersianDigits(value: string | number) {
-  return String(value).replace(
-    /\d/g,
-    (digit) => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)] ?? digit
-  );
-}
+export { toPersianDigits } from "./persian-number.ts";
+
+export type CalendarType = "shamsi" | "miladi";
 
 function dateParts(date: Date, calendarType: CalendarType) {
   const locale =
     calendarType === "shamsi"
-      ? "fa-IR-u-ca-persian-nu-arabext"
-      : "fa-IR-u-ca-gregory-nu-arabext";
+      ? PERSIAN_DATE_LOCALE
+      : PERSIAN_GREGORIAN_DATE_LOCALE;
   const parts = new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "2-digit",
@@ -27,5 +28,5 @@ export function formatPersianPickerDate(
   calendarType: CalendarType = "shamsi"
 ) {
   const { year, month, day } = dateParts(date, calendarType);
-  return `${year}/${month}/${day}`;
+  return toPersianDigits(`${year}/${month}/${day}`);
 }

@@ -1,3 +1,54 @@
+# QA | Besanj 1.4.0
+
+## فاز تجربه بومی فارسی
+
+- Mikhak FD به عنوان فونت اصلی رابط کاربری
+- commit ثابت upstream برای فونت
+- رقم فارسی صریح با `fa-IR-u-nu-arabext`
+- تاریخ شمسی با `fa-IR-u-ca-persian-nu-arabext`
+- تبدیل رقم Latin و Arabic-Indic به فارسی
+- پوشش داشبورد، پرونده، فروشنده، بودجه، Insights، نمودار و گزارش
+- حفظ RTL و تقویم Doran
+- Service Worker `besanj-shell-v15` و cache فونت
+- Guard جدید `check:persian-ui`
+- Dexie v6 بدون migration
+- بدون dependency جدید npm
+
+## بررسی های اجراشده در محیط ساخت
+
+- `npm test`: **107/107 PASS**
+- `TZ=Asia/Tehran npm test`: **107/107 PASS**
+- `check:ui`: **PASS**
+- `check:theme`: **PASS**
+- `check:pwa`: **PASS**
+- `check:workflow`: **PASS**
+- `check:data`: **PASS**
+- `check:report`: **PASS**
+- `check:automation`: **PASS**
+- `check:capture`: **PASS**
+- `check:purchase`: **PASS**
+- `check:insights`: **PASS**
+- `check:categories-budget`: **PASS**
+- `check:sellers`: **PASS**
+- `check:persian-ui`: **PASS**
+- TS/TSX syntax/transpile: **138 فایل، 0 خطا**
+- Local import resolution: **570 import، 0 مسیر شکسته**
+- JavaScript syntax برای Service Worker و همه scriptهای `.mjs`: **PASS**
+- LF normalization: **182 فایل متنی، 0 فایل CRLF**
+
+## محدودیت محیط ساخت
+
+Dependencyهای کامل npm داخل sandbox موجود نیستند. بنابراین `npm run check` کامل، TypeScript پروژه، ESLint و Next production build باید روی سیستم مقصد که `npm install` موفق دارد تأیید شوند.
+
+## گیت مرجع روی سیستم مقصد
+
+```bash
+npm install
+npm run check
+```
+
+---
+
 # QA | Besanj 1.3.0
 
 ## فاز پروفایل سراسری فروشنده

@@ -69,7 +69,7 @@ export function CaseTimeline({
             <div className="flex items-center gap-2">
               <ReceiptText className="size-4.5 text-primary" />
               <h2 className="type-section-title">خط زمانی پرونده</h2>
-              <Badge variant="secondary">{timeline.length.toLocaleString("fa-IR")}</Badge>
+              <Badge variant="secondary">{timeline.length.toLocaleString("fa-IR-u-nu-arabext")}</Badge>
             </div>
             <p className="type-caption mt-1 text-muted-foreground">
               استعلام، پیگیری، فایل، تصمیم و نتیجه خرید را به ترتیب زمان کنار هم می‌بینی.

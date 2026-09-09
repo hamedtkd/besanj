@@ -126,10 +126,10 @@ export function PriceHistoryChart({
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
-          <Badge variant="secondary">{activeProviders.length.toLocaleString("fa-IR")} فروشنده</Badge>
-          <Badge variant="outline">{quotes.length.toLocaleString("fa-IR")} استعلام</Badge>
+          <Badge variant="secondary">{activeProviders.length.toLocaleString("fa-IR-u-nu-arabext")} فروشنده</Badge>
+          <Badge variant="outline">{quotes.length.toLocaleString("fa-IR-u-nu-arabext")} استعلام</Badge>
           {repeatedProviders ? (
-            <Badge variant="outline">{repeatedProviders.toLocaleString("fa-IR")} فروشنده با بیش از یک قیمت</Badge>
+            <Badge variant="outline">{repeatedProviders.toLocaleString("fa-IR-u-nu-arabext")} فروشنده با بیش از یک قیمت</Badge>
           ) : null}
         </div>
 
@@ -349,13 +349,13 @@ const tooltipStyle = {
 
 function compactAxisValue(value: number) {
   if (value >= 1_000_000_000) {
-    return `${(value / 1_000_000_000).toLocaleString("fa-IR", { maximumFractionDigits: 1 })} میلیارد`;
+    return `${(value / 1_000_000_000).toLocaleString("fa-IR-u-nu-arabext", { maximumFractionDigits: 1 })} میلیارد`;
   }
   if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toLocaleString("fa-IR", { maximumFractionDigits: 1 })} م`;
+    return `${(value / 1_000_000).toLocaleString("fa-IR-u-nu-arabext", { maximumFractionDigits: 1 })} م`;
   }
   if (value >= 1_000) {
-    return `${(value / 1_000).toLocaleString("fa-IR", { maximumFractionDigits: 0 })} ه`;
+    return `${(value / 1_000).toLocaleString("fa-IR-u-nu-arabext", { maximumFractionDigits: 0 })} ه`;
   }
-  return value.toLocaleString("fa-IR");
+  return value.toLocaleString("fa-IR-u-nu-arabext");
 }

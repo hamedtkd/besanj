@@ -113,7 +113,7 @@ export function QuoteFilters({
           >
             <SlidersHorizontal />
             فیلترها
-            {count ? <Badge variant="default">{count.toLocaleString("fa-IR")}</Badge> : null}
+            {count ? <Badge variant="default">{count.toLocaleString("fa-IR-u-nu-arabext")}</Badge> : null}
             <ChevronDown className={cn("transition-transform", open && "rotate-180")} />
           </Button>
           {count ? (
@@ -260,8 +260,8 @@ export function QuoteFilters({
 
       <div className="border-t border-border px-3 py-2 text-xs text-muted-foreground">
         {resultCount === totalCount
-          ? `${totalCount.toLocaleString("fa-IR")} گزینه فعلی`
-          : `${resultCount.toLocaleString("fa-IR")} از ${totalCount.toLocaleString("fa-IR")} گزینه`}
+          ? `${totalCount.toLocaleString("fa-IR-u-nu-arabext")} گزینه فعلی`
+          : `${resultCount.toLocaleString("fa-IR-u-nu-arabext")} از ${totalCount.toLocaleString("fa-IR-u-nu-arabext")} گزینه`}
       </div>
     </div>
   );

@@ -280,7 +280,7 @@ export function CaseDetailsPanel({
                 <h3 className="type-section-title">پیگیری‌ها</h3>
               </div>
               <p className="type-caption mt-1 text-muted-foreground">
-                {openReminders.length.toLocaleString("fa-IR")} مورد باز · {doneReminders.length.toLocaleString("fa-IR")} انجام‌شده
+                {openReminders.length.toLocaleString("fa-IR-u-nu-arabext")} مورد باز · {doneReminders.length.toLocaleString("fa-IR-u-nu-arabext")} انجام‌شده
               </p>
             </div>
             <Button type="button" size="sm" variant="outline" onClick={() => setFollowUpOpen(true)}>
@@ -345,14 +345,14 @@ export function CaseDetailsPanel({
                     </div>
                     <div className="type-caption mt-0.5 truncate text-muted-foreground">
                       {provider.rating
-                        ? `امتیاز ${provider.rating.toLocaleString("fa-IR")} از ۵${provider.ratingNote ? ` · ${provider.ratingNote}` : ""}`
+                        ? `امتیاز ${provider.rating.toLocaleString("fa-IR-u-nu-arabext")} از ۵${provider.ratingNote ? ` · ${provider.ratingNote}` : ""}`
                         : "هنوز امتیازی ثبت نشده"}
                     </div>
                   </div>
                   {provider.rating ? (
                     <Badge variant="outline">
                       <Star className="fill-current text-amber-500" />
-                      {provider.rating.toLocaleString("fa-IR")}/۵
+                      {provider.rating.toLocaleString("fa-IR-u-nu-arabext")}/۵
                     </Badge>
                   ) : null}
                   <Button type="button" size="sm" variant="ghost" onClick={() => setRatingProvider(provider)}>
@@ -370,7 +370,7 @@ export function CaseDetailsPanel({
           <div className="flex items-center gap-2">
             <FileText className="size-5 text-primary" />
             <h3 className="type-section-title">پیوست‌های استعلام</h3>
-            {attachments.length ? <Badge variant="secondary">{attachments.length.toLocaleString("fa-IR")}</Badge> : null}
+            {attachments.length ? <Badge variant="secondary">{attachments.length.toLocaleString("fa-IR-u-nu-arabext")}</Badge> : null}
           </div>
           <p className="type-caption mt-1 text-muted-foreground">
             فایل‌ها فقط روی همین مرورگر و داخل دیتابیس محلی بسنج ذخیره می‌شوند.

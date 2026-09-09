@@ -134,11 +134,11 @@ export function DataBackupSection() {
             <div className="type-label">داده فعلی این مرورگر</div>
             {stats ? (
               <p className="type-caption mt-1 text-muted-foreground">
-                {stats.cases.toLocaleString("fa-IR")} پرونده ·{" "}
-                {stats.quotes.toLocaleString("fa-IR")} استعلام ·{" "}
-                {stats.reminders.toLocaleString("fa-IR")} پیگیری ·{" "}
-                {stats.attachments.toLocaleString("fa-IR")} پیوست
-                {stats.sellerProfiles ? ` · ${stats.sellerProfiles.toLocaleString("fa-IR")} پروفایل فروشنده` : ""}
+                {stats.cases.toLocaleString("fa-IR-u-nu-arabext")} پرونده ·{" "}
+                {stats.quotes.toLocaleString("fa-IR-u-nu-arabext")} استعلام ·{" "}
+                {stats.reminders.toLocaleString("fa-IR-u-nu-arabext")} پیگیری ·{" "}
+                {stats.attachments.toLocaleString("fa-IR-u-nu-arabext")} پیوست
+                {stats.sellerProfiles ? ` · ${stats.sellerProfiles.toLocaleString("fa-IR-u-nu-arabext")} پروفایل فروشنده` : ""}
                 {stats.budgetPlans ? " · بودجه ماهانه تنظیم شده" : ""}
                 {stats.attachmentBytes
                   ? ` · ${formatFileSize(stats.attachmentBytes)} فایل`
@@ -196,12 +196,12 @@ export function DataBackupSection() {
               </span>
               <span>نسخه برنامه: {pendingBackup.appVersion}</span>
               <span>
-                {pendingBackup.stats.cases.toLocaleString("fa-IR")} پرونده ·{" "}
-                {pendingBackup.stats.quotes.toLocaleString("fa-IR")} استعلام
+                {pendingBackup.stats.cases.toLocaleString("fa-IR-u-nu-arabext")} پرونده ·{" "}
+                {pendingBackup.stats.quotes.toLocaleString("fa-IR-u-nu-arabext")} استعلام
               </span>
               <span>
-                {(pendingBackup.stats.sellerProfiles ?? 0).toLocaleString("fa-IR")} پروفایل فروشنده ·{" "}
-                {pendingBackup.stats.attachments.toLocaleString("fa-IR")} پیوست
+                {(pendingBackup.stats.sellerProfiles ?? 0).toLocaleString("fa-IR-u-nu-arabext")} پروفایل فروشنده ·{" "}
+                {pendingBackup.stats.attachments.toLocaleString("fa-IR-u-nu-arabext")} پیوست
               </span>
               <span>{formatFileSize(pendingBackup.stats.attachmentBytes)} فایل پیوست</span>
               <span>حجم فایل: {formatFileSize(pendingFileSize)}</span>

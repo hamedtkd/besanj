@@ -102,7 +102,7 @@ export function DuplicateCaseSheet({
             title="شرط‌های خرید"
             description={
               purchaseCase.requirements?.length
-                ? `${purchaseCase.requirements.length.toLocaleString("fa-IR")} شرط با شناسه‌های تازه کپی می‌شوند.`
+                ? `${purchaseCase.requirements.length.toLocaleString("fa-IR-u-nu-arabext")} شرط با شناسه‌های تازه کپی می‌شوند.`
                 : "در پرونده فعلی شرطی ثبت نشده است."
             }
             disabled={!purchaseCase.requirements?.length}
@@ -114,7 +114,7 @@ export function DuplicateCaseSheet({
             title="فروشنده‌های قبلی"
             description={
               providerCount
-                ? `${providerCount.toLocaleString("fa-IR")} فروشنده با شماره و امتیاز اعتماد کپی می‌شوند.`
+                ? `${providerCount.toLocaleString("fa-IR-u-nu-arabext")} فروشنده با شماره و امتیاز اعتماد کپی می‌شوند.`
                 : "هنوز فروشنده‌ای در این پرونده نیست."
             }
             disabled={!providerCount}

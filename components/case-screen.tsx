@@ -153,7 +153,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
   function toggleCompare(quote: Quote) {
     const result = toggleShortlist(comparedQuoteIds, quote.id);
     if (result.limitReached) {
-      toast(`حداکثر ${MAX_COMPARE_QUOTES.toLocaleString("fa-IR")} گزینه را می‌توانی هم‌زمان مقایسه کنی.`, "error");
+      toast(`حداکثر ${MAX_COMPARE_QUOTES.toLocaleString("fa-IR-u-nu-arabext")} گزینه را می‌توانی هم‌زمان مقایسه کنی.`, "error");
       return;
     }
     setRequestedComparedQuoteIds(result.ids);
@@ -267,7 +267,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
           {purchaseCase.requirements?.length ? (
             <span className="inline-flex items-center gap-1.5 rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
               <ListChecks className="size-4" />
-              {purchaseCase.requirements.length.toLocaleString("fa-IR")} شرط مهم
+              {purchaseCase.requirements.length.toLocaleString("fa-IR-u-nu-arabext")} شرط مهم
             </span>
           ) : null}
         </section>
@@ -305,9 +305,9 @@ export function CaseScreen({ caseId }: { caseId: string }) {
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(String(value))} variant="line">
         <TabsList className="overflow-x-auto hide-scrollbar">
           <TabsTrigger value="compare"><GitCompareArrows className="size-3.5" />مقایسه</TabsTrigger>
-          <TabsTrigger value="decision"><Sparkles className="size-3.5" />تصمیم‌یار {comparedQuoteIds.length ? <span className="type-data text-xs opacity-60">{comparedQuoteIds.length.toLocaleString("fa-IR")}</span> : null}</TabsTrigger>
+          <TabsTrigger value="decision"><Sparkles className="size-3.5" />تصمیم‌یار {comparedQuoteIds.length ? <span className="type-data text-xs opacity-60">{comparedQuoteIds.length.toLocaleString("fa-IR-u-nu-arabext")}</span> : null}</TabsTrigger>
           <TabsTrigger value="chart"><BarChart3 className="size-3.5" />نمودار</TabsTrigger>
-          <TabsTrigger value="history">تاریخچه <span className="type-data text-xs opacity-60">{data.quotes.length.toLocaleString("fa-IR")}</span></TabsTrigger>
+          <TabsTrigger value="history">تاریخچه <span className="type-data text-xs opacity-60">{data.quotes.length.toLocaleString("fa-IR-u-nu-arabext")}</span></TabsTrigger>
           <TabsTrigger value="timeline"><ScrollText className="size-3.5" />رویدادها</TabsTrigger>
           <TabsTrigger value="details">جزئیات</TabsTrigger>
         </TabsList>
@@ -368,7 +368,7 @@ export function CaseScreen({ caseId }: { caseId: string }) {
                 <div className="sticky bottom-3 z-20 mx-auto mt-4 flex max-w-xl items-center justify-between gap-2 rounded-2xl border border-primary/20 bg-popover/95 p-2.5 shadow-xl backdrop-blur">
                   <div className="flex min-w-0 items-center gap-2 px-1">
                     <GitCompareArrows className="size-4 shrink-0 text-primary" />
-                    <span className="type-label truncate">{comparedQuoteIds.length.toLocaleString("fa-IR")} گزینه برای تصمیم</span>
+                    <span className="type-label truncate">{comparedQuoteIds.length.toLocaleString("fa-IR-u-nu-arabext")} گزینه برای تصمیم</span>
                   </div>
                   <div className="flex shrink-0 gap-1.5">
                     <Button type="button" size="icon-sm" variant="ghost" aria-label="پاک کردن انتخاب‌ها" title="پاک کردن انتخاب‌ها" onClick={() => setRequestedComparedQuoteIds([])}><X /></Button>

@@ -9,7 +9,7 @@ export function TaskQuickLink() {
   const { tasks } = useNotifications();
   const count = tasks.length;
   const label = count
-    ? `کارهای امروز، ${count.toLocaleString("fa-IR")} مورد`
+    ? `کارهای امروز، ${count.toLocaleString("fa-IR-u-nu-arabext")} مورد`
     : "کارهای امروز";
 
   return (
@@ -25,7 +25,7 @@ export function TaskQuickLink() {
       <BellRing />
       {count ? (
         <span className="absolute -end-1 -top-1 grid min-w-4 place-items-center rounded-full bg-destructive px-1 text-[.58rem] font-bold leading-4 text-white shadow-sm">
-          {count > 9 ? "+۹" : count.toLocaleString("fa-IR")}
+          {count > 9 ? "+۹" : count.toLocaleString("fa-IR-u-nu-arabext")}
         </span>
       ) : null}
     </Button>

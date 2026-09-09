@@ -176,15 +176,15 @@ export function SellerProfilePage({ sellerId }: { sellerId: string }) {
         <MetricCard label="پرونده" value={formatInteger(details.stats.caseCount)} icon={<Store />} />
         <MetricCard label="استعلام" value={formatInteger(details.stats.quoteCount)} icon={<ReceiptText />} />
         <MetricCard label="خرید" value={formatInteger(details.stats.purchaseCount)} icon={<ShoppingBag />} />
-        <MetricCard label="نرخ انتخاب" value={`${winPercent.toLocaleString("fa-IR")}٪`} icon={<BadgeCheck />} />
+        <MetricCard label="نرخ انتخاب" value={`${winPercent.toLocaleString("fa-IR-u-nu-arabext")}٪`} icon={<BadgeCheck />} />
         <MetricCard
           label="امتیاز میانگین"
-          value={details.stats.averageRating === null ? "ثبت نشده" : `${details.stats.averageRating.toLocaleString("fa-IR", { maximumFractionDigits: 1 })} از ۵`}
+          value={details.stats.averageRating === null ? "ثبت نشده" : `${details.stats.averageRating.toLocaleString("fa-IR-u-nu-arabext", { maximumFractionDigits: 1 })} از ۵`}
           icon={<Star />}
         />
         <MetricCard
           label="تحویل به‌موقع"
-          value={onTimePercent === null ? "داده ندارد" : `${onTimePercent.toLocaleString("fa-IR")}٪`}
+          value={onTimePercent === null ? "داده ندارد" : `${onTimePercent.toLocaleString("fa-IR-u-nu-arabext")}٪`}
           icon={<CalendarDays />}
         />
       </section>
@@ -404,7 +404,7 @@ function SellerQuoteHistory({
                   {row.purchased ? <Badge variant="success">خرید شده</Badge> : row.selected ? <Badge variant="secondary">انتخاب نهایی</Badge> : null}
                 </div>
                 <p className="type-caption mt-1 text-muted-foreground">
-                  {formatCompactPersianDate(row.quote.quotedAt)} · {row.quote.deliveryDays === undefined ? "زمان تحویل ثبت نشده" : row.quote.deliveryDays === 0 ? "تحویل فوری" : `${row.quote.deliveryDays.toLocaleString("fa-IR")} روز تا تحویل`}
+                  {formatCompactPersianDate(row.quote.quotedAt)} · {row.quote.deliveryDays === undefined ? "زمان تحویل ثبت نشده" : row.quote.deliveryDays === 0 ? "تحویل فوری" : `${row.quote.deliveryDays.toLocaleString("fa-IR-u-nu-arabext")} روز تا تحویل`}
                 </p>
               </div>
               <div className="type-data inline-flex items-center gap-1.5 text-lg sm:justify-end">
@@ -453,7 +453,7 @@ function SellerRatingHistory({
               </div>
               <Badge variant={(row.provider.rating ?? 0) >= 4 ? "success" : "outline"}>
                 <Star className="fill-current text-amber-500" />
-                {(row.provider.rating ?? 0).toLocaleString("fa-IR")} از ۵
+                {(row.provider.rating ?? 0).toLocaleString("fa-IR-u-nu-arabext")} از ۵
               </Badge>
             </div>
           ))}

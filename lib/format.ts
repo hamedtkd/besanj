@@ -1,22 +1,22 @@
 import type { PurchaseKind, QuoteChannel } from "@/lib/types";
-import { toPersianDigits } from "./persian-date.ts";
+import { PERSIAN_DATE_LOCALE, PERSIAN_NUMBER_LOCALE, toPersianDigits } from "./persian-number.ts";
 import { normalizeOptionalText } from "./validation-rules.ts";
 
-const tomanFormatter = new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 0 });
-const integerFormatter = new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 0 });
+const tomanFormatter = new Intl.NumberFormat(PERSIAN_NUMBER_LOCALE, { maximumFractionDigits: 0 });
+const integerFormatter = new Intl.NumberFormat(PERSIAN_NUMBER_LOCALE, { maximumFractionDigits: 0 });
 
-const persianDateFormatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+const persianDateFormatter = new Intl.DateTimeFormat(PERSIAN_DATE_LOCALE, {
   year: "numeric",
   month: "long",
   day: "numeric",
 });
 
-const compactDateFormatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+const compactDateFormatter = new Intl.DateTimeFormat(PERSIAN_DATE_LOCALE, {
   month: "short",
   day: "numeric",
 });
 
-const dateTimeFormatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+const dateTimeFormatter = new Intl.DateTimeFormat(PERSIAN_DATE_LOCALE, {
   month: "short",
   day: "numeric",
   hour: "2-digit",

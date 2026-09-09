@@ -176,7 +176,7 @@ export function buildDashboardTasks(
         kind: "ready",
         priority: "normal",
         title: "این پرونده آماده تصمیم‌گیری است",
-        detail: `${purchaseCase.title} · ${metrics.latestQuotes.length.toLocaleString("fa-IR")} گزینه تازه`,
+        detail: `${purchaseCase.title} · ${metrics.latestQuotes.length.toLocaleString("fa-IR-u-nu-arabext")} گزینه تازه`,
       });
     }
   }

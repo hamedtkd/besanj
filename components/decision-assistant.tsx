@@ -110,7 +110,7 @@ export function DecisionAssistant({
           </div>
           <div className="flex items-center gap-2">
             <Badge variant={selectedQuotes.length >= 2 ? "success" : "secondary"}>
-              {selectedQuotes.length.toLocaleString("fa-IR")} از {MAX_COMPARE_QUOTES.toLocaleString("fa-IR")}
+              {selectedQuotes.length.toLocaleString("fa-IR-u-nu-arabext")} از {MAX_COMPARE_QUOTES.toLocaleString("fa-IR-u-nu-arabext")}
             </Badge>
             {selectedQuotes.length >= 2 ? (
               <Button type="button" size="sm" variant="outline" onClick={onOpenSideBySide}>
@@ -285,7 +285,7 @@ export function DecisionAssistant({
                         {providerById.get(quoteById.get(best.quoteId)?.providerId ?? "")?.name ?? "گزینه منتخب"}
                       </h3>
                       <p className="type-caption mt-1 text-muted-foreground">
-                        امتیاز کمکی {best.score.toLocaleString("fa-IR")} از ۱۰۰
+                        امتیاز کمکی {best.score.toLocaleString("fa-IR-u-nu-arabext")} از ۱۰۰
                       </p>
                     </div>
                   </div>
@@ -335,7 +335,7 @@ export function DecisionAssistant({
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant={index === 0 && result.eligible ? "default" : "secondary"}>
-                          رتبه {(index + 1).toLocaleString("fa-IR")}
+                          رتبه {(index + 1).toLocaleString("fa-IR-u-nu-arabext")}
                         </Badge>
                         {!result.eligible ? <Badge variant="warning">خارج از شروط</Badge> : null}
                         {selected ? <Badge variant="success"><CircleCheck />انتخاب نهایی فعلی</Badge> : null}
@@ -352,7 +352,7 @@ export function DecisionAssistant({
                     </div>
 
                     <div className="shrink-0 text-end">
-                      <div className="type-data text-2xl text-primary">{result.score.toLocaleString("fa-IR")}</div>
+                      <div className="type-data text-2xl text-primary">{result.score.toLocaleString("fa-IR-u-nu-arabext")}</div>
                       <div className="type-caption text-muted-foreground">از ۱۰۰</div>
                       <Button
                         type="button"
