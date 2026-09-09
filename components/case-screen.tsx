@@ -24,6 +24,7 @@ import {
   X,
 } from "lucide-react";
 import { CaseDetailsPanel } from "@/components/case-details-panel";
+import { CasePriceIntelligence } from "@/components/case-price-intelligence";
 import { CaseFollowUpSheet } from "@/components/case-follow-up-sheet";
 import { CaseTimeline } from "@/components/case-timeline";
 import { DecisionAssistant } from "@/components/decision-assistant";
@@ -256,6 +257,11 @@ export function CaseScreen({ caseId }: { caseId: string }) {
         <MetricCard label="بیشترین قیمت" value={metrics.maxTotal} />
         <MetricCard label="اختلاف" value={metrics.spread} />
       </section>
+
+      <CasePriceIntelligence
+        purchaseCase={purchaseCase}
+        quotes={data.quotes}
+      />
 
       {purchaseCase.targetBudgetToman || purchaseCase.requirements?.length || purchaseCase.categoryKey || purchaseCase.tags?.length ? (
         <section className="mb-6 flex flex-wrap gap-2 rounded-2xl border border-border bg-card/65 p-3">

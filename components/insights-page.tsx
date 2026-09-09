@@ -28,6 +28,7 @@ import {
 } from "recharts";
 import { BudgetOverview } from "@/components/budget-overview";
 import { HelpHint } from "@/components/help-hint";
+import { PersonalPriceIntelligence } from "@/components/personal-price-intelligence";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -44,13 +45,14 @@ export function InsightsPage() {
   const [tag, setTag] = React.useState("all");
 
   const data = useLiveQuery(async () => {
-    const [cases, quotes, providers, budgetPlan] = await Promise.all([
+    const [cases, quotes, providers, sellerProfiles, budgetPlan] = await Promise.all([
       db.purchaseCases.toArray(),
       db.quotes.toArray(),
       db.providers.toArray(),
+      db.sellerProfiles.toArray(),
       db.budgetPlans.get("monthly"),
     ]);
-    return { cases, quotes, providers, budgetPlan };
+    return { cases, quotes, providers, sellerProfiles, budgetPlan };
   }, []);
 
   if (!data) return <InsightsSkeleton />;
@@ -146,6 +148,15 @@ export function InsightsPage() {
           </div>
         </div>
       </Card>
+
+      <PersonalPriceIntelligence
+        cases={data.cases}
+        quotes={data.quotes}
+        providers={data.providers}
+        sellerProfiles={data.sellerProfiles}
+        categoryKey={categoryKey}
+        tag={tag}
+      />
 
       {summary.purchaseCount === 0 ? (
         <EmptyInsights />
