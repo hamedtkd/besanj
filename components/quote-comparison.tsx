@@ -340,7 +340,7 @@ export function QuoteComparison({
                   onClick={() => onRequote(quote, provider)}
                 >
                   <RefreshCw />
-                  استعلام مجدد
+                  قیمت جدید
                 </Button>
               </div>
             </Card>

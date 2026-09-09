@@ -1,5 +1,5 @@
 /* global self, caches, fetch, Response, URL */
-const CACHE_VERSION = "besanj-shell-v15";
+const CACHE_VERSION = "besanj-shell-v16";
 const MIKHAK_FD_URL = "https://cdn.jsdelivr.net/gh/aminabedi68/Mikhak@9dea055eb3dfc752879442224460c6e5d6ebe232/fonts/webfonts/variable/Mikhak-FD%5BDSTY%2CKSHD%2Cwght%5D.woff2";
 const CORE_ASSETS = [
   "/",

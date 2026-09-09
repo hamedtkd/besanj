@@ -4,7 +4,7 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { DoranDate } from "@doranjs/core";
-import { Calculator, CirclePlus, ListChecks, Paperclip, X } from "lucide-react";
+import { Calculator, ChevronDown, ChevronUp, CirclePlus, ListChecks, Paperclip, X } from "lucide-react";
 import { QuoteCapturePanel } from "@/components/quote-capture-panel";
 import { addQuote } from "@/lib/db";
 import { formatFileSize, validateAttachmentSelection } from "@/lib/attachments";
@@ -107,6 +107,7 @@ export function QuoteFormDialog({
   const [requirementChecks, setRequirementChecks] = React.useState<Record<string, boolean>>(() => ({ ...(preset?.quote.requirementChecks ?? {}) }));
   const [pendingFiles, setPendingFiles] = React.useState<File[]>([]);
   const [providerChoice, setProviderChoice] = React.useState("__new__");
+  const [showDetails, setShowDetails] = React.useState(false);
   const [selectedSellerProfileId, setSelectedSellerProfileId] = React.useState<string | undefined>(
     preset?.provider.sellerProfileId
   );
@@ -294,7 +295,7 @@ export function QuoteFormDialog({
     <ResponsiveSheet
       open={open}
       onOpenChange={handleOpenChange}
-      title={preset ? `استعلام مجدد از ${preset.provider.name}` : "ثبت استعلام"}
+      title={preset ? `قیمت جدید از ${preset.provider.name}` : "ثبت استعلام"}
       description={
         preset
           ? "قیمت قبلی حذف نمی‌شود و تغییر قیمت در تاریخچه همان فروشنده می‌ماند."
@@ -439,6 +440,18 @@ export function QuoteFormDialog({
           <Calculator className="size-5 text-primary/70" />
         </div>
 
+        <Button
+          type="button"
+          variant="ghost"
+          className="justify-between rounded-xl border border-dashed border-border"
+          onClick={() => setShowDetails((current) => !current)}
+        >
+          <span>{showDetails ? "بستن جزئیات" : "جزئیات بیشتر، اختیاری"}</span>
+          {showDetails ? <ChevronUp /> : <ChevronDown />}
+        </Button>
+
+        {showDetails ? (
+          <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             label="تاریخ استعلام"
@@ -643,6 +656,9 @@ export function QuoteFormDialog({
             {...form.register("note")}
           />
         </FormField>
+
+          </>
+        ) : null}
 
         {preset ? (
           <div className="rounded-2xl bg-muted/50 px-3.5 py-3">

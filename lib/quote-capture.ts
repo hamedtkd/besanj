@@ -1,8 +1,18 @@
 import { normalizeIranPhone } from "./iranian-mobile.ts";
 import { normalizePersianDigits } from "./normalize-persian-digits.ts";
+import { parseQuickToman } from "./quick-capture.ts";
+import {
+  PERSIAN_SIMPLE_NUMBER_WORD_PATTERN,
+  findSpokenDigitSequence,
+  parsePersianNumberWords,
+  parseSpokenDigitSequence,
+} from "./spoken-persian-number.ts";
 import type { QuoteChannel } from "./types.ts";
 
+export type QuoteAvailability = "available" | "unavailable" | "preorder";
+
 export interface QuoteCaptureDraft {
+  subjectTitle?: string;
   providerName?: string;
   phone?: string;
   priceToman?: number;
@@ -10,6 +20,7 @@ export interface QuoteCaptureDraft {
   deliveryDays?: number;
   warranty?: string;
   paymentTerms?: string;
+  availability?: QuoteAvailability;
   channel?: QuoteChannel;
   contactRef?: string;
   validForDays?: number;
@@ -53,6 +64,7 @@ function parseAmount(rawNumber: string, scale?: string, unit?: string) {
 
   let value = number;
   const scaleText = scale?.toLocaleLowerCase("fa-IR");
+  if (scaleText === "میلیارد") value *= 1_000_000_000;
   if (scaleText === "میلیون") value *= 1_000_000;
   if (scaleText === "هزار") value *= 1_000;
 
@@ -66,24 +78,51 @@ function parseAmount(rawNumber: string, scale?: string, unit?: string) {
 function amountCandidates(text: string) {
   const normalized = normalizePersianDigits(text);
   const rows: Array<{ value: number; index: number }> = [];
-  const pattern = /((?:\d{1,3}(?:[\s,٬،]\d{3})+|\d+(?:\.\d+)?))\s*(میلیون|هزار)?\s*(تومان|تومن|ریال)/gi;
-  for (const match of normalized.matchAll(pattern)) {
+  const currencyPattern = /((?:\d{1,3}(?:[\s,٬،]\d{3})+|\d+(?:\.\d+)?))\s*(میلیارد|میلیون|هزار)?\s*(تومان|تومن|ریال)/gi;
+  for (const match of normalized.matchAll(currencyPattern)) {
     const value = parseAmount(match[1], match[2], match[3]);
     if (value) rows.push({ value, index: match.index ?? 0 });
   }
-  return rows;
+
+  const scaledNumberPattern = /(\d+(?:\.\d+)?)\s*(میلیارد|میلیون|هزار)(?:\s*(تومان|تومن|ریال))?/gi;
+  for (const match of normalized.matchAll(scaledNumberPattern)) {
+    const value = parseAmount(match[1], match[2], match[3]);
+    if (value && !rows.some((row) => row.value === value && row.index === (match.index ?? 0))) {
+      rows.push({ value, index: match.index ?? 0 });
+    }
+  }
+
+  const spokenPattern = new RegExp(
+    `((?:(?:${PERSIAN_SIMPLE_NUMBER_WORD_PATTERN})\\s*){1,12})(میلیارد|میلیون|هزار)(?:\\s*(تومان|تومن|ریال))?`,
+    "gi"
+  );
+  for (const match of normalized.matchAll(spokenPattern)) {
+    const base = parsePersianNumberWords(match[1]);
+    if (base === undefined || base <= 0) continue;
+    const value = parseAmount(String(base), match[2], match[3]);
+    if (value && !rows.some((row) => row.value === value && row.index === (match.index ?? 0))) {
+      rows.push({ value, index: match.index ?? 0 });
+    }
+  }
+
+
+  return rows.sort((left, right) => left.index - right.index);
 }
 
 function labeledAmount(text: string, labels: string[]) {
   const normalized = normalizePersianDigits(text);
   const escaped = labels.join("|");
-  const pattern = new RegExp(
-    `(?:${escaped})\\s*[:：-]?\\s*((?:\\d{1,3}(?:[\\s,٬،]\\d{3})+|\\d+(?:\\.\\d+)?))\\s*(میلیون|هزار)?\\s*(تومان|تومن|ریال)?`,
+  const numericPattern = new RegExp(
+    `(?:${escaped})\\s*[:：-]?\\s*((?:\\d{1,3}(?:[\\s,٬،]\\d{3})+|\\d+(?:\\.\\d+)?))\\s*(میلیارد|میلیون|هزار)?\\s*(تومان|تومن|ریال)?`,
     "i"
   );
-  const match = pattern.exec(normalized);
-  if (!match) return undefined;
-  return parseAmount(match[1], match[2], match[3]);
+  const numericMatch = numericPattern.exec(normalized);
+  if (numericMatch) return parseAmount(numericMatch[1], numericMatch[2], numericMatch[3]);
+
+  const lines = normalized.split(/\r?\n/).map(cleanLine).filter(Boolean);
+  const tail = labeledText(lines, labels);
+  if (!tail) return undefined;
+  return parseQuickToman(tail).valueToman;
 }
 
 function labeledText(lines: string[], labels: string[]) {
@@ -101,22 +140,56 @@ function labeledText(lines: string[], labels: string[]) {
   return undefined;
 }
 
+function looksLikeDetailLine(line: string) {
+  return /^(?:قیمت|مبلغ|جمع|موبایل|شماره|تلفن|تحویل|ارسال|گارانتی|ضمانت|پرداخت|شرایط پرداخت|اعتبار|موجود|ناموجود|واتساپ|تلگرام|اینستاگرام|سایت|وب)\b/i.test(
+    line
+  );
+}
+
+function looksLikeProviderLine(line: string) {
+  return /^(?:فروشنده|نام فروشنده|ارائه‌دهنده)\s*[:：-]|^(?:فروشگاه|شرکت|مرکز)\s+\S+/i.test(line);
+}
+
+function detailBoundaryIndex(line: string) {
+  const normalized = normalizePersianDigits(line);
+  const indices: number[] = [];
+  const marker = /\s+(?=(?:قیمت|مبلغ|جمع|موجود|ناموجود|گارانتی|ضمانت|تحویل|ارسال|پرداخت|اعتبار|موبایل|شماره|تلفن))/i.exec(normalized);
+  if (marker?.index !== undefined) indices.push(marker.index);
+  const firstAmount = amountCandidates(normalized)[0];
+  if (firstAmount && firstAmount.index > 0) indices.push(firstAmount.index);
+  return indices.length ? Math.min(...indices) : undefined;
+}
+
+function cutBeforeDetails(line: string) {
+  const boundary = detailBoundaryIndex(line);
+  return (boundary === undefined ? line : line.slice(0, boundary)).replace(/[،,؛;:\-]+$/, "").trim();
+}
+
+function detectSubjectTitle(lines: string[]) {
+  for (const line of lines) {
+    if (line.length < 2 || looksLikeProviderLine(line) || looksLikeDetailLine(line)) continue;
+    const normalized = normalizePersianDigits(line);
+    if (/^(?:\+98|0098|98|0)?9[\d\s().-]{9,17}$/.test(normalized)) continue;
+
+    const candidate = cutBeforeDetails(line);
+    if (candidate.length >= 2 && candidate.length <= 120) return candidate;
+  }
+  return undefined;
+}
+
 function detectProvider(lines: string[]) {
   for (const line of lines) {
     const labeled = /^(?:فروشنده|نام فروشنده|ارائه‌دهنده)\s*[:：-]\s*(.+)$/i.exec(line)?.[1];
-    if (labeled && labeled.length <= 100 && !/\d{6,}/.test(labeled)) return labeled;
-    if (/^(?:فروشگاه|شرکت|مرکز)\s+\S+/i.test(line) && line.length <= 100 && !/\d{6,}/.test(line)) {
-      return line;
+    if (labeled) {
+      const candidate = cutBeforeDetails(labeled);
+      if (candidate.length <= 100 && !/\d{6,}/.test(candidate)) return candidate;
+    }
+    if (/^(?:فروشگاه|شرکت|مرکز)\s+\S+/i.test(line)) {
+      const candidate = cutBeforeDetails(line);
+      if (candidate.length <= 100 && !/\d{6,}/.test(candidate)) return candidate;
     }
   }
-
-  const first = lines.find(
-    (line) =>
-      line.length >= 2 &&
-      line.length <= 80 &&
-      !/(قیمت|مبلغ|تومان|ریال|تحویل|گارانتی|پرداخت|اعتبار|09\d)/i.test(line)
-  );
-  return first;
+  return undefined;
 }
 
 function detectPhone(text: string) {
@@ -126,13 +199,33 @@ function detectPhone(text: string) {
     const phone = normalizeIranPhone(raw);
     if (/^09\d{9}$/.test(phone)) return phone;
   }
+
+  const spokenLine = normalized
+    .split(/\r?\n/)
+    .map(cleanLine)
+    .find((line) => /^(?:موبایل|شماره|تلفن)\s*[:：-]?\s*/i.test(line));
+  if (spokenLine) {
+    const tail = spokenLine.replace(/^(?:موبایل|شماره|تلفن)\s*[:：-]?\s*/i, "");
+    const digits = parseSpokenDigitSequence(tail);
+    if (digits) {
+      const phone = normalizeIranPhone(digits);
+      if (/^09\d{9}$/.test(phone)) return phone;
+    }
+  }
+
+  const embeddedDigits = findSpokenDigitSequence(normalized, 11);
+  if (embeddedDigits) {
+    const phone = normalizeIranPhone(embeddedDigits);
+    if (/^09\d{9}$/.test(phone)) return phone;
+  }
   return undefined;
 }
 
 function detectDelivery(text: string) {
   const normalized = normalizePersianDigits(text);
-  if (/تحویل\s*(?:فوری|همان\s*روز|همون\s*روز)/i.test(normalized)) return 0;
-  const match = /تحویل(?:\s*[:：-]?\s*|\s+حدود\s+)(\d{1,3})\s*روز/i.exec(normalized);
+  if (/(?:تحویل|ارسال)\s*(?:فوری|همان\s*روز|همون\s*روز|امروز)/i.test(normalized)) return 0;
+  if (/(?:تحویل|ارسال)[^\n]{0,16}فردا/i.test(normalized)) return 1;
+  const match = /(?:تحویل|ارسال)(?:\s*[:：-]?\s*|\s+حدود\s+)(\d{1,3})\s*(?:روز|روزه)/i.exec(normalized);
   if (!match) return undefined;
   const value = Number(match[1]);
   return Number.isFinite(value) && value >= 0 ? value : undefined;
@@ -148,6 +241,22 @@ function detectValidityDays(text: string) {
   if (!match) return undefined;
   const value = Number(match[1]);
   return Number.isFinite(value) && value >= 0 ? value : undefined;
+}
+
+function detectWarranty(_text: string, lines: string[]) {
+  const tail = labeledText(lines, ["گارانتی", "ضمانت"]);
+  if (!tail) return undefined;
+  return tail
+    .split(/\s+(?=(?:ارسال|تحویل|موجود|ناموجود|پرداخت|اعتبار|موبایل|شماره|تلفن|واتساپ|تلگرام|اینستاگرام))/i)[0]
+    ?.trim();
+}
+
+function detectAvailability(text: string): QuoteAvailability | undefined {
+  const normalized = text.toLocaleLowerCase("fa-IR");
+  if (/ناموجود|موجود\s*نیست|اتمام\s*موجودی/.test(normalized)) return "unavailable";
+  if (/پیش[\s‌-]*سفارش|سفارشی/.test(normalized)) return "preorder";
+  if (/(?:^|[\s،,.])موجود(?:$|[\s،,.])/.test(normalized)) return "available";
+  return undefined;
 }
 
 function detectChannel(text: string): QuoteChannel | undefined {
@@ -170,6 +279,13 @@ function pushField(rows: string[], value: unknown, label: string) {
   if (value !== undefined && value !== null && value !== "") rows.push(label);
 }
 
+export function availabilityLabel(value?: QuoteAvailability) {
+  if (value === "available") return "موجود";
+  if (value === "unavailable") return "ناموجود";
+  if (value === "preorder") return "سفارشی / پیش‌سفارش";
+  return undefined;
+}
+
 export function parseQuoteCapture(input: string): QuoteCaptureDraft {
   const text = input.trim();
   const lines = text.split(/\r?\n/).map(cleanLine).filter(Boolean);
@@ -178,25 +294,28 @@ export function parseQuoteCapture(input: string): QuoteCaptureDraft {
 
   if (!text) return { warnings: [], detectedFields: [] };
 
+  const subjectTitle = detectSubjectTitle(lines);
   const providerName = detectProvider(lines);
   const phone = detectPhone(text);
   const allAmounts = amountCandidates(text);
-  const explicitPrice = labeledAmount(text, ["قیمت", "مبلغ", "جمع"]);
-  const extraCostToman = labeledAmount(text, ["هزینه ارسال", "ارسال", "هزینه نصب", "نصب", "هزینه جانبی"]);
+  const explicitPrice = labeledAmount(text, ["قیمت", "مبلغ", "جمع", "قیمت نهایی"]);
+  const extraCostToman = labeledAmount(text, ["هزینه ارسال", "هزینه نصب", "نصب", "هزینه جانبی"]);
   const priceCandidates = allAmounts.filter((row) => row.value !== extraCostToman);
   const priceToman = explicitPrice ?? priceCandidates[0]?.value;
 
   if (!explicitPrice && priceCandidates.length > 1) {
-    warnings.push("چند مبلغ در متن پیدا شد؛ مبلغ اول در فرم قرار گرفت و بهتر است قیمت را بررسی کنی.");
+    warnings.push("چند مبلغ در متن پیدا شد؛ مبلغ اول پیشنهاد شده و بهتر است قیمت را بررسی کنی.");
   }
 
   const deliveryDays = detectDelivery(text);
   const validForDays = detectValidityDays(text);
-  const warranty = labeledText(lines, ["گارانتی", "ضمانت"]);
+  const warranty = detectWarranty(text, lines);
   const paymentTerms = labeledText(lines, ["شرایط پرداخت", "پرداخت"]);
+  const availability = detectAvailability(text);
   const channel = detectChannel(text);
   const contactRef = detectContactRef(text, channel);
 
+  pushField(detectedFields, subjectTitle, "کالا / خدمت");
   pushField(detectedFields, providerName, "فروشنده");
   pushField(detectedFields, phone, "موبایل");
   pushField(detectedFields, priceToman, "قیمت");
@@ -205,6 +324,7 @@ export function parseQuoteCapture(input: string): QuoteCaptureDraft {
   pushField(detectedFields, validForDays, "اعتبار قیمت");
   pushField(detectedFields, warranty, "گارانتی");
   pushField(detectedFields, paymentTerms, "پرداخت");
+  pushField(detectedFields, availability, "موجودی");
   pushField(detectedFields, channel, "روش استعلام");
   pushField(detectedFields, contactRef, "مرجع تماس");
 
@@ -213,6 +333,7 @@ export function parseQuoteCapture(input: string): QuoteCaptureDraft {
   }
 
   return {
+    subjectTitle,
     providerName,
     phone,
     priceToman,
@@ -220,6 +341,7 @@ export function parseQuoteCapture(input: string): QuoteCaptureDraft {
     deliveryDays,
     warranty,
     paymentTerms,
+    availability,
     channel,
     contactRef,
     validForDays,

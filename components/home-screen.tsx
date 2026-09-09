@@ -11,9 +11,11 @@ import {
   RotateCcw,
   Search,
   Sparkles,
+  Zap,
 } from "lucide-react";
 import { CaseCard } from "@/components/case-card";
 import { CreateCaseDialog } from "@/components/create-case-dialog";
+import { QuickCaptureSheet } from "@/components/quick-capture-sheet";
 import { EmptyState } from "@/components/empty-state";
 import { TodayQueue } from "@/components/today-queue";
 import { MonthlyBudgetSummary } from "@/components/monthly-budget-summary";
@@ -40,6 +42,7 @@ import { buildMonthlyBudgetSnapshot } from "@/lib/budget";
 import { collectCategoryOptions, collectTagOptions } from "@/lib/categories";
 import { buildDashboardTasks } from "@/lib/follow-up";
 import type { PurchaseStatus } from "@/lib/types";
+import { QUICK_CAPTURE_DRAFT_KEY, parseQuickCaptureDraft, type QuickCaptureDraftState } from "@/lib/quick-capture";
 
 const statusTabs: Array<{ value: PurchaseStatus; label: string }> = [
   { value: "active", label: "فعال" },
@@ -69,6 +72,9 @@ const SORT_ITEMS: Array<{ value: HomeCaseSort; label: string }> = [
 
 export function HomeScreen() {
   const [createOpen, setCreateOpen] = React.useState(false);
+  const [quickOpen, setQuickOpen] = React.useState(false);
+  const [quickSession, setQuickSession] = React.useState(0);
+  const [quickInitialDraft, setQuickInitialDraft] = React.useState<QuickCaptureDraftState | undefined>(undefined);
   const [status, setStatus] = React.useState<PurchaseStatus>("active");
   const [search, setSearch] = React.useState("");
   const [kind, setKind] = React.useState<HomeCaseKindFilter>("all");
@@ -134,6 +140,15 @@ export function HomeScreen() {
     setSort("updated");
   }
 
+  function openQuickCapture() {
+    const saved = typeof window === "undefined"
+      ? undefined
+      : parseQuickCaptureDraft(window.localStorage.getItem(QUICK_CAPTURE_DRAFT_KEY));
+    setQuickInitialDraft(saved);
+    setQuickSession((current) => current + 1);
+    setQuickOpen(true);
+  }
+
   return (
     <>
       <section className="mb-6 overflow-hidden rounded-3xl border border-border/90 bg-card/72 shadow-[0_18px_60px_color-mix(in_oklab,var(--foreground)_5%,transparent)] sm:mb-7">
@@ -169,11 +184,20 @@ export function HomeScreen() {
               <Button
                 type="button"
                 size="lg"
-                className="shadow-md"
+                variant="outline"
                 onClick={() => setCreateOpen(true)}
               >
                 <CirclePlus />
                 پرونده جدید
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                className="shadow-md"
+                onClick={openQuickCapture}
+              >
+                <Zap />
+                ثبت سریع
               </Button>
             </div>
           </div>
@@ -395,13 +419,19 @@ export function HomeScreen() {
         type="button"
         size="lg"
         className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] end-4 z-30 rounded-2xl shadow-xl sm:hidden"
-        onClick={() => setCreateOpen(true)}
+        onClick={openQuickCapture}
       >
-        <CirclePlus />
-        پرونده جدید
+        <Zap />
+        ثبت سریع
       </Button>
 
       <CreateCaseDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <QuickCaptureSheet
+        key={quickSession}
+        open={quickOpen}
+        onOpenChange={setQuickOpen}
+        initialDraft={quickInitialDraft}
+      />
     </>
   );
 }

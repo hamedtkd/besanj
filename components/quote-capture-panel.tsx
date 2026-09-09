@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { CircleAlert, Clipboard, Sparkles } from "lucide-react";
+import { LocalVoiceCapture } from "@/components/local-voice-capture";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { parseQuoteCapture, type QuoteCaptureDraft } from "@/lib/quote-capture";
@@ -41,6 +42,12 @@ export function QuoteCapturePanel({
           dir="auto"
           className="min-h-28 bg-background/70"
           placeholder={"مثلاً:\nفروشگاه آریا\nقیمت: ۶۸,۵۰۰,۰۰۰ تومان\nموبایل: ۰۹۱۲۱۲۳۴۵۶۷\nتحویل ۳ روز\nگارانتی: ۱۸ ماه شرکتی\nاعتبار ۲ روز"}
+        />
+
+        <LocalVoiceCapture
+          onTranscript={(transcript) =>
+            setText((current) => [current.trim(), transcript.trim()].filter(Boolean).join("\n"))
+          }
         />
 
         <div className="flex flex-wrap items-center justify-between gap-2">
